@@ -1,0 +1,420 @@
+---
+title: "EEG Source Localization with PhysioEEG"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{EEG Source Localization}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+# EEG Source Localization with PhysioEEG
+
+This vignette demonstrates EEG source localization methods available in
+PhysioEEG. Source localization (also called source imaging) addresses the
+inverse problem: estimating brain source activity from scalp-recorded
+potentials. The EEG inverse problem is ill-posed (infinitely many source
+configurations can produce the same scalp pattern), so additional constraints
+are needed to obtain a unique solution.
+
+PhysioEEG provides:
+
+- **Forward modeling** with spherical head and simplified BEM models
+- **Distributed source imaging** via eLORETA, sLORETA, and MNE
+- **Beamforming** via LCMV and DICS spatial filters
+- **Source-space frequency analysis** for band-specific source maps
+- **Visualization** of source estimates on a 2D brain projection
+
+## Setup
+
+```{r setup, eval=FALSE}
+library(PhysioEEG)
+
+# Create 19-channel EEG data (10-20 system)
+pe <- make_eeg(n_time = 2500, n_channels = 19, sr = 500)
+
+# Assign standard electrode positions (required for source localization)
+pe <- eegMontage(pe, system = "10-20")
+
+# Verify positions are set
+head(SummarizedExperiment::colData(pe))
+```
+
+For best results, preprocess the data before source localization:
+
+```{r preprocess, eval=FALSE}
+# Bandpass filter to remove drift and high-frequency noise
+pe <- eegFilter(pe, lowcut = 1, highcut = 40)
+
+# Re-reference to average (recommended for source imaging)
+pe <- eegRereference(pe, ref_type = "average", assay_name = "filtered")
+```
+
+## Forward Model
+
+The forward model describes how neural source activity maps to scalp
+electrode potentials. It is represented by a leadfield matrix of dimensions
+(n_electrodes x n_sources * 3), where each source has three orientation
+columns (x, y, z dipole directions).
+
+### Spherical Head Model
+
+The simplest approach models the head as an infinite homogeneous conducting
+medium with conductivity 0.33 S/m:
+
+```{r forward-spherical, eval=FALSE}
+# Build forward model with 100 source locations
+fm_sphere <- eegForwardModel(pe, method = "spherical", n_sources = 100,
+                              assay_name = "rereferenced")
+
+# Inspect the leadfield
+dim(fm_sphere$leadfield)
+# [1]  19 300  (19 electrodes x 100 sources x 3 orientations)
+
+# Source positions are distributed inside a sphere of radius 0.8
+head(fm_sphere$source_positions)
+
+# Electrode positions
+print(fm_sphere$electrode_positions)
+```
+
+### Simplified BEM Model
+
+The Berg & Scherg (1994) 3-shell approximation accounts for the different
+conductivities of brain, skull, and scalp using virtual dipoles at scaled
+eccentricities:
+
+```{r forward-bem, eval=FALSE}
+fm_bem <- eegForwardModel(pe, method = "bem_simplified", n_sources = 100,
+                           assay_name = "rereferenced")
+dim(fm_bem$leadfield)
+# Same dimensions, but different values due to 3-shell correction
+```
+
+### Leadfield Interpretation
+
+The leadfield encodes the sensitivity pattern of each electrode to each
+source:
+
+```{r forward-interpret, eval=FALSE}
+# For source 1, orientation x: how much does each electrode "see"?
+source1_x <- fm_sphere$leadfield[, 1]
+names(source1_x) <- fm_sphere$electrode_positions$label
+print(round(source1_x, 4))
+
+# Electrodes closest to the source have the largest values
+```
+
+## Source Estimation
+
+Source estimation uses the forward model and data to reconstruct brain
+activity. PhysioEEG supports three distributed source imaging methods:
+
+### MNE (Minimum Norm Estimate)
+
+MNE minimizes the L2 norm of the source distribution. It provides the
+minimum-energy solution but tends to favor superficial sources:
+
+```{r source-mne, eval=FALSE}
+pe_mne <- eegSourceEstimate(pe, fm_sphere, method = "mne",
+                             lambda = 0.05,
+                             assay_name = "rereferenced")
+
+# Source estimates are stored as a time x (n_sources*3) matrix
+src_data <- SummarizedExperiment::assay(pe_mne, "source")
+dim(src_data)
+# [1] 2500  300  (2500 time points x 100 sources x 3 orientations)
+```
+
+### sLORETA (Standardized Low-Resolution Brain Electromagnetic Tomography)
+
+sLORETA normalizes MNE by the resolution matrix diagonal, providing
+zero-localization error for point sources:
+
+```{r source-sloreta, eval=FALSE}
+pe_sloreta <- eegSourceEstimate(pe, fm_sphere, method = "sloreta",
+                                 lambda = 0.05,
+                                 assay_name = "rereferenced")
+```
+
+### eLORETA (Exact Low-Resolution Electromagnetic Tomography)
+
+eLORETA uses iterative weight estimation to achieve exact localization for
+point sources, even with noise:
+
+```{r source-eloreta, eval=FALSE}
+pe_eloreta <- eegSourceEstimate(pe, fm_sphere, method = "eloreta",
+                                 lambda = 0.05,
+                                 assay_name = "rereferenced")
+```
+
+### Comparing Methods
+
+The three methods differ in their spatial resolution, depth bias, and noise
+sensitivity:
+
+```{r source-compare, eval=FALSE}
+# Compute source power (RMS across orientations) for each method
+.rms_power <- function(pe_src, n_sources) {
+  src <- SummarizedExperiment::assay(pe_src, "source")
+  power <- numeric(n_sources)
+  for (j in seq_len(n_sources)) {
+    cols <- ((j - 1) * 3 + 1):(j * 3)
+    power[j] <- mean(rowSums(src[, cols]^2))
+  }
+  power
+}
+
+mne_power <- .rms_power(pe_mne, 100)
+sloreta_power <- .rms_power(pe_sloreta, 100)
+eloreta_power <- .rms_power(pe_eloreta, 100)
+
+# Find peak source for each method
+cat("MNE peak source:", which.max(mne_power), "\n")
+cat("sLORETA peak source:", which.max(sloreta_power), "\n")
+cat("eLORETA peak source:", which.max(eloreta_power), "\n")
+```
+
+## Beamformer
+
+Beamformers are spatial filters that estimate the power at each source
+location by constructing a filter that passes activity from the target
+location while suppressing contributions from elsewhere.
+
+### LCMV Beamformer
+
+The Linearly Constrained Minimum Variance (LCMV) beamformer operates in the
+time domain using the data covariance matrix:
+
+```{r beamformer-lcmv, eval=FALSE}
+pe_lcmv <- eegBeamformer(pe, fm_sphere, method = "lcmv",
+                          assay_name = "rereferenced")
+
+# Source power is stored as a n_sources x 1 matrix
+bf_power <- SummarizedExperiment::assay(pe_lcmv, "beamformer")
+dim(bf_power)
+# [1] 100   1
+
+# Find the source with maximum power
+peak_source <- which.max(bf_power[, 1])
+cat("LCMV peak source:", peak_source, "\n")
+cat("Peak power:", bf_power[peak_source, 1], "\n")
+```
+
+### DICS Beamformer
+
+Dynamic Imaging of Coherent Sources (DICS) operates in the frequency domain,
+using the cross-spectral density matrix in a specified frequency band:
+
+```{r beamformer-dics, eval=FALSE}
+# Alpha-band (8-13 Hz) source localization
+pe_dics <- eegBeamformer(pe, fm_sphere, method = "dics",
+                          freq_range = c(8, 13),
+                          assay_name = "rereferenced")
+
+dics_power <- SummarizedExperiment::assay(pe_dics, "beamformer")
+peak_dics <- which.max(dics_power[, 1])
+cat("DICS alpha peak source:", peak_dics, "\n")
+
+# Compare with beta-band source
+pe_dics_beta <- eegBeamformer(pe, fm_sphere, method = "dics",
+                               freq_range = c(13, 30),
+                               assay_name = "rereferenced")
+dics_beta <- SummarizedExperiment::assay(pe_dics_beta, "beamformer")
+cat("DICS beta peak source:", which.max(dics_beta[, 1]), "\n")
+```
+
+## Source Power
+
+`eegSourcePower()` computes frequency-band source maps from previously
+estimated source time series. It requires prior source estimation via
+`eegSourceEstimate()`:
+
+```{r source-power, eval=FALSE}
+# Compute band power at each source location
+bp <- eegSourcePower(pe_mne, source_assay = "source")
+head(bp)
+# source_id, band, power
+
+# Reshape to wide format for comparison
+bp_wide <- reshape(bp, direction = "wide", idvar = "source_id",
+                   timevar = "band", v.names = "power")
+head(bp_wide)
+```
+
+### Custom Frequency Bands
+
+```{r source-power-custom, eval=FALSE}
+# Narrow-band source analysis
+custom_bands <- list(
+  mu     = c(8, 12),
+  beta   = c(15, 25),
+  gamma1 = c(30, 45)
+)
+
+bp_custom <- eegSourcePower(pe_mne, bands = custom_bands,
+                             source_assay = "source")
+head(bp_custom)
+```
+
+## Visualization
+
+PhysioEEG provides `eegPlotSource()` for visualizing source localization
+results on a 2D brain projection.
+
+### Scatter Plot
+
+Source locations are shown as points, sized and colored by amplitude. Only
+sources above a percentile threshold are displayed:
+
+```{r vis-scatter, eval=FALSE}
+# Create source data for visualization
+src_positions <- fm_sphere$source_positions
+src_amplitudes <- bf_power[, 1]
+
+src_df <- data.frame(
+  x = src_positions$x,
+  y = src_positions$y,
+  amplitude = src_amplitudes
+)
+
+# Plot with 80th percentile threshold (show top 20% sources)
+eegPlotSource(pe, source_data = src_df, method = "scatter",
+              threshold_pct = 80)
+```
+
+### Flat Map
+
+The flat map mode uses interpolation to create a continuous image of source
+activity:
+
+```{r vis-flatmap, eval=FALSE}
+eegPlotSource(pe, source_data = src_df, method = "flatmap",
+              threshold_pct = 70)
+```
+
+### Comparing Methods Visually
+
+```{r vis-compare, eval=FALSE}
+# LCMV result
+lcmv_df <- data.frame(
+  x = src_positions$x,
+  y = src_positions$y,
+  amplitude = bf_power[, 1]
+)
+p_lcmv <- eegPlotSource(pe, source_data = lcmv_df, method = "scatter",
+                          threshold_pct = 80)
+
+# DICS alpha result
+dics_df <- data.frame(
+  x = src_positions$x,
+  y = src_positions$y,
+  amplitude = dics_power[, 1]
+)
+p_dics <- eegPlotSource(pe, source_data = dics_df, method = "scatter",
+                          threshold_pct = 80)
+
+# Display side by side (requires patchwork or gridExtra)
+print(p_lcmv)
+print(p_dics)
+```
+
+## Method Comparison
+
+### Distributed Source Imaging vs. Beamforming
+
+| Feature | Distributed (MNE/LORETA) | Beamformer (LCMV/DICS) |
+|---------|--------------------------|------------------------|
+| Output | Full time course per source | Power per source |
+| Multiple sources | Well-suited | Can suppress correlated sources |
+| Depth bias | MNE biased to surface | Less depth bias |
+| Regularization | Lambda parameter | Data covariance |
+| Frequency specificity | Post-hoc via eegSourcePower | DICS: built-in |
+
+### Choosing a Method
+
+- **MNE**: Good starting point, interpretable, but surface-biased.
+- **sLORETA**: Best for localization accuracy of focal sources; zero
+  localization error for point sources in noiseless data.
+- **eLORETA**: Exact localization even with noise, but more computationally
+  expensive due to iterative estimation.
+- **LCMV**: Effective for broadband source power estimation; robust to noise.
+- **DICS**: Best for frequency-specific source analysis (e.g., alpha
+  generators, beta oscillations in motor cortex).
+
+## Best Practices
+
+### Electrode Density
+
+Source localization accuracy improves with more electrodes. The 19-channel
+10-20 system provides limited spatial resolution. For research applications,
+64 or more channels are recommended:
+
+```{r best-density, eval=FALSE}
+# For demonstration with 19 channels
+pe_19 <- make_eeg(n_time = 2500, n_channels = 19, sr = 500)
+pe_19 <- eegMontage(pe_19, system = "10-20")
+fm_19 <- eegForwardModel(pe_19, method = "spherical", n_sources = 50)
+# Limited spatial resolution with 19 channels
+```
+
+### SNR Considerations
+
+Higher signal-to-noise ratio (SNR) improves source estimation. Strategies
+to improve SNR include:
+
+- Averaging across epochs (ERP paradigms)
+- Narrowband filtering before source estimation
+- Artifact rejection and ICA cleaning
+- Increasing regularization (lambda) for noisy data
+
+```{r best-snr, eval=FALSE}
+# Higher regularization for noisy data
+pe_noisy <- eegSourceEstimate(pe, fm_sphere, method = "sloreta",
+                               lambda = 0.2,
+                               assay_name = "rereferenced")
+
+# Lower regularization for clean data
+pe_clean <- eegSourceEstimate(pe, fm_sphere, method = "sloreta",
+                               lambda = 0.01,
+                               assay_name = "rereferenced")
+```
+
+### Regularization
+
+The regularization parameter `lambda` controls the trade-off between data
+fit and solution smoothness:
+
+- **Small lambda** (e.g., 0.01): Better data fit, but sensitive to noise
+  and may produce spurious peaks.
+- **Large lambda** (e.g., 0.5): Smoother solution, more robust to noise,
+  but reduced spatial resolution.
+- **Typical range**: 0.01 to 0.1 for well-preprocessed data.
+
+```{r best-regularization, eval=FALSE}
+# Sweep regularization values
+lambdas <- c(0.001, 0.01, 0.05, 0.1, 0.5)
+for (lam in lambdas) {
+  pe_src <- eegSourceEstimate(pe, fm_sphere, method = "mne",
+                               lambda = lam,
+                               assay_name = "rereferenced")
+  src <- SummarizedExperiment::assay(pe_src, "source")
+  max_power <- max(rowSums(src^2))
+  cat(sprintf("lambda = %.3f -> max source power = %.2e\n", lam, max_power))
+}
+```
+
+### Preprocessing Recommendations
+
+1. **Filter**: Bandpass 1-40 Hz (or narrower for specific questions)
+2. **Re-reference**: Average reference is standard for source imaging
+3. **Artifact rejection**: Remove or correct eye blinks, muscle, and
+   cardiac artifacts
+4. **Electrode positions**: Use digitized positions when available;
+   standard montage positions are an approximation
+5. **Forward model**: Use BEM for more realistic head modeling when
+   individual MRIs are available (not implemented in this package;
+   consider MNE-Python for advanced forward modeling)

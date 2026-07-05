@@ -1,0 +1,434 @@
+---
+title: "Connectivity Analysis"
+author: "Matsui Lab, Nagoya University"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Connectivity Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Introduction
+
+Brain connectivity analysis aims to quantify the statistical dependencies and information flow between different brain regions or electrodes. Understanding these interactions is fundamental to cognitive neuroscience, revealing how distributed neural networks coordinate during perception, cognition, and action.
+
+**Key Concepts:**
+
+- **Functional connectivity**: Statistical dependencies between signals, regardless of directionality (e.g., coherence, PLV, wPLI)
+- **Effective connectivity**: Directed influence of one region on another (e.g., Granger causality)
+- **Volume conduction problem**: Instantaneous spatial spread of electrical activity through tissue creates spurious connectivity that doesn't reflect true neural coupling
+
+PhysioEEG provides methods ranging from basic coherence to advanced phase-based metrics that mitigate volume conduction artifacts.
+
+# Setup
+
+Load the PhysioEEG package and create multi-channel test data representing activity from frontal, central, parietal, and occipital regions:
+
+```{r}
+library(PhysioEEG)
+library(ggplot2)
+
+# Create 8-channel EEG data with 10-second epochs
+# Channels: Fp1, Fp2, C3, C4, P3, P4, O1, O2
+eeg <- make_eeg(
+  n_channels = 8,
+  n_time = 2500,      # 10 seconds at 250 Hz
+  n_samples = 20,     # 20 trials
+  sr = 250
+)
+
+# Set realistic channel names
+colData(eeg)$channel_name <- c("Fp1", "Fp2", "C3", "C4", "P3", "P4", "O1", "O2")
+colData(eeg)$type <- "EEG"
+
+# Add alpha oscillations (8-12 Hz) to occipital channels to simulate visual cortex activity
+# This creates realistic posterior connectivity
+```
+
+# Coherence Analysis
+
+Magnitude-squared coherence (MSC) quantifies frequency-specific correlation between two signals. It ranges from 0 (no linear relationship) to 1 (perfect linear relationship) at each frequency.
+
+**Formula**: $C_{xy}(f) = \frac{|P_{xy}(f)|^2}{P_{xx}(f)P_{yy}(f)}$
+
+where $P_{xy}$ is the cross-spectral density and $P_{xx}$, $P_{yy}$ are auto-spectral densities.
+
+## Magnitude-Squared Coherence
+
+```{r}
+# Compute coherence between occipital channels (O1-O2) in alpha band (8-12 Hz)
+# Expected to show strong coupling due to bilateral alpha rhythm
+coh_alpha <- eegCoherence(
+  eeg,
+  method = "msc",
+  freq_range = c(8, 12),
+  window_size = 500,  # 2-second windows for spectral estimation
+  assay_name = "raw"
+)
+
+# Result contains coherence values averaged over the frequency range
+print(coh_alpha)
+
+# Compute broadband coherence for theta through gamma
+coh_broad <- eegCoherence(
+  eeg,
+  method = "msc",
+  freq_range = c(4, 40),
+  window_size = 1000,  # Longer window for lower frequencies
+  assay_name = "raw"
+)
+```
+
+**Interpretation**: MSC > 0.5 in alpha band between O1-O2 indicates strong bilateral synchronization of visual cortex rhythms. However, MSC is sensitive to volume conduction—high coherence may reflect passive spread rather than true neural coupling.
+
+## Imaginary Coherence
+
+Imaginary coherence uses only the imaginary part of the cross-spectrum, eliminating zero-lag correlations introduced by volume conduction:
+
+```{r}
+# Compute imaginary coherence to reduce volume conduction artifacts
+icoh_alpha <- eegCoherence(
+  eeg,
+  method = "imaginary",
+  freq_range = c(8, 12),
+  window_size = 500,
+  assay_name = "raw"
+)
+
+# Compare with MSC to identify spurious connectivity
+# Large difference suggests volume conduction contamination
+```
+
+**Guideline**: Use imaginary coherence when you suspect volume conduction artifacts, particularly for nearby electrodes or high signal-to-noise data. Lower values are expected but reflect more genuine neural interactions.
+
+# Phase Locking Value (PLV)
+
+PLV measures phase consistency between two signals across trials, independent of amplitude fluctuations. This makes PLV robust to non-stationarities in signal amplitude.
+
+**Formula**: $PLV = \left|\frac{1}{N}\sum_{n=1}^N e^{i\Delta\phi_n}\right|$
+
+where $\Delta\phi_n$ is the phase difference between channels at trial $n$.
+
+```{r}
+# Compute PLV in theta band (4-8 Hz) for frontal-central connectivity
+# Theta coupling reflects working memory and cognitive control processes
+plv_theta <- eegPLV(
+  eeg,
+  freq_range = c(4, 8),
+  assay_name = "raw"
+)
+
+# PLV in alpha band for posterior connectivity
+plv_alpha <- eegPLV(
+  eeg,
+  freq_range = c(8, 12),
+  assay_name = "raw"
+)
+
+# PLV in beta band (13-30 Hz) for motor coordination
+# Expected higher C3-C4 coupling during motor planning
+plv_beta <- eegPLV(
+  eeg,
+  freq_range = c(13, 30),
+  assay_name = "raw"
+)
+```
+
+**Interpretation**:
+
+- **PLV = 0**: Random phase relationship across trials
+- **PLV = 1**: Perfect phase alignment across trials
+- **PLV > 0.3**: Generally considered moderate phase locking
+- **PLV > 0.5**: Strong phase locking, indicates robust neural coordination
+
+PLV is particularly useful for event-related designs where phase consistency changes with experimental conditions. However, PLV can still be affected by volume conduction since zero-lag phase relationships can occur artifactually.
+
+# Weighted Phase Lag Index (wPLI)
+
+The weighted phase lag index (Vinck et al., 2011) addresses the volume conduction problem by focusing only on non-zero phase lags, eliminating instantaneous correlations.
+
+**Key advantage**: wPLI is insensitive to volume conduction while maintaining statistical power better than imaginary coherence.
+
+```{r}
+# Compute wPLI in alpha band
+# More conservative estimate of true neural coupling
+wpli_alpha <- eegWPLI(
+  eeg,
+  freq_range = c(8, 12),
+  assay_name = "raw"
+)
+
+# wPLI across multiple frequency bands for comparison
+wpli_theta <- eegWPLI(eeg, freq_range = c(4, 8))
+wpli_beta <- eegWPLI(eeg, freq_range = c(13, 30))
+wpli_gamma <- eegWPLI(eeg, freq_range = c(30, 50))
+
+# Compare PLV vs wPLI to assess volume conduction impact
+# Large PLV but small wPLI suggests spurious connectivity
+```
+
+**When to use wPLI**:
+
+- High-density EEG with nearby electrodes
+- Source localization is unavailable
+- You need robust connectivity estimates free from zero-lag artifacts
+- Comparing connectivity across different montages or subjects
+
+**Trade-off**: wPLI may have lower sensitivity than PLV, but higher specificity for genuine neural coupling.
+
+# Granger Causality
+
+Spectral Granger causality quantifies directed (causal) influence in the frequency domain. It tests whether past values of signal X improve prediction of signal Y beyond Y's own history.
+
+**Interpretation**: $GC_{X\to Y}(f)$ represents the reduction in prediction error for Y when incorporating X's history, at frequency $f$.
+
+```{r}
+# Compute Granger causality from frontal to parietal regions
+# Tests top-down attentional control hypothesis
+gc_frontal_parietal <- eegGrangerCausality(
+  eeg,
+  order = 10,          # Model order (typically 10-20 for EEG)
+  freq_range = c(4, 40),
+  assay_name = "raw"
+)
+
+# Model order selection is critical
+# Too low: Underfitting, missing dynamics
+# Too high: Overfitting, spurious causality
+
+# Rule of thumb: order ≈ 2 × (sampling_rate / lowest_frequency_of_interest)
+# For 250 Hz and 4 Hz: order ≈ 2 × (250/4) = 125 samples, but use 10-20 for stability
+
+# Compute bidirectional causality to assess feedback loops
+gc_parietal_frontal <- eegGrangerCausality(
+  eeg,
+  order = 10,
+  freq_range = c(4, 40),
+  assay_name = "raw"
+)
+```
+
+**Important caveats**:
+
+1. **Directionality ≠ anatomical causation**: Granger causality reflects predictive relationships, not necessarily anatomical connections
+2. **Stationarity assumption**: Time series must be stationary; apply to short epochs or detrended data
+3. **Common input problem**: Shared inputs can create spurious Granger causality
+4. **Model order**: Critical parameter; use AIC/BIC for selection or physiologically motivated values
+
+**Frequency-specific interpretation**:
+
+- High theta GC (4-8 Hz): Top-down cognitive control
+- High alpha GC (8-12 Hz): Attentional modulation
+- High beta GC (13-30 Hz): Motor preparation and sensorimotor feedback
+- High gamma GC (30-80 Hz): Local processing and feedforward sensory flow
+
+# Building Connectivity Matrices
+
+For whole-brain network analysis, compute all-to-all connectivity matrices. This enables graph-theoretic analysis and visualization of network topology.
+
+```{r}
+# Compute comprehensive connectivity matrix using wPLI in alpha band
+# Results in 8×8 symmetric matrix for 8 channels
+conn_matrix_alpha <- eegConnectivityMatrix(
+  eeg,
+  method = "wpli",
+  freq_range = c(8, 12),
+  assay_name = "raw"
+)
+
+# Connectivity matrix for theta band
+conn_matrix_theta <- eegConnectivityMatrix(
+  eeg,
+  method = "wpli",
+  freq_range = c(4, 8),
+  assay_name = "raw"
+)
+
+# Using PLV for comparison (more sensitive but volume conduction prone)
+conn_matrix_plv <- eegConnectivityMatrix(
+  eeg,
+  method = "plv",
+  freq_range = c(8, 12),
+  assay_name = "raw"
+)
+
+# Coherence-based matrix (most traditional approach)
+conn_matrix_coh <- eegConnectivityMatrix(
+  eeg,
+  method = "coherence",
+  freq_range = c(8, 12),
+  assay_name = "raw"
+)
+```
+
+## Thresholding Strategies
+
+Raw connectivity matrices often contain weak, potentially spurious connections. Thresholding improves interpretability:
+
+```{r}
+# Proportional thresholding: Keep top 20% of connections
+threshold_prop <- quantile(conn_matrix_alpha[upper.tri(conn_matrix_alpha)], 0.80)
+
+# Absolute thresholding: Keep connections above physiological significance
+threshold_abs <- 0.3  # For wPLI, values > 0.3 often indicate robust coupling
+
+# Statistical thresholding: Compare against surrogate data distribution
+# (requires permutation testing, not shown here)
+
+# Apply threshold to matrix
+conn_matrix_thresh <- conn_matrix_alpha
+conn_matrix_thresh[conn_matrix_thresh < threshold_prop] <- 0
+```
+
+# Visualization
+
+Effective visualization reveals network topology and identifies functional hubs.
+
+## Heatmap View
+
+```{r}
+# Heatmap shows full connectivity structure
+# Useful for identifying clusters and bilateral symmetry
+eegPlotConnectivity(
+  eeg,
+  method = "heatmap",
+  matrix = conn_matrix_alpha,
+  threshold = 0.25,   # Show only moderate-to-strong connections
+  labels = colData(eeg)$channel_name,
+  palette = "RdYlBu"  # Red = strong, Blue = weak
+)
+
+# Hierarchical clustering can reveal functional modules
+# (requires additional analysis, not shown)
+```
+
+**Interpretation guide**:
+
+- **Diagonal blocks**: Within-region connectivity (frontal-frontal, parietal-parietal)
+- **Off-diagonal blocks**: Between-region connectivity (frontal-parietal, parietal-occipital)
+- **Symmetry**: Bilateral connectivity across hemispheres
+- **Hubs**: Rows/columns with consistently high values
+
+## Circle Plot
+
+Circle plots emphasize long-range connections and network topology:
+
+```{r}
+# Circular layout with channels arranged anatomically
+# Lines connect functionally coupled regions
+eegPlotConnectivity(
+  eeg,
+  method = "circle",
+  matrix = conn_matrix_alpha,
+  threshold = 0.4,    # Higher threshold for clarity
+  labels = colData(eeg)$channel_name,
+  palette = "viridis"
+)
+
+# Anterior-posterior gradient in alpha connectivity
+# Expected pattern: strong occipital-occipital, weaker frontal-occipital
+
+# Compare theta vs alpha network topology
+eegPlotConnectivity(
+  eeg,
+  method = "circle",
+  matrix = conn_matrix_theta,
+  threshold = 0.4,
+  labels = colData(eeg)$channel_name
+)
+```
+
+**Best practices**:
+
+- Use higher thresholds for circle plots to avoid visual clutter
+- Arrange nodes anatomically (frontal → central → parietal → occipital)
+- Compare across conditions to identify task-modulated networks
+- Line thickness can encode connection strength
+
+# Method Comparison
+
+Choosing the appropriate connectivity metric depends on research question, data quality, and analytical goals:
+
+| Method | Sensitivity to Volume Conduction | Directionality | Computational Cost | Best Use Case |
+|--------|----------------------------------|----------------|-------------------|---------------|
+| **Coherence (MSC)** | High | No | Low | Initial exploration, high SNR data, frequency-specific coupling |
+| **Imaginary Coherence** | Low | No | Low | Nearby electrodes, reducing zero-lag artifacts, exploratory analysis |
+| **PLV** | Moderate | No | Low | Event-related designs, trial-to-trial variability, phase dynamics |
+| **wPLI** | Very Low | No | Moderate | High-density EEG, robust connectivity, eliminating volume conduction |
+| **Granger Causality** | Moderate | Yes | High | Directed influence, feedback loops, testing causal hypotheses |
+
+## Practical Recommendations
+
+**For exploratory analysis**:
+```{r}
+# Start with wPLI to get robust, volume-conduction-free overview
+conn_explore <- eegConnectivityMatrix(eeg, method = "wpli", freq_range = c(4, 40))
+eegPlotConnectivity(eeg, method = "heatmap", matrix = conn_explore, threshold = 0.3)
+```
+
+**For hypothesis testing**:
+```{r}
+# Use multiple metrics to triangulate true connectivity
+# Convergent evidence across methods strengthens conclusions
+
+# Compare PLV vs wPLI
+plv_result <- eegPLV(eeg, freq_range = c(8, 12))
+wpli_result <- eegWPLI(eeg, freq_range = c(8, 12))
+
+# If PLV >> wPLI, volume conduction likely present
+# If PLV ≈ wPLI, genuine phase coupling more likely
+```
+
+**For directed connectivity**:
+```{r}
+# Granger causality for testing information flow direction
+# Combine with non-directed metrics for comprehensive picture
+gc_forward <- eegGrangerCausality(eeg, order = 15, freq_range = c(4, 12))
+wpli_baseline <- eegWPLI(eeg, freq_range = c(4, 12))
+
+# Granger without corresponding wPLI suggests spurious causality
+# Granger with wPLI suggests genuine directed influence
+```
+
+## Frequency Band Considerations
+
+Different frequency bands reflect distinct neural processes:
+
+- **Delta (0.5-4 Hz)**: Sleep, deep brain structures, slow cortical potentials
+- **Theta (4-8 Hz)**: Working memory, navigation, frontal-midline coupling
+- **Alpha (8-12 Hz)**: Attention, inhibition, posterior dominance, thalamo-cortical loops
+- **Beta (13-30 Hz)**: Motor control, sensorimotor integration, top-down signaling
+- **Gamma (30-80 Hz)**: Local processing, binding, feedforward sensory processing
+
+Connectivity patterns are frequency-specific; analyze multiple bands separately rather than broadband.
+
+# Conclusion
+
+PhysioEEG provides a comprehensive toolkit for EEG connectivity analysis, from basic coherence to advanced phase-based metrics robust to volume conduction. Key principles:
+
+1. **Start conservative**: Use wPLI or imaginary coherence to avoid volume conduction artifacts
+2. **Converging evidence**: Apply multiple methods; consistent results indicate robust connectivity
+3. **Frequency specificity**: Analyze narrow bands aligned with neural oscillatory processes
+4. **Threshold appropriately**: Balance sensitivity and specificity using data-driven or statistical thresholds
+5. **Interpret cautiously**: Connectivity reflects statistical relationships, not direct anatomical connections
+
+For directed connectivity questions, Granger causality provides unique insights but requires careful model selection and stationarity checks.
+
+## References
+
+- Vinck, M., Oostenveld, R., van Wingerden, M., Battaglia, F., & Pennartz, C. M. (2011). An improved index of phase-synchronization for electrophysiological data in the presence of volume-conduction, noise and sample-size bias. *NeuroImage, 55*(4), 1548-1565.
+- Bastos, A. M., & Schoffelen, J. M. (2016). A tutorial review of functional connectivity analysis methods and their interpretational pitfalls. *Frontiers in Systems Neuroscience, 9*, 175.
+- Nolte, G., Bai, O., Wheaton, L., Mari, Z., Vorbach, S., & Hallett, M. (2004). Identifying true brain interaction from EEG data using the imaginary part of coherence. *Clinical Neurophysiology, 115*(10), 2292-2307.
+
+---
+
+*For more information, see `?eegConnectivityMatrix` and related function documentation.*

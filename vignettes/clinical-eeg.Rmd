@@ -1,0 +1,404 @@
+---
+title: "Clinical EEG Analysis with PhysioEEG"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Clinical EEG Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+# Clinical EEG Analysis with PhysioEEG
+
+This vignette demonstrates the clinical EEG analysis capabilities of PhysioEEG,
+covering epileptic spike detection, quantitative EEG (QEEG) band power analysis,
+hemispheric asymmetry indices, burst-suppression detection, and EEG slowing
+assessment. These tools are designed to assist clinical neurophysiologists in
+routine EEG interpretation but should always be used in conjunction with
+clinical judgment.
+
+## Setup
+
+Load PhysioEEG and generate simulated clinical EEG data containing known
+epileptiform discharges:
+
+```{r setup, eval=FALSE}
+library(PhysioEEG)
+
+# Create 60 seconds of 19-channel EEG with 15 embedded spikes
+pe <- make_eeg_spikes(n_time = 30000, n_channels = 19, sr = 500, n_spikes = 15)
+
+# Inspect the data
+dim(SummarizedExperiment::assay(pe, "raw"))
+# [1] 30000    19
+
+# Ground-truth spike locations are stored in metadata
+spike_truth <- metadata(pe)$spike_locations
+head(spike_truth)
+```
+
+For preprocessing before clinical analysis, apply filtering to remove
+low-frequency drift and powerline noise:
+
+```{r preprocess, eval=FALSE}
+# Bandpass filter (0.5-70 Hz) with 50 Hz notch
+pe <- eegFilter(pe, lowcut = 0.5, highcut = 70, notch = 50)
+```
+
+## Spike Detection
+
+The `eegSpikeDetect()` function identifies epileptiform spike discharges using
+either morphology-based derivative analysis or template matching. The morphology
+method detects sharp transients by thresholding the first derivative, while the
+template method cross-correlates a canonical spike waveform with each channel.
+
+### Basic Spike Detection
+
+```{r spike-basic, eval=FALSE}
+# Morphology-based detection (default)
+spikes <- eegSpikeDetect(pe, method = "morphology",
+                          assay_name = "filtered")
+head(spikes)
+# Returns: channel, sample, time_sec, amplitude, duration_ms, confidence
+```
+
+### Parameter Tuning
+
+The detection sensitivity depends on the `threshold_sd` parameter. Lower values
+increase sensitivity (more detections) but may produce false positives. Higher
+values are more conservative:
+
+```{r spike-tuning, eval=FALSE}
+# High sensitivity (more detections, more false positives)
+spikes_sensitive <- eegSpikeDetect(pe, method = "morphology",
+                                    threshold_sd = 3,
+                                    min_amplitude = 30,
+                                    assay_name = "filtered")
+
+# Conservative detection (fewer false positives)
+spikes_conservative <- eegSpikeDetect(pe, method = "morphology",
+                                       threshold_sd = 5,
+                                       min_amplitude = 80,
+                                       assay_name = "filtered")
+
+cat("Sensitive:", nrow(spikes_sensitive), "detections\n")
+cat("Conservative:", nrow(spikes_conservative), "detections\n")
+```
+
+### Template Matching
+
+The template method uses cross-correlation with a canonical spike waveform,
+which can be more robust for stereotyped spike morphologies:
+
+```{r spike-template, eval=FALSE}
+spikes_template <- eegSpikeDetect(pe, method = "template",
+                                   min_amplitude = 50,
+                                   assay_name = "filtered")
+cat("Template detections:", nrow(spikes_template), "\n")
+```
+
+### Sensitivity Analysis
+
+Compare detections against known spike locations to evaluate performance:
+
+```{r spike-sensitivity, eval=FALSE}
+# Compare with ground truth
+truth_times <- spike_truth$time_sec
+detected_times <- spikes$time_sec
+
+# Count hits (within 100ms tolerance)
+tolerance <- 0.1
+hits <- sum(sapply(truth_times, function(t) {
+  any(abs(detected_times - t) < tolerance)
+}))
+
+sensitivity <- hits / length(truth_times)
+cat(sprintf("Sensitivity: %.1f%% (%d/%d spikes detected)\n",
+            100 * sensitivity, hits, length(truth_times)))
+```
+
+## Quantitative EEG (QEEG)
+
+`eegQEEG()` computes absolute and relative spectral band powers for each
+channel using Welch's method (windowed FFT averaging). Standard EEG frequency
+bands are delta (1-4 Hz), theta (4-8 Hz), alpha (8-13 Hz), beta (13-30 Hz),
+and gamma (30-50 Hz).
+
+```{r qeeg, eval=FALSE}
+# Compute QEEG with standard bands
+pe_qeeg <- eegQEEG(pe, assay_name = "filtered")
+
+# Access results
+qeeg_info <- metadata(pe_qeeg)$qeeg
+
+# Relative power per channel (channels x bands)
+print(round(qeeg_info$relative_power, 3))
+
+# Absolute power is also available
+print(round(qeeg_info$absolute_power, 2))
+```
+
+### Custom Band Definitions
+
+You can define custom frequency bands for specific clinical questions:
+
+```{r qeeg-custom, eval=FALSE}
+# Fine-grained alpha sub-bands
+custom_bands <- list(
+  delta      = c(1, 4),
+  theta      = c(4, 8),
+  low_alpha  = c(8, 10),
+  high_alpha = c(10, 13),
+  beta1      = c(13, 20),
+  beta2      = c(20, 30)
+)
+
+pe_custom <- eegQEEG(pe, bands = custom_bands, assay_name = "filtered",
+                      output_assay = "qeeg_custom")
+custom_info <- metadata(pe_custom)$qeeg
+print(custom_info$band_names)
+```
+
+### Normative Comparison
+
+Compare band power ratios against typical normative ranges:
+
+```{r qeeg-normative, eval=FALSE}
+# Compute theta/alpha ratio (elevated in cognitive impairment)
+rel_power <- qeeg_info$relative_power
+theta_alpha_ratio <- rel_power[, "theta"] / pmax(rel_power[, "alpha"], 1e-10)
+cat("Theta/Alpha ratio per channel:\n")
+print(round(theta_alpha_ratio, 2))
+
+# Channels with ratio > 1.5 may indicate abnormal slowing
+abnormal <- which(theta_alpha_ratio > 1.5)
+if (length(abnormal) > 0) {
+  cat("Potentially abnormal channels:", paste(abnormal, collapse = ", "), "\n")
+}
+```
+
+## Asymmetry Indices
+
+`eegAsymmetry()` computes hemispheric asymmetry indices from paired electrode
+sites. The standard metric is log(right power) - log(left power) in the alpha
+band. Positive values indicate relatively greater right-hemisphere alpha power,
+which is typically associated with greater left-hemisphere cortical activity.
+
+```{r asymmetry, eval=FALSE}
+# Compute frontal alpha asymmetry (standard F4-F3, F8-F7 pairs)
+asym <- eegAsymmetry(pe, assay_name = "filtered")
+print(asym)
+```
+
+### Custom Electrode Pairs and Bands
+
+```{r asymmetry-custom, eval=FALSE}
+# Parietal asymmetry in theta band
+parietal_asym <- eegAsymmetry(pe,
+                               pairs = list(c("P4", "P3"), c("T6", "T5")),
+                               band = c(4, 8),
+                               assay_name = "filtered")
+print(parietal_asym)
+```
+
+### Clinical Interpretation
+
+Frontal alpha asymmetry is used in research on emotional processing and
+depression. A consistently negative asymmetry index (greater left alpha
+= less left activity) has been associated with withdrawal-related affect:
+
+```{r asymmetry-interpret, eval=FALSE}
+# Evaluate asymmetry direction
+for (i in seq_len(nrow(asym))) {
+  direction <- if (asym$asymmetry_index[i] > 0) {
+    "greater right alpha (left activation)"
+  } else {
+    "greater left alpha (right activation)"
+  }
+  cat(sprintf("Pair %s: AI = %.3f -> %s\n",
+              asym$pair[i], asym$asymmetry_index[i], direction))
+}
+```
+
+## EEG Suppression
+
+`eegSuppression()` identifies periods of burst and suppression by computing
+the root mean square (RMS) amplitude in sliding windows. This is relevant for
+monitoring depth of anesthesia, coma assessment, and neonatal EEG
+interpretation.
+
+```{r suppression, eval=FALSE}
+# Detect burst-suppression patterns
+bs <- eegSuppression(pe, threshold = 10, min_duration_ms = 500,
+                      assay_name = "filtered")
+
+# View segments
+head(bs)
+
+# Burst-Suppression Ratio (percentage of time in suppression)
+bsr <- attr(bs, "bsr")
+cat(sprintf("Burst-Suppression Ratio: %.1f%%\n", bsr))
+```
+
+### Interpreting BSR
+
+The Burst-Suppression Ratio (BSR) provides a single summary metric:
+
+```{r suppression-interpret, eval=FALSE}
+if (bsr < 5) {
+  cat("BSR < 5%: Normal or mild suppression\n")
+} else if (bsr < 40) {
+  cat("BSR 5-40%: Moderate burst-suppression\n")
+} else {
+  cat("BSR > 40%: Severe burst-suppression\n")
+}
+
+# Segment durations
+burst_durations <- bs$duration_ms[bs$type == "burst"]
+supp_durations <- bs$duration_ms[bs$type == "suppression"]
+cat(sprintf("Mean burst duration: %.0f ms\n", mean(burst_durations)))
+if (length(supp_durations) > 0) {
+  cat(sprintf("Mean suppression duration: %.0f ms\n", mean(supp_durations)))
+}
+```
+
+## EEG Slowing
+
+`eegSlowing()` detects pathological EEG slowing using spectral analysis. Three
+methods are available:
+
+- **TDR**: Theta/delta ratio per channel
+- **DTAR**: (Delta + theta) / (alpha + beta) ratio per channel
+- **Peak frequency**: Dominant frequency per channel
+
+```{r slowing, eval=FALSE}
+# DTAR method (most comprehensive)
+slowing <- eegSlowing(pe, method = "dtar", assay_name = "filtered")
+print(slowing)
+
+# Summarize classifications
+table(slowing$classification)
+```
+
+### Peak Frequency Method
+
+The peak frequency method identifies the dominant oscillation in each channel.
+Peak frequency below 8 Hz is considered abnormal:
+
+```{r slowing-peak, eval=FALSE}
+slowing_pf <- eegSlowing(pe, method = "peak_frequency",
+                          assay_name = "filtered")
+print(slowing_pf)
+
+# Channels with abnormal peak frequency
+abnormal <- slowing_pf[slowing_pf$classification != "normal", ]
+if (nrow(abnormal) > 0) {
+  cat("Channels with slowing:\n")
+  print(abnormal)
+}
+```
+
+### Focal vs. Generalized Slowing
+
+Compare slowing across hemispheres to distinguish focal from generalized
+patterns:
+
+```{r slowing-focal, eval=FALSE}
+slowing_all <- eegSlowing(pe, method = "dtar", assay_name = "filtered")
+
+# Separate left and right channels
+col_data <- SummarizedExperiment::colData(pe)
+labels <- as.character(col_data$label)
+
+left_ch <- grep("1|3|5|7", labels)
+right_ch <- grep("2|4|6|8", labels)
+
+left_mean <- mean(slowing_all$value[left_ch])
+right_mean <- mean(slowing_all$value[right_ch])
+
+cat(sprintf("Left hemisphere mean DTAR: %.2f\n", left_mean))
+cat(sprintf("Right hemisphere mean DTAR: %.2f\n", right_mean))
+
+if (abs(left_mean - right_mean) > 1.0) {
+  cat("Possible focal slowing detected (hemispheric difference > 1.0)\n")
+} else {
+  cat("Slowing pattern appears generalized\n")
+}
+```
+
+## Full Clinical Workflow
+
+A complete clinical EEG assessment combines all tools in a systematic pipeline:
+
+```{r workflow, eval=FALSE}
+# 1. Generate or load clinical EEG data
+pe <- make_eeg_spikes(n_time = 30000, n_channels = 19, sr = 500, n_spikes = 15)
+
+# 2. Preprocessing
+pe <- eegFilter(pe, lowcut = 0.5, highcut = 70, notch = 50)
+
+# 3. Spike detection
+spikes <- eegSpikeDetect(pe, method = "morphology", assay_name = "filtered")
+cat(sprintf("Detected %d spike events\n", nrow(spikes)))
+
+# 4. QEEG band power
+pe <- eegQEEG(pe, assay_name = "filtered")
+qeeg <- metadata(pe)$qeeg
+
+# 5. Asymmetry assessment
+asym <- eegAsymmetry(pe, assay_name = "filtered")
+
+# 6. Burst-suppression
+bs <- eegSuppression(pe, assay_name = "filtered")
+bsr <- attr(bs, "bsr")
+
+# 7. Slowing detection
+slowing <- eegSlowing(pe, method = "dtar", assay_name = "filtered")
+
+# 8. Summary report
+cat("\n=== Clinical EEG Summary ===\n")
+cat(sprintf("Recording duration: %.1f seconds\n", 30000 / 500))
+cat(sprintf("Channels: %d\n", 19))
+cat(sprintf("Spike events: %d\n", nrow(spikes)))
+cat(sprintf("Burst-Suppression Ratio: %.1f%%\n", bsr))
+cat(sprintf("Channels with slowing: %d/%d\n",
+            sum(slowing$classification != "normal"), nrow(slowing)))
+cat(sprintf("Asymmetry (F4-F3): %.3f\n", asym$asymmetry_index[1]))
+```
+
+## Clinical Interpretation Guidelines
+
+When interpreting results from PhysioEEG clinical analysis functions, keep
+the following considerations in mind:
+
+### Spike Detection Limitations
+
+- Automated spike detection has high sensitivity but moderate specificity.
+  All detections should be confirmed by visual inspection.
+- False positives commonly occur at eye blink artifacts, electrode artifacts,
+  and steep sleep transients (vertex sharp waves, K-complexes).
+- The `confidence` score provides a relative ranking but is not calibrated
+  as a probability.
+
+### QEEG Interpretation
+
+- Band power values depend on recording montage, impedances, and electrode
+  placement. Normative comparisons require matched recording conditions.
+- Relative power is more robust to inter-individual amplitude differences
+  than absolute power.
+- Age-appropriate normative databases should be used for comparison (not
+  included in this package).
+
+### When to Combine with Clinical Judgment
+
+- These tools are intended to augment, not replace, clinical expertise.
+- Abnormalities detected by automated analysis should always be verified
+  against the raw EEG trace.
+- Clinical context (medications, state of consciousness, age, clinical
+  history) is essential for proper interpretation.
+- Findings from automated analysis should be integrated with other clinical
+  data (imaging, neuropsychological testing, clinical presentation) for a
+  complete assessment.

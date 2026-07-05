@@ -1,0 +1,395 @@
+---
+title: "EEG Preprocessing Pipeline"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{EEG Preprocessing Pipeline}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
+```
+
+## Introduction
+
+EEG data preprocessing is critical for removing artifacts and noise that can obscure neural signals. A typical preprocessing pipeline involves several sequential steps, each targeting specific sources of noise or artifact. The order of operations matters: filtering should generally precede re-referencing, bad channel detection should occur before interpolation, and artifact rejection should be performed after epoching.
+
+This vignette demonstrates a complete EEG preprocessing workflow using the PhysioEEG package, from raw continuous data to clean, analysis-ready epochs. We cover filtering, re-referencing, channel interpolation, ICA-based artifact removal, epoching, and automated artifact rejection.
+
+## Setup
+
+First, load the PhysioEEG package and create example EEG data for demonstration purposes.
+
+```{r}
+library(PhysioEEG)
+
+eeg <- make_eeg(
+  n_channels = 64,
+  n_time = 60000,
+  sampling_rate = 500,
+  add_noise = TRUE
+)
+```
+
+The `make_eeg()` function creates a simulated EEG dataset with realistic noise characteristics. In practice, you would load your data using `readEDF()`, `readBrainVision()`, or similar I/O functions.
+
+## Filtering with eegFilter()
+
+Filtering removes frequency-specific noise and artifacts. The choice of filter type and cutoff frequencies depends on your research question and the characteristics of your data.
+
+### Highpass Filtering
+
+Highpass filters remove slow drifts and DC offsets that can interfere with subsequent processing steps. A cutoff of 0.1 Hz is common for ERP studies, while 1 Hz may be appropriate for resting-state analysis.
+
+```{r}
+eeg_hp <- eegFilter(eeg, lowcut = 0.1, type = "butter", order = 4)
+```
+
+### Lowpass Filtering
+
+Lowpass filters attenuate high-frequency noise, including muscle artifacts and electrical interference above the frequency range of interest. For most cognitive EEG studies, 40-50 Hz is a reasonable cutoff.
+
+```{r}
+eeg_lp <- eegFilter(eeg, highcut = 40, type = "butter", order = 4)
+```
+
+### Bandpass Filtering
+
+Bandpass filters combine highpass and lowpass in a single operation, isolating the frequency band of interest. This is the most common approach for EEG preprocessing.
+
+```{r}
+eeg_bp <- eegFilter(eeg, lowcut = 1, highcut = 40, type = "butter", order = 4)
+```
+
+### Notch Filtering
+
+Notch filters remove narrow-band line noise at 50 Hz (Europe/Asia) or 60 Hz (Americas). Apply notch filtering before bandpass filtering for best results.
+
+```{r}
+eeg_notch <- eegFilter(eeg, notch = 60, notch_width = 2)
+```
+
+### FIR vs IIR Filters
+
+The package supports both finite impulse response (FIR) and infinite impulse response (IIR) filters. FIR filters (type = "fir") have linear phase characteristics and no phase distortion, making them ideal for ERP analysis. IIR filters (type = "butter", "cheby1", etc.) are computationally efficient but introduce phase shifts.
+
+```{r}
+eeg_fir <- eegFilter(eeg, lowcut = 1, highcut = 40, type = "fir", order = 100)
+eeg_iir <- eegFilter(eeg, lowcut = 1, highcut = 40, type = "butter", order = 4)
+```
+
+For most applications, a 4th-order Butterworth filter provides an excellent balance between roll-off characteristics and computational efficiency. Use FIR filters when precise timing is critical (e.g., high-resolution ERPs).
+
+## Re-referencing with eegRereference()
+
+The choice of reference electrode affects the spatial distribution of recorded potentials. Re-referencing transforms data from the original recording reference to a new reference scheme.
+
+### Average Reference
+
+Average referencing uses the mean of all electrodes as the reference. This is the most common choice for high-density EEG and is required for source localization methods.
+
+```{r}
+eeg_avg <- eegRereference(eeg_bp, method = "average")
+```
+
+### Mastoid Reference
+
+Mastoid (or linked mastoids) referencing is common in clinical applications and sleep studies. Mastoid channels (typically A1 and A2 or TP9 and TP10) are relatively inactive during most cognitive tasks.
+
+```{r}
+eeg_mast <- eegRereference(eeg_bp, method = "mastoid", ref_channels = c("TP9", "TP10"))
+```
+
+### Single Channel Reference
+
+Re-referencing to a single electrode (commonly Cz) can be useful when comparing to older literature or for specific experimental designs.
+
+```{r}
+eeg_cz <- eegRereference(eeg_bp, method = "single", ref_channels = "Cz")
+```
+
+### When to Use Each Type
+
+- **Average reference**: Default choice for most research applications, especially with 32+ channels
+- **Mastoid reference**: Clinical EEG, sleep studies, or when following specific protocol requirements
+- **Single channel reference**: When electrodes cover only part of the scalp or for compatibility with previous studies
+
+## Bad Channel Detection and Interpolation
+
+Bad channels can arise from poor electrode contact, excessive impedance, or equipment malfunction. Detecting and interpolating bad channels improves data quality and prevents artifact propagation.
+
+### Detecting Bad Channels
+
+The `eegBadChannels()` function identifies problematic channels using multiple criteria: flatness (no signal variation), high noise levels, and low correlation with neighboring channels.
+
+```{r}
+bad_info <- eegBadChannels(
+  eeg_avg,
+  flat_threshold = 0.1,
+  noise_threshold = 4,
+  correlation_threshold = 0.4,
+  correlation_window = 1.0
+)
+
+print(bad_info$bad_channels)
+print(bad_info$reasons)
+```
+
+### Interpolating Bad Channels
+
+Once bad channels are identified, spherical spline interpolation reconstructs their signals based on surrounding electrodes. This method assumes that scalp potentials vary smoothly across the head surface.
+
+```{r}
+eeg_interp <- eegInterpolate(
+  eeg_avg,
+  bad_channels = bad_info$bad_channels,
+  method = "spherical"
+)
+```
+
+### Recommended Workflow
+
+1. Apply initial filtering (bandpass 1-40 Hz)
+2. Re-reference to average
+3. Detect bad channels
+4. Visually inspect flagged channels to confirm
+5. Interpolate confirmed bad channels
+6. Document which channels were interpolated for each participant
+
+Interpolation works well for isolated bad channels (up to ~10% of total channels). If more channels are bad, consider rejecting the entire dataset or recording segment.
+
+## ICA Artifact Removal
+
+Independent Component Analysis (ICA) separates EEG signals into statistically independent sources, enabling removal of stereotypical artifacts like eye blinks, eye movements, and muscle activity.
+
+### Running ICA
+
+The `eegICA()` function performs ICA decomposition using the FastICA or Infomax algorithm. Run ICA on filtered, re-referenced data before epoching.
+
+```{r}
+eeg_ica <- eegICA(eeg_interp, n_components = 30, method = "fastica")
+```
+
+### Detecting Artifact Components
+
+Automated detection identifies components likely to represent artifacts based on spatial patterns, temporal characteristics, and spectral properties.
+
+```{r}
+artifact_comps <- eegICAdetect(
+  eeg_ica,
+  types = c("eye", "muscle", "heart"),
+  threshold = 0.8
+)
+
+print(artifact_comps$eye_components)
+print(artifact_comps$muscle_components)
+```
+
+### Removing Artifact Components
+
+After confirming which components represent artifacts (visual inspection recommended), remove them from the data.
+
+```{r}
+eeg_clean <- eegICAremove(eeg_ica, components = c(1, 3, 7))
+```
+
+### Typical Workflow
+
+Eye blinks typically appear in 1-2 frontal components with high amplitude and low frequency. Lateral eye movements produce bipolar patterns over frontal electrodes. Muscle artifacts show high-frequency activity and focal topographies. Always visually inspect components before removal.
+
+## Epoching with eegEpoch()
+
+Epoching segments continuous EEG into time-locked trials around events of interest. This step is essential for event-related potential (ERP) analysis and trial-based statistics.
+
+### Creating Event Markers
+
+First, define your experimental events. Events should include onset times (in samples or seconds) and condition labels.
+
+```{r}
+events <- data.frame(
+  onset = seq(1000, 55000, by = 2000),
+  duration = 0,
+  type = rep(c("stimulus_A", "stimulus_B"), length.out = 28)
+)
+```
+
+### Extracting Epochs
+
+Extract epochs from -200 ms to 800 ms around each event, using the pre-stimulus interval (-200 to 0 ms) for baseline correction.
+
+```{r}
+eeg_epochs <- eegEpoch(
+  eeg_clean,
+  events = events,
+  epoch_limits = c(-0.2, 0.8),
+  baseline_limits = c(-0.2, 0)
+)
+```
+
+The `epoch_limits` parameter defines the time window around each event (in seconds). The `baseline_limits` parameter specifies the interval used for baseline correction, which removes pre-stimulus voltage differences across trials.
+
+### Alternative Baseline Methods
+
+You can also apply baseline correction separately or use different baseline windows for different analyses.
+
+```{r}
+eeg_epochs_nobl <- eegEpoch(
+  eeg_clean,
+  events = events,
+  epoch_limits = c(-0.5, 1.5),
+  baseline_limits = NULL
+)
+
+eeg_epochs_bl <- eegBaselineCorrect(
+  eeg_epochs_nobl,
+  baseline_limits = c(-0.5, -0.1)
+)
+```
+
+## Artifact Rejection with eegArtifactReject()
+
+Even after ICA, some trials may contain residual artifacts. Automated artifact rejection identifies and removes contaminated epochs.
+
+### Threshold-Based Rejection
+
+The simplest approach rejects epochs where any channel exceeds an absolute voltage threshold (typically ±100 μV for scalp EEG).
+
+```{r}
+eeg_clean_thresh <- eegArtifactReject(
+  eeg_epochs,
+  method = "threshold",
+  threshold = 100,
+  unit = "uV"
+)
+```
+
+### Gradient-Based Rejection
+
+Gradient (voltage step) criteria detect rapid voltage changes characteristic of muscle artifacts or electrode pops.
+
+```{r}
+eeg_clean_grad <- eegArtifactReject(
+  eeg_epochs,
+  method = "gradient",
+  threshold = 50,
+  unit = "uV"
+)
+```
+
+### Joint Probability Method
+
+Joint probability computes z-scores for each channel and epoch based on the distribution of values across all trials, rejecting outliers.
+
+```{r}
+eeg_clean_prob <- eegArtifactReject(
+  eeg_epochs,
+  method = "probability",
+  local_threshold = 5,
+  global_threshold = 3
+)
+```
+
+### When to Use Each Method
+
+- **Threshold**: Fast, simple, good for obvious artifacts; may miss subtle contamination
+- **Gradient**: Excellent for muscle artifacts and electrode jumps; sensitive to high-frequency noise
+- **Probability**: Sophisticated approach that adapts to data characteristics; best for research applications
+
+You can combine methods by applying them sequentially. Most studies use threshold-based rejection with ±75-100 μV limits.
+
+## Full Pipeline with eegPreprocess()
+
+For standardized processing, `eegPreprocess()` executes a complete pipeline in a single function call, applying filtering, re-referencing, bad channel interpolation, ICA artifact removal, epoching, and artifact rejection.
+
+```{r}
+eeg_final <- eegPreprocess(
+  eeg,
+  filter_lowcut = 1,
+  filter_highcut = 40,
+  filter_order = 4,
+  filter_type = "butter",
+  notch = 60,
+  reref_method = "average",
+  bad_channel_detect = TRUE,
+  bad_channel_interp = TRUE,
+  ica_method = "fastica",
+  ica_components = 30,
+  ica_artifact_types = c("eye", "muscle"),
+  events = events,
+  epoch_limits = c(-0.2, 0.8),
+  baseline_limits = c(-0.2, 0),
+  artifact_reject = TRUE,
+  artifact_method = "threshold",
+  artifact_threshold = 100
+)
+```
+
+### Parameter Selection for Different Paradigms
+
+**ERP Studies (cognitive tasks):**
+- Bandpass: 0.1-40 Hz
+- Average reference
+- ICA for eye artifacts
+- Baseline: -200 to 0 ms
+- Threshold: ±75 μV
+
+**Resting-State Analysis:**
+- Bandpass: 1-50 Hz (or analysis-specific, e.g., 8-13 Hz for alpha)
+- Average reference
+- ICA for eye, muscle, and cardiac artifacts
+- No epoching (continuous analysis)
+
+**Sleep EEG:**
+- Bandpass: 0.3-35 Hz
+- Mastoid reference
+- Minimal ICA (preserve physiological slow waves)
+- Epoch in 30-second windows for staging
+
+## Best Practices
+
+### Recommended Parameter Ranges
+
+- **Highpass cutoff**: 0.1-1 Hz (lower for slow ERPs, higher for oscillations)
+- **Lowpass cutoff**: 40-50 Hz (above gamma range for most applications)
+- **Filter order**: 4 (IIR) or 100+ (FIR)
+- **Baseline window**: 100-200 ms pre-stimulus
+- **Artifact threshold**: 75-100 μV for adults, 150-200 μV for children
+- **Bad channel interpolation**: Maximum 10% of channels
+
+### Pipeline Order Matters
+
+The sequence of preprocessing steps affects final data quality:
+
+1. Notch filter (if needed for line noise)
+2. Bandpass filter
+3. Re-reference to average
+4. Bad channel detection and interpolation
+5. ICA decomposition and artifact removal
+6. Epoching
+7. Baseline correction
+8. Artifact rejection
+
+Filtering before re-referencing prevents noise propagation. ICA on continuous data captures artifact patterns better than on epoched data. Artifact rejection should be the final step to preserve maximum trials.
+
+### Always Inspect Data Between Steps
+
+Automated preprocessing is powerful but not infallible. Visually inspect your data:
+
+- After filtering: Check for filter ringing or residual noise
+- After bad channel detection: Confirm flagged channels are truly bad
+- After ICA: Verify artifact components before removal
+- After artifact rejection: Ensure sufficient trials remain per condition (minimum 15-20 for ERPs)
+
+Use plotting functions like `plotEEG()`, `plotTopomap()`, and `plotERP()` to visualize data at each stage.
+
+### Document Your Pipeline
+
+Record all preprocessing parameters in your analysis script and research outputs. Parameter choices significantly impact results and must be reported for reproducibility. The PhysioEEG package stores preprocessing history in the metadata slot of the returned object.
+
+```{r}
+preprocessing_log <- metadata(eeg_final)$processing_history
+print(preprocessing_log)
+```
+
+This vignette provides a foundation for EEG preprocessing with PhysioEEG. Adapt these workflows to your specific experimental design and research questions. When in doubt, consult domain-specific literature for parameter recommendations.

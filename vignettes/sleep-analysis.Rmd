@@ -1,0 +1,481 @@
+---
+title: "Sleep EEG Analysis"
+author: "PhysioEEG Development Team"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Sleep EEG Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Introduction
+
+Sleep is a complex physiological state characterized by distinct stages, each with unique electroencephalographic (EEG) signatures. The American Academy of Sleep Medicine (AASM) defines five sleep stages: wakefulness (W), three non-REM stages (N1, N2, N3), and rapid eye movement sleep (REM). Accurate sleep staging is critical for diagnosing sleep disorders, assessing sleep quality, and understanding neurological health.
+
+Traditional sleep scoring is a time-intensive manual process performed by trained polysomnographic technologists. This vignette demonstrates how **PhysioEEG** provides automated tools for:
+
+- **Automatic sleep staging** based on AASM criteria using spectral features
+- **Detection of sleep-specific waveforms**: spindles, K-complexes, and slow waves
+- **Quantification of sleep architecture**: total sleep time, efficiency, stage distribution
+- **Visualization**: hypnograms for clinical interpretation
+
+These tools can accelerate research workflows, provide preliminary automated scoring for clinical review, and enable large-scale sleep studies.
+
+# Setup and Data Preparation
+
+First, load the PhysioEEG library and create simulated sleep EEG data. The `make_eeg_sleep()` function generates synthetic data with realistic spectral characteristics for each sleep stage.
+
+```{r load_library}
+library(PhysioEEG)
+library(ggplot2)
+
+# Create 8 hours of simulated sleep EEG data
+# Sampling rate: 256 Hz (common for clinical polysomnography)
+# Channels: 6 standard EEG derivations
+n_hours <- 8
+sr <- 256
+n_time <- n_hours * 60 * 60 * sr  # 7,372,800 samples
+
+eeg <- make_eeg_sleep(
+  n_time = n_time,
+  n_channels = 6,
+  sr = sr
+)
+
+# Inspect the data structure
+print(eeg)
+dim(assay(eeg, "raw"))
+colData(eeg)$channel_name
+```
+
+The simulated dataset includes channels typically used in clinical sleep studies: F3, F4 (frontal), C3, C4 (central), O1, O2 (occipital). Real sleep EEG would also include EOG (eye movements) and EMG (muscle tone) for comprehensive staging.
+
+# Preprocessing for Sleep EEG
+
+Sleep EEG analysis requires appropriate filtering to preserve relevant frequency bands while removing artifacts and high-frequency noise.
+
+## Recommended Filter Settings
+
+The AASM recommends a bandpass filter of **0.3-35 Hz** for sleep EEG:
+
+- **High-pass (0.3 Hz)**: Removes slow DC drift and movement artifacts
+- **Low-pass (35 Hz)**: Removes muscle artifact and electrical noise while preserving beta activity
+
+```{r preprocessing}
+# Apply AASM-recommended bandpass filter
+eeg_filt <- eegFilter(
+  eeg,
+  lowcut = 0.3,
+  highcut = 35,
+  order = 4,
+  assay_name = "raw",
+  output_assay = "filtered"
+)
+
+# Re-referencing to linked mastoids (A1+A2)/2 is common for sleep
+# This would require mastoid channels in real data
+# For this example, we'll use the average reference
+eeg_filt <- eegReReference(
+  eeg_filt,
+  ref_type = "average",
+  assay_name = "filtered",
+  output_assay = "reref"
+)
+```
+
+## Artifact Detection and Removal
+
+Before automated staging, it's crucial to identify and handle artifacts that could confound results.
+
+```{r artifact_detection}
+# Detect high-amplitude artifacts (movement, electrode issues)
+artifacts <- eegArtifactDetect(
+  eeg_filt,
+  method = "amplitude",
+  threshold_uv = 150,  # ±150 μV threshold
+  assay_name = "reref"
+)
+
+# Mark artifact epochs for exclusion from analysis
+metadata(eeg_filt)$artifact_epochs <- artifacts$epochs
+```
+
+# Automatic Sleep Staging
+
+The `eegSleepStage()` function implements AASM-based automated sleep staging using spectral power features across standard frequency bands.
+
+## Sleep Stage Characteristics
+
+- **Wake (W)**: Low delta, high alpha (8-12 Hz) and beta (>13 Hz) when eyes open
+- **N1**: Theta activity (4-7 Hz) dominates, alpha dropout
+- **N2**: Sleep spindles (11-16 Hz bursts) and K-complexes
+- **N3**: High delta power (0.5-2 Hz), slow wave sleep (SWS)
+- **REM**: Mixed frequency, low amplitude, theta in sawtooth waves
+
+```{r sleep_staging}
+# Perform automatic sleep staging in 30-second epochs
+stages <- eegSleepStage(
+  eeg_filt,
+  epoch_sec = 30,  # AASM standard epoch length
+  assay_name = "reref"
+)
+
+# Examine staging results
+head(stages$stage_sequence)
+table(stages$stage_sequence)
+
+# Stage probabilities for each epoch
+head(stages$probabilities)
+
+# Spectral features used for classification
+names(stages$features)
+
+# Store staging results in metadata
+metadata(eeg_filt)$sleep_stages <- stages
+```
+
+## Interpreting Staging Output
+
+The output includes:
+
+- `stage_sequence`: Vector of stage labels (W, N1, N2, N3, REM) for each epoch
+- `probabilities`: Matrix of posterior probabilities for each stage per epoch
+- `features`: Spectral power in delta, theta, alpha, sigma, beta bands
+- `epoch_times`: Start time of each epoch in seconds
+
+Low-confidence epochs (no stage with >60% probability) may require manual review.
+
+# Sleep Spindle Detection
+
+Sleep spindles are bursts of 11-16 Hz oscillations characteristic of N2 sleep, generated by thalamocortical networks. Spindle density is clinically relevant for memory consolidation and neurological assessment.
+
+## Detection Parameters
+
+AASM criteria for spindles:
+
+- **Frequency**: 11-16 Hz (sigma band)
+- **Duration**: 0.5-2.0 seconds
+- **Amplitude**: At least 2x background activity
+
+```{r spindle_detection}
+# Detect sleep spindles across all channels
+spindles <- eegSpindleDetect(
+  eeg_filt,
+  freq_range = c(11, 16),  # Sigma band
+  duration_range = c(0.5, 2.0),  # Minimum and maximum duration
+  amplitude_threshold = 2.0,  # Relative to background
+  assay_name = "reref"
+)
+
+# Spindle events: onset time, duration, peak frequency, amplitude
+head(spindles$events)
+
+# Spindle density (spindles per minute) by channel
+spindles$density_per_channel
+
+# Spindle rate by sleep stage
+spindles$density_by_stage
+
+# Visualize spindle distribution over time
+plot(spindles$timeline, type = "h",
+     xlab = "Time (hours)", ylab = "Spindle Count per Minute",
+     main = "Sleep Spindle Density Throughout Night")
+```
+
+## Clinical Significance
+
+- **Normal adults**: 2-5 spindles per minute during N2/N3
+- **Reduced density**: Schizophrenia, autism, aging
+- **Increased density**: Early Alzheimer's (compensatory), some epilepsies
+- **Asymmetry**: May indicate focal pathology
+
+# K-Complex Detection
+
+K-complexes are large amplitude negative-positive biphasic waveforms characteristic of N2 sleep, serving as markers of cortical downstates and sleep protection.
+
+## Detection Methodology
+
+The `eegKcomplexDetect()` function identifies K-complexes based on:
+
+- **Morphology**: Negative deflection followed by positive component
+- **Amplitude**: >75 μV peak-to-peak
+- **Duration**: 0.5-1.5 seconds total
+
+```{r kcomplex_detection}
+# Detect K-complexes in central channels (C3, C4)
+kcomplexes <- eegKcomplexDetect(
+  eeg_filt,
+  channels = c("C3", "C4"),  # Most prominent in central leads
+  amplitude_threshold = 75,  # μV
+  duration_range = c(0.5, 1.5),
+  assay_name = "reref"
+)
+
+# K-complex events
+head(kcomplexes$events)
+
+# Distribution across sleep stages (primarily N2)
+table(kcomplexes$events$sleep_stage)
+
+# K-complex density
+kcomplexes$density_per_minute
+```
+
+## Clinical Applications
+
+K-complexes reflect:
+
+- **Cortical integrity**: Reduced in dementia, encephalopathy
+- **Arousal threshold**: More K-complexes = better sleep protection
+- **Age effects**: Decrease in amplitude and frequency with aging
+- **Evoked K-complexes**: Can be elicited by auditory stimuli
+
+# Slow Wave Detection and Analysis
+
+Slow waves (0.5-2 Hz, >75 μV) are the hallmark of N3 sleep. Slow wave activity (SWA) is the gold standard measure of sleep depth and homeostatic sleep pressure.
+
+## Slow Wave Detection
+
+```{r slow_wave_detection}
+# Detect slow waves in frontal channels (F3, F4)
+# Slow waves have maximum amplitude in frontal regions
+slow_waves <- eegSlowWaveDetect(
+  eeg_filt,
+  channels = c("F3", "F4"),
+  freq_range = c(0.5, 2.0),  # Delta band slow waves
+  amplitude_threshold = 75,  # μV (AASM criterion)
+  negative_peak = TRUE,  # Detect negative-going slow waves
+  slope_threshold = 0.5,  # Minimum downslope steepness
+  assay_name = "reref"
+)
+
+# Slow wave characteristics
+head(slow_waves$events)
+
+# Slow wave density (waves per minute)
+slow_waves$density
+
+# SWA: Average slow wave amplitude
+slow_waves$mean_amplitude
+
+# Slow wave slope (marker of sleep depth)
+mean(slow_waves$events$max_slope)
+```
+
+## SWA Dynamics Across the Night
+
+Slow wave activity exhibits characteristic temporal dynamics:
+
+```{r swa_dynamics}
+# Compute SWA in consecutive NREM periods
+# SWA typically declines exponentially across sleep cycles
+swa_by_cycle <- slow_waves$swa_by_cycle
+
+# Plot SWA decline
+plot(swa_by_cycle$cycle, swa_by_cycle$swa,
+     type = "b", pch = 19,
+     xlab = "Sleep Cycle", ylab = "SWA (μV²)",
+     main = "Slow Wave Activity Dissipation Across Night")
+
+# Exponential decay indicates normal homeostatic process
+```
+
+## Clinical Interpretation
+
+- **Elevated SWA**: Sleep deprivation, recovery sleep
+- **Reduced SWA**: Aging, insomnia, depression, neurodegenerative disease
+- **Frontal SWA deficit**: ADHD, schizophrenia
+- **SWA slope**: Steeper slopes correlate with better cognition
+
+# Sleep Architecture Metrics
+
+The `eegSleepMetrics()` function computes standard polysomnographic measures of sleep quality and continuity.
+
+```{r sleep_metrics}
+# Calculate comprehensive sleep metrics
+metrics <- eegSleepMetrics(
+  eeg_filt,
+  stages = metadata(eeg_filt)$sleep_stages,
+  lights_off = 0,  # Recording start = lights off
+  lights_on = n_hours * 3600  # Recording end
+)
+
+# Print standardized sleep report
+print(metrics)
+
+# Key metrics:
+# - Total Sleep Time (TST): Total minutes of N1+N2+N3+REM
+# - Sleep Efficiency (SE%): TST / Time in Bed × 100
+# - Wake After Sleep Onset (WASO): Wake time after initial sleep
+# - Sleep Latency (SL): Time from lights off to first sleep epoch
+# - REM Latency (RL): Time from sleep onset to first REM
+# - Stage percentages: %N1, %N2, %N3, %REM
+# - Arousals per hour (if arousal detection performed)
+```
+
+## Normal Adult Sleep Architecture
+
+Healthy adult sleep typically shows:
+
+- **Sleep Efficiency**: >85%
+- **Sleep Latency**: <30 minutes
+- **REM Latency**: 60-120 minutes
+- **N1**: 2-5% of TST
+- **N2**: 45-55% of TST
+- **N3**: 15-25% of TST (decreases with age)
+- **REM**: 20-25% of TST
+- **WASO**: <30 minutes
+
+Deviations suggest sleep disorders or other pathology.
+
+# Hypnogram Visualization
+
+The hypnogram is the standard visualization of sleep staging, showing sleep depth across the night.
+
+```{r hypnogram}
+# Create a hypnogram with custom colors
+eegPlotHypnogram(
+  eeg_filt,
+  stages = metadata(eeg_filt)$sleep_stages$stage_sequence,
+  epoch_sec = 30,
+  colors = c(
+    "W" = "#FF6B6B",    # Red for wake
+    "N1" = "#4ECDC4",   # Cyan for N1
+    "N2" = "#45B7D1",   # Blue for N2
+    "N3" = "#1A535C",   # Dark blue for N3
+    "REM" = "#FFE66D"   # Yellow for REM
+  ),
+  show_cycles = TRUE  # Mark sleep cycles
+)
+
+# Overlay spindle density
+eegPlotHypnogram(
+  eeg_filt,
+  stages = metadata(eeg_filt)$sleep_stages$stage_sequence,
+  overlay = spindles$timeline,
+  overlay_label = "Spindle Density"
+)
+
+# Hypnogram with SWA
+eegPlotHypnogram(
+  eeg_filt,
+  stages = metadata(eeg_filt)$sleep_stages$stage_sequence,
+  overlay = slow_waves$swa_by_epoch,
+  overlay_label = "SWA (μV²)",
+  overlay_color = "#FF6B6B"
+)
+```
+
+# Clinical Interpretation and Reporting
+
+## Complete Analysis Workflow
+
+Here's an integrated workflow for clinical sleep EEG analysis:
+
+```{r complete_workflow}
+# 1. Load and preprocess data
+eeg <- make_eeg_sleep(n_time = 8*60*60*256, n_channels = 6, sr = 256)
+eeg <- eegFilter(eeg, lowcut = 0.3, highcut = 35)
+eeg <- eegReReference(eeg, ref_type = "average")
+
+# 2. Automatic sleep staging
+stages <- eegSleepStage(eeg, epoch_sec = 30)
+metadata(eeg)$sleep_stages <- stages
+
+# 3. Detect sleep-specific waveforms
+spindles <- eegSpindleDetect(eeg, freq_range = c(11, 16))
+kcomplexes <- eegKcomplexDetect(eeg, channels = c("C3", "C4"))
+slow_waves <- eegSlowWaveDetect(eeg, channels = c("F3", "F4"))
+
+# 4. Compute sleep architecture metrics
+metrics <- eegSleepMetrics(eeg, stages = stages)
+
+# 5. Generate visualization
+eegPlotHypnogram(eeg, stages = stages$stage_sequence)
+
+# 6. Export comprehensive report
+report <- list(
+  demographics = list(age = 35, sex = "M"),
+  sleep_metrics = metrics,
+  spindle_density = spindles$density_per_channel,
+  kcomplex_count = nrow(kcomplexes$events),
+  swa_mean = slow_waves$mean_amplitude,
+  staging_quality = mean(apply(stages$probabilities, 1, max))
+)
+
+# Save report for clinical review
+saveRDS(report, "sleep_study_report.rds")
+```
+
+## Abnormalities to Look For
+
+### Insomnia Pattern
+- Low sleep efficiency (<80%)
+- Prolonged sleep latency (>30 min)
+- Excessive WASO (>60 min)
+- Reduced N3 percentage
+
+### Sleep Apnea
+- Fragmented sleep with frequent arousals
+- Stage shifts following apneic events
+- Would require integration with respiratory signals
+
+### Depression
+- Shortened REM latency (<60 min)
+- Increased REM percentage
+- Reduced SWA in first sleep cycle
+
+### Neurodegenerative Disease
+- Reduced spindle density
+- Lower SWA amplitude
+- REM sleep behavior disorder (requires EMG)
+
+## Limitations of Automated Staging
+
+While automated staging is powerful, clinicians should be aware of limitations:
+
+1. **No EMG/EOG**: This implementation uses EEG only; true polysomnography includes eye movements and muscle tone
+2. **Artifact sensitivity**: Heavy artifacts can cause misclassification
+3. **Individual variation**: Algorithm trained on population norms may not capture individual sleep patterns
+4. **Ambiguous epochs**: Transitional sleep may have low classification confidence
+5. **Requires validation**: Automated staging should be reviewed by trained personnel for clinical decisions
+
+## Best Practices
+
+- **Manual review**: Check low-confidence epochs (probability <60%)
+- **Compare channels**: Spindles may be focal; check multiple derivations
+- **Context matters**: Integrate with clinical history and other polysomnographic signals
+- **Normative data**: Compare metrics to age-matched norms
+- **Longitudinal tracking**: Sleep architecture changes across nights; single studies may not represent typical sleep
+
+# Conclusion
+
+PhysioEEG provides a comprehensive toolkit for automated sleep EEG analysis, from preprocessing through detection of sleep-specific oscillations to quantification of sleep architecture. These tools enable:
+
+- **Rapid screening** of large sleep study datasets
+- **Objective quantification** of sleep quality metrics
+- **Research applications** investigating sleep's role in cognition and health
+- **Clinical decision support** when combined with expert review
+
+For further analysis, PhysioEEG integrates with time-frequency analysis (`eegTimeFreq()`), connectivity analysis (`eegConnectivity()`), and source localization (`eegSourceLoc()`) to provide deeper insights into sleep neurophysiology.
+
+## References
+
+- Iber C, et al. (2007). The AASM Manual for the Scoring of Sleep and Associated Events. American Academy of Sleep Medicine.
+- Rechtschaffen A, Kales A (1968). A Manual of Standardized Terminology, Techniques and Scoring System for Sleep Stages of Human Subjects.
+- Berry RB, et al. (2017). The AASM Manual for the Scoring of Sleep and Associated Events: Rules, Terminology and Technical Specifications, Version 2.4.
+
+## Session Information
+
+```{r session_info}
+sessionInfo()
+```

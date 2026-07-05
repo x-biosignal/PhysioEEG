@@ -1,0 +1,59 @@
+Package: PhysioEEG
+Title: EEG Analysis Functions for PhysioExperiment Objects
+Version: 0.2.0
+Authors@R:
+    person(given = "Yusuke",
+           family = "Matsui",
+           role = c("aut", "cre"),
+           email = "mail.to.matsui@gmail.com")
+Author: Yusuke Matsui
+Maintainer: Yusuke Matsui <mail.to.matsui@gmail.com>
+Description: Provides comprehensive electroencephalography (EEG) analysis
+    functions for PhysioExperiment objects. Includes preprocessing (filtering,
+    re-referencing, bad channel detection, interpolation, epoching, artifact
+    rejection), independent component analysis (FastICA, Infomax, JADE) with
+    automatic artifact detection, event-related potential (ERP) component
+    detection and measurement (N100, P300, N400, P600, MMN), source
+    localization (eLORETA, sLORETA, LCMV beamformer), EEG microstate analysis
+    (K-means, AAHC), sleep staging (AASM criteria, spindle/K-complex/slow-wave
+    detection), brain-computer interface features (CSP, SSVEP, motor imagery),
+    clinical EEG analysis (spike detection, QEEG, asymmetry indices),
+    time-frequency analysis (Morlet wavelet, STFT, multitaper, ERSP, ITC),
+    connectivity analysis (coherence, PLV, wPLI, Granger causality),
+    visualization (signal traces, ERP waveforms, topographic maps,
+    spectrograms, connectivity plots, hypnograms, source maps), and
+    simulated data generators for testing and demonstration.
+Depends:
+    R (>= 4.2),
+    PhysioCore
+Imports:
+    SummarizedExperiment,
+    S4Vectors,
+    utils,
+    stats
+Suggests:
+    ggplot2,
+    signal,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.2.0)
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr
+Collate:
+    'eeg-data.R'
+    'eeg-preprocess.R'
+    'eeg-ica.R'
+    'eeg-erp.R'
+    'eeg-source.R'
+    'eeg-microstate.R'
+    'eeg-sleep.R'
+    'eeg-timefreq.R'
+    'eeg-connectivity.R'
+    'eeg-bci.R'
+    'eeg-clinical.R'
+    'eeg-vis.R'
+    'zzz.R'
+RoxygenNote: 7.3.3

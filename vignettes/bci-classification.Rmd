@@ -1,0 +1,575 @@
+---
+title: "BCI Classification"
+author: "PhysioEEG Development Team"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{BCI Classification}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+# Introduction
+
+Brain-Computer Interfaces (BCIs) enable direct communication between the brain and external devices by translating neural activity into control signals. This vignette demonstrates how to analyze and classify BCI data using PhysioEEG, focusing on motor imagery and steady-state visual evoked potential (SSVEP) paradigms.
+
+## Motor Imagery Paradigm
+
+Motor imagery BCI relies on event-related desynchronization (ERD) and event-related synchronization (ERS) in the mu (8-12 Hz) and beta (13-30 Hz) frequency bands. When users imagine left or right hand movements, characteristic power decreases occur over contralateral sensorimotor cortex.
+
+## SSVEP Paradigm
+
+SSVEP BCIs use flickering visual stimuli at specific frequencies to elicit steady-state responses in visual cortex. Different flicker frequencies enable multi-class control by detecting which frequency dominates the EEG spectrum.
+
+## Classification Pipeline
+
+A typical BCI classification workflow involves:
+1. Preprocessing (filtering, artifact removal)
+2. Feature extraction (CSP, bandpower, Riemannian geometry)
+3. Classification (LDA, SVM with cross-validation)
+4. Performance evaluation (accuracy, kappa, information transfer rate)
+
+# Setup
+
+```{r load-library}
+library(PhysioEEG)
+library(ggplot2)
+library(dplyr)
+```
+
+Create simulated BCI data with motor imagery trials (left vs. right hand):
+
+```{r create-bci-data}
+# Generate 80 trials: 40 left hand, 40 right hand
+# 16 channels, 250 Hz sampling rate, 4-second trials
+eeg <- make_eeg_bci(
+  n_trials = 80,
+  n_channels = 16,
+  sr = 250,
+  trial_sec = 4
+)
+
+# Examine data structure
+eeg
+dim(assay(eeg, "raw"))  # 1000 timepoints x 16 channels x 80 trials
+
+# Check trial labels
+table(eeg$condition)  # Should show balanced left/right classes
+```
+
+# Motor Imagery Analysis
+
+Motor imagery produces ERD during movement imagination and ERS after task completion. The `eegMotorImagery()` function computes power changes in motor-related frequency bands.
+
+```{r motor-imagery-erd}
+# Compute ERD/ERS in mu and beta bands
+# Focus on sensorimotor channels (C3, Cz, C4)
+eeg <- eegMotorImagery(
+  eeg,
+  bands = list(
+    mu = c(8, 12),
+    beta = c(13, 30)
+  ),
+  laterality_channels = c("C3", "C4"),
+  assay_name = "raw"
+)
+
+# ERD/ERS results stored in metadata
+erd_results <- metadata(eeg)$motor_imagery
+
+# Examine mu-band power changes
+mu_power <- erd_results$mu
+head(mu_power)
+
+# Compute laterality index: (C4 - C3) / (C4 + C3)
+# Positive values indicate right hemisphere dominance (left hand imagery)
+# Negative values indicate left hemisphere dominance (right hand imagery)
+laterality <- erd_results$laterality_index
+```
+
+Visualize ERD/ERS patterns:
+
+```{r plot-erd}
+# Plot time-course of ERD for left vs. right conditions
+library(ggplot2)
+
+# Average mu-band power for each condition
+mu_left <- mu_power[eeg$condition == "left", ]
+mu_right <- mu_power[eeg$condition == "right", ]
+
+# Create data frame for plotting
+time_points <- seq(0, 4, length.out = ncol(mu_left))
+df_plot <- data.frame(
+  time = rep(time_points, 2),
+  power = c(colMeans(mu_left), colMeans(mu_right)),
+  condition = rep(c("Left", "Right"), each = length(time_points))
+)
+
+ggplot(df_plot, aes(x = time, y = power, color = condition)) +
+  geom_line(linewidth = 1) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(
+    title = "Motor Imagery ERD/ERS (Mu Band)",
+    x = "Time (s)",
+    y = "Power Change (%)",
+    color = "Condition"
+  ) +
+  theme_minimal()
+```
+
+# Common Spatial Patterns (CSP)
+
+CSP is a powerful technique for extracting spatial filters that maximize variance differences between two classes. It finds projections where one class has high variance and the other has low variance.
+
+```{r csp-extraction}
+# Apply bandpass filter to isolate mu+beta band
+eeg <- eegFilter(eeg, lowcut = 8, highcut = 30, assay_name = "raw")
+
+# Extract CSP features
+# Typically use 3-6 components (first and last pairs)
+eeg <- eegCSP(
+  eeg,
+  labels = eeg$condition,
+  n_components = 6,
+  assay_name = "filtered"
+)
+
+# CSP spatial filters stored in metadata
+csp_filters <- metadata(eeg)$csp$filters
+dim(csp_filters)  # 16 channels x 6 components
+
+# Projected data (features for classification)
+csp_features <- metadata(eeg)$csp$features
+dim(csp_features)  # 80 trials x 6 features
+```
+
+Understanding CSP components:
+
+```{r interpret-csp}
+# First components maximize variance for class 1 (left hand)
+# Last components maximize variance for class 2 (right hand)
+
+# Visualize first CSP filter (most discriminative for left)
+filter_1 <- csp_filters[, 1]
+names(filter_1) <- colnames(eeg)
+
+# Create topographic visualization data
+topo_data <- data.frame(
+  channel = names(filter_1),
+  weight = filter_1
+)
+
+print(topo_data)
+
+# Examine CSP feature distributions
+boxplot(
+  csp_features[, 1] ~ eeg$condition,
+  main = "CSP Component 1 (Left-specific)",
+  xlab = "Condition",
+  ylab = "Log Variance"
+)
+
+boxplot(
+  csp_features[, 6] ~ eeg$condition,
+  main = "CSP Component 6 (Right-specific)",
+  xlab = "Condition",
+  ylab = "Log Variance"
+)
+```
+
+# Feature Extraction
+
+The `eegBCIfeatures()` function provides multiple feature extraction methods that can be combined for robust classification.
+
+```{r multi-method-features}
+# Extract features using multiple methods
+features_all <- eegBCIfeatures(
+  eeg,
+  methods = c("bandpower", "csp", "riemannian"),
+  labels = eeg$condition,
+  assay_name = "filtered"
+)
+
+# Features is a list with each method's output
+names(features_all)
+
+# Bandpower features: power in specified frequency bands per channel
+bp_features <- features_all$bandpower
+dim(bp_features)  # 80 trials x (16 channels * n_bands)
+
+# CSP features: log-variance of CSP-projected signals
+csp_features <- features_all$csp
+dim(csp_features)  # 80 trials x 6 components
+
+# Riemannian features: tangent space projection of covariance matrices
+riem_features <- features_all$riemannian
+dim(riem_features)  # 80 trials x n_tangent_features
+```
+
+Bandpower-specific feature extraction:
+
+```{r bandpower-features}
+# Extract power in multiple frequency bands
+features_bp <- eegBCIfeatures(
+  eeg,
+  methods = "bandpower",
+  labels = eeg$condition,
+  assay_name = "raw"
+)
+
+# Typically computed for:
+# - Delta (1-4 Hz), Theta (4-8 Hz), Alpha (8-13 Hz)
+# - Beta (13-30 Hz), Gamma (30-50 Hz)
+
+# Normalize features (z-score per feature dimension)
+features_norm <- scale(features_bp$bandpower)
+
+# Examine feature importance via correlation with labels
+label_numeric <- ifelse(eeg$condition == "left", 0, 1)
+correlations <- cor(features_norm, label_numeric)
+head(sort(abs(correlations), decreasing = TRUE))
+```
+
+Riemannian geometry features:
+
+```{r riemannian-features}
+# Riemannian approach treats covariance matrices as points
+# on a manifold and projects to tangent space
+
+features_riem <- eegBCIfeatures(
+  eeg,
+  methods = "riemannian",
+  labels = eeg$condition,
+  assay_name = "filtered"
+)
+
+# These features often outperform traditional methods
+# for BCI classification due to better handling of
+# non-Euclidean structure of covariance matrices
+
+riem_data <- features_riem$riemannian
+dim(riem_data)
+```
+
+# SSVEP Detection
+
+For frequency-tagged visual stimuli, SSVEP analysis identifies the target frequency in the EEG spectrum.
+
+```{r ssvep-analysis}
+# Detect SSVEP at 12 Hz (common flicker frequency)
+# Include 2nd and 3rd harmonics (24 Hz, 36 Hz)
+ssvep_results <- eegSSVEP(
+  eeg,
+  target_freq = 12,
+  harmonics = 3,
+  assay_name = "raw"
+)
+
+# Results contain SNR at target frequency and harmonics
+snr_fundamental <- ssvep_results$snr[, 1]  # 12 Hz
+snr_2nd_harmonic <- ssvep_results$snr[, 2]  # 24 Hz
+snr_3rd_harmonic <- ssvep_results$snr[, 3]  # 36 Hz
+
+# High SNR indicates strong SSVEP response
+mean(snr_fundamental)
+sd(snr_fundamental)
+
+# Binary classification: SSVEP present vs. absent
+ssvep_detected <- snr_fundamental > 3  # Threshold at SNR = 3
+table(ssvep_detected)
+```
+
+Multi-frequency SSVEP (for multi-class BCI):
+
+```{r ssvep-multiclass, eval=FALSE}
+# In real multi-class SSVEP BCI, test multiple target frequencies
+target_freqs <- c(7, 9, 11, 13)  # 4-class BCI
+
+ssvep_all <- lapply(target_freqs, function(freq) {
+  eegSSVEP(eeg, target_freq = freq, harmonics = 2, assay_name = "raw")
+})
+
+# For each trial, select frequency with highest SNR
+snr_matrix <- sapply(ssvep_all, function(x) x$snr[, 1])
+predicted_class <- apply(snr_matrix, 1, which.max)
+
+# predicted_class now contains 1-4 indicating detected frequency
+table(predicted_class)
+```
+
+# Classification
+
+The `eegBCIclassify()` function performs classification with cross-validation to estimate generalization performance.
+
+```{r classification-lda}
+# Classify using CSP features and LDA
+# 5-fold cross-validation for robust performance estimation
+results_lda <- eegBCIclassify(
+  eeg,
+  features = csp_features,
+  labels = eeg$condition,
+  method = "lda",
+  cv_folds = 5
+)
+
+# Extract performance metrics
+accuracy_lda <- results_lda$accuracy
+kappa_lda <- results_lda$kappa
+confusion_lda <- results_lda$confusion_matrix
+
+cat(sprintf("LDA Accuracy: %.2f%%\n", accuracy_lda * 100))
+cat(sprintf("Cohen's Kappa: %.3f\n", kappa_lda))
+print(confusion_lda)
+```
+
+Compare multiple classifiers:
+
+```{r classification-comparison}
+# LDA: Linear Discriminant Analysis (assumes Gaussian distributions)
+results_lda <- eegBCIclassify(
+  eeg,
+  features = csp_features,
+  labels = eeg$condition,
+  method = "lda",
+  cv_folds = 10
+)
+
+# SVM: Support Vector Machine (non-linear decision boundaries)
+results_svm <- eegBCIclassify(
+  eeg,
+  features = csp_features,
+  labels = eeg$condition,
+  method = "svm",
+  cv_folds = 10
+)
+
+# Compare performance
+comparison <- data.frame(
+  Method = c("LDA", "SVM"),
+  Accuracy = c(results_lda$accuracy, results_svm$accuracy),
+  Kappa = c(results_lda$kappa, results_svm$kappa)
+)
+
+print(comparison)
+```
+
+Feature comparison for classification:
+
+```{r feature-comparison}
+# Classify using different feature sets
+# 1. CSP features
+acc_csp <- eegBCIclassify(
+  eeg,
+  features = features_all$csp,
+  labels = eeg$condition,
+  method = "lda",
+  cv_folds = 5
+)$accuracy
+
+# 2. Bandpower features
+acc_bp <- eegBCIclassify(
+  eeg,
+  features = features_all$bandpower,
+  labels = eeg$condition,
+  method = "lda",
+  cv_folds = 5
+)$accuracy
+
+# 3. Riemannian features
+acc_riem <- eegBCIclassify(
+  eeg,
+  features = features_all$riemannian,
+  labels = eeg$condition,
+  method = "lda",
+  cv_folds = 5
+)$accuracy
+
+# Compare feature sets
+feature_comparison <- data.frame(
+  Features = c("CSP", "Bandpower", "Riemannian"),
+  Accuracy = c(acc_csp, acc_bp, acc_riem)
+)
+
+print(feature_comparison)
+```
+
+# Performance Evaluation
+
+## Classification Accuracy
+
+Accuracy is the proportion of correctly classified trials. For balanced two-class problems, chance level is 50%.
+
+```{r accuracy-metrics}
+# Overall accuracy
+results <- eegBCIclassify(
+  eeg,
+  features = csp_features,
+  labels = eeg$condition,
+  method = "lda",
+  cv_folds = 5
+)
+
+overall_acc <- results$accuracy
+
+# Per-class accuracy (sensitivity/recall)
+conf_mat <- results$confusion_matrix
+class_acc_left <- conf_mat[1, 1] / sum(conf_mat[1, ])
+class_acc_right <- conf_mat[2, 2] / sum(conf_mat[2, ])
+
+cat(sprintf("Overall Accuracy: %.2f%%\n", overall_acc * 100))
+cat(sprintf("Left Hand Accuracy: %.2f%%\n", class_acc_left * 100))
+cat(sprintf("Right Hand Accuracy: %.2f%%\n", class_acc_right * 100))
+```
+
+## Cohen's Kappa
+
+Kappa accounts for chance agreement and is more informative than raw accuracy for imbalanced datasets.
+
+```{r kappa-interpretation}
+kappa <- results$kappa
+
+# Interpretation:
+# < 0.00: Poor agreement (worse than chance)
+# 0.00-0.20: Slight agreement
+# 0.21-0.40: Fair agreement
+# 0.41-0.60: Moderate agreement
+# 0.61-0.80: Substantial agreement
+# 0.81-1.00: Almost perfect agreement
+
+cat(sprintf("Cohen's Kappa: %.3f\n", kappa))
+
+if (kappa < 0.4) {
+  cat("Classification performance: Fair\n")
+} else if (kappa < 0.6) {
+  cat("Classification performance: Moderate\n")
+} else if (kappa < 0.8) {
+  cat("Classification performance: Substantial\n")
+} else {
+  cat("Classification performance: Excellent\n")
+}
+```
+
+## Information Transfer Rate (ITR)
+
+ITR measures the communication speed of a BCI in bits per minute. It depends on accuracy, number of classes, and selection time.
+
+```{r calculate-itr}
+# ITR formula for binary classification:
+# ITR = (log2(N) + P*log2(P) + (1-P)*log2((1-P)/(N-1))) * (60/T)
+# where N = number of classes, P = accuracy, T = trial duration (sec)
+
+calculate_itr <- function(accuracy, n_classes, trial_duration) {
+  if (accuracy <= 1/n_classes) return(0)  # Below chance
+
+  P <- accuracy
+  N <- n_classes
+
+  # Bits per trial
+  bits_per_trial <- log2(N) + P * log2(P) +
+                    (1 - P) * log2((1 - P) / (N - 1))
+
+  # Bits per minute
+  itr <- bits_per_trial * (60 / trial_duration)
+  return(itr)
+}
+
+# For our 2-class BCI with 4-second trials
+itr <- calculate_itr(
+  accuracy = overall_acc,
+  n_classes = 2,
+  trial_duration = 4
+)
+
+cat(sprintf("Information Transfer Rate: %.2f bits/min\n", itr))
+
+# Compare different scenarios
+scenarios <- expand.grid(
+  accuracy = seq(0.6, 0.95, by = 0.05),
+  trial_duration = c(3, 4, 5)
+)
+
+scenarios$itr <- mapply(
+  calculate_itr,
+  accuracy = scenarios$accuracy,
+  trial_duration = scenarios$trial_duration,
+  MoreArgs = list(n_classes = 2)
+)
+
+# Find optimal configuration
+best <- scenarios[which.max(scenarios$itr), ]
+cat(sprintf("\nOptimal configuration:\n"))
+cat(sprintf("  Accuracy: %.2f%%\n", best$accuracy * 100))
+cat(sprintf("  Trial Duration: %.1f s\n", best$trial_duration))
+cat(sprintf("  ITR: %.2f bits/min\n", best$itr))
+```
+
+## Cross-Validation Strategies
+
+Proper cross-validation is critical for reliable performance estimation.
+
+```{r cv-strategies}
+# 5-fold CV: Standard for small datasets (n < 100)
+cv5 <- eegBCIclassify(
+  eeg,
+  features = csp_features,
+  labels = eeg$condition,
+  method = "lda",
+  cv_folds = 5
+)
+
+# 10-fold CV: More reliable estimate, higher computational cost
+cv10 <- eegBCIclassify(
+  eeg,
+  features = csp_features,
+  labels = eeg$condition,
+  method = "lda",
+  cv_folds = 10
+)
+
+# Leave-one-out CV: Maximum variance reduction (n = n_trials)
+# Only for small datasets due to computational cost
+cv_loo <- eegBCIclassify(
+  eeg,
+  features = csp_features,
+  labels = eeg$condition,
+  method = "lda",
+  cv_folds = nrow(csp_features)  # 80 folds = leave-one-out
+)
+
+cv_comparison <- data.frame(
+  Method = c("5-Fold", "10-Fold", "Leave-One-Out"),
+  Accuracy = c(cv5$accuracy, cv10$accuracy, cv_loo$accuracy),
+  Kappa = c(cv5$kappa, cv10$kappa, cv_loo$kappa)
+)
+
+print(cv_comparison)
+```
+
+# Summary
+
+This vignette demonstrated a complete BCI classification pipeline:
+
+1. **Data preparation**: Simulated motor imagery EEG with left/right hand classes
+2. **Motor imagery analysis**: ERD/ERS computation in mu and beta bands
+3. **Spatial filtering**: CSP for optimal discrimination between classes
+4. **Feature extraction**: Bandpower, CSP, and Riemannian geometry methods
+5. **SSVEP detection**: Frequency-domain analysis for visual BCIs
+6. **Classification**: LDA and SVM with cross-validation
+7. **Performance metrics**: Accuracy, kappa, and information transfer rate
+
+For real BCI applications, additional considerations include:
+- Online vs. offline analysis pipelines
+- Adaptive classifiers that update with user feedback
+- Multi-session training and transfer learning
+- Real-time artifact rejection
+- User-specific calibration and optimization
+
+The PhysioEEG package provides flexible tools for exploring these advanced topics in BCI research.
