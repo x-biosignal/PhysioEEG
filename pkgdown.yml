@@ -1,0 +1,17 @@
+pandoc: 3.8.3
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  bci-classification: bci-classification.html
+  clinical-eeg: clinical-eeg.html
+  connectivity-analysis: connectivity-analysis.html
+  erp-analysis: erp-analysis.html
+  getting-started: getting-started.html
+  preprocessing-pipeline: preprocessing-pipeline.html
+  sleep-analysis: sleep-analysis.html
+  source-localization: source-localization.html
+  time-frequency-analysis: time-frequency-analysis.html
+last_built: 2026-08-08T05:57Z
+urls:
+  reference: https://x-biosignal.github.io/PhysioEEG/reference
+  article: https://x-biosignal.github.io/PhysioEEG/articles
