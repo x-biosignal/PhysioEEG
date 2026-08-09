@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,10 @@
       <small>Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.6.3" id="physioeeg-063">PhysioEEG 0.6.3<a class="anchor" aria-label="anchor" href="#physioeeg-063"></a></h2>
+<ul><li>Made the glass-brain outline hash-governance test portable across the r-universe build matrix. It previously shelled out to <code>sha256sum</code> and compared the tool’s whole output line; Windows Rtools’ <code>sha256sum</code> prints a binary-mode ’ *’ separator vs coreutils’ ’ ’, so the byte-identical hashes mismatched and the check ERRORed on Windows. The SHA-256 is now computed in-process with <code>digest::digest(file=)</code> and compared hash-only. Added <code>digest</code> to Suggests and a <code>.gitattributes</code> pinning the sealed artifacts so no checkout can EOL-rewrite them. Governance intent (offline, closed, tamper-evident) is unchanged.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.2" id="physioeeg-062">PhysioEEG 0.6.2<a class="anchor" aria-label="anchor" href="#physioeeg-062"></a></h2>
 <div class="section level3">

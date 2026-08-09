@@ -1,5 +1,17 @@
 # Changelog
 
+## PhysioEEG 0.6.3
+
+- Made the glass-brain outline hash-governance test portable across the
+  r-universe build matrix. It previously shelled out to `sha256sum` and
+  compared the tool’s whole output line; Windows Rtools’ `sha256sum`
+  prints a binary-mode ’ \*’ separator vs coreutils’ ’ ’, so the
+  byte-identical hashes mismatched and the check ERRORed on Windows. The
+  SHA-256 is now computed in-process with `digest::digest(file=)` and
+  compared hash-only. Added `digest` to Suggests and a `.gitattributes`
+  pinning the sealed artifacts so no checkout can EOL-rewrite them.
+  Governance intent (offline, closed, tamper-evident) is unchanged.
+
 ## PhysioEEG 0.6.2
 
 ### Bug fixes
