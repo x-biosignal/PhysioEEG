@@ -1,5 +1,36 @@
 # Changelog
 
+## PhysioEEG 0.6.5
+
+- [`make_eeg_bci()`](https://x-biosignal.github.io/PhysioEEG/reference/make_eeg_bci.md)
+  now pads channel labels with generic names when more channels than the
+  eight-entry motor/occipital pool are requested (previously
+  `n_channels > 8` produced `NA` labels, which made the per-channel
+  artifact tests error with “missing value where TRUE/FALSE needed”).
+- Documentation: the `bci-classification`, `connectivity-analysis`,
+  `preprocessing-pipeline`, `sleep-analysis`, and
+  `time-frequency-analysis` vignettes were modernized to the current
+  package API. They had drifted from the code (stale/renamed arguments
+  and functions, changed return structures, and 2D-vs-3D data-shape
+  assumptions) and no longer ran. Fixes attach `SummarizedExperiment`,
+  use the current `make_eeg*()` signatures and the real
+  accessor/analysis functions (`eegFilter(method=)`, `eegRereference`,
+  `eegMontage`, `eegBadChannels`, `eegInterpolate`, `eegICA`,
+  `eegMorletWavelet`, `eegSTFT`, `eegSleepStage`, the
+  spindle/K-complex/slow-wave detectors, etc.), and read
+  time-frequency/staging output from `metadata()`. All package vignettes
+  now run clean under `R CMD check`. No package behaviour changed.
+
+## PhysioEEG 0.6.4
+
+- [`eegICA()`](https://x-biosignal.github.io/PhysioEEG/reference/eegICA.md)
+  and
+  [`eegCoherence()`](https://x-biosignal.github.io/PhysioEEG/reference/eegCoherence.md)
+  now record a W3C-PROV provenance activity (shared `.recordProv`
+  helper), so the ICA decomposition and coherence steps are visible to
+  the reproducibility substrate run-tracing. No change to the computed
+  components/connectivity.
+
 ## PhysioEEG 0.6.3
 
 - Made the glass-brain outline hash-governance test portable across the

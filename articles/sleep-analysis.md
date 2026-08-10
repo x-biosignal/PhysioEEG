@@ -37,14 +37,16 @@ characteristics for each sleep stage.
 ``` r
 
 library(PhysioEEG)
+library(SummarizedExperiment)
 library(ggplot2)
 
-# Create 8 hours of simulated sleep EEG data
+# Create a short excerpt of simulated sleep EEG for a fast, self-contained demo.
+# Real polysomnography scores a full ~8-hour night; the API is identical at scale.
 # Sampling rate: 256 Hz (common for clinical polysomnography)
 # Channels: 6 standard EEG derivations
-n_hours <- 8
 sr <- 256
-n_time <- n_hours * 60 * 60 * sr  # 7,372,800 samples
+n_minutes <- 20
+n_time <- n_minutes * 60 * sr
 
 eeg <- make_eeg_sleep(
   n_time = n_time,
@@ -54,8 +56,8 @@ eeg <- make_eeg_sleep(
 
 # Inspect the data structure
 print(eeg)
-dim(assay(eeg, "raw"))
-colData(eeg)$channel_name
+dim(SummarizedExperiment::assay(eeg, "raw"))
+colData(eeg)$label
 ```
 
 The simulated dataset includes channels typically used in clinical sleep
@@ -91,7 +93,7 @@ eeg_filt <- eegFilter(
 # Re-referencing to linked mastoids (A1+A2)/2 is common for sleep
 # This would require mastoid channels in real data
 # For this example, we'll use the average reference
-eeg_filt <- eegReReference(
+eeg_filt <- eegRereference(
   eeg_filt,
   ref_type = "average",
   assay_name = "filtered",
@@ -106,16 +108,18 @@ that could confound results.
 
 ``` r
 
-# Detect high-amplitude artifacts (movement, electrode issues)
-artifacts <- eegArtifactDetect(
-  eeg_filt,
-  method = "amplitude",
-  threshold_uv = 150,  # ±150 μV threshold
-  assay_name = "reref"
-)
+# Flag 30-second epochs whose peak amplitude exceeds +/-150 uV as artifacts
+reref <- assay(eeg_filt, "reref")
+epoch_len <- 30 * samplingRate(eeg_filt)
+n_epochs <- nrow(reref) %/% epoch_len
+artifact_epochs <- Filter(function(e) {
+  seg <- reref[((e - 1) * epoch_len + 1):(e * epoch_len), , drop = FALSE]
+  max(abs(seg)) > 150
+}, seq_len(n_epochs))
+artifact_epochs <- unlist(artifact_epochs)
 
 # Mark artifact epochs for exclusion from analysis
-metadata(eeg_filt)$artifact_epochs <- artifacts$epochs
+metadata(eeg_filt)$artifact_epochs <- artifact_epochs
 ```
 
 ## Automatic Sleep Staging
@@ -143,30 +147,31 @@ stages <- eegSleepStage(
   assay_name = "reref"
 )
 
-# Examine staging results
-head(stages$stage_sequence)
-table(stages$stage_sequence)
+# eegSleepStage() returns a data.frame with one row per epoch
+head(stages)
 
-# Stage probabilities for each epoch
-head(stages$probabilities)
+# Sequence of stage labels and their distribution
+head(stages$stage)
+table(stages$stage)
 
-# Spectral features used for classification
-names(stages$features)
+# Spectral power features used for classification
+grep("_power$", names(stages), value = TRUE)
 
-# Store staging results in metadata
+# Store staging results in metadata (used by eegSleepMetrics)
 metadata(eeg_filt)$sleep_stages <- stages
 ```
 
 ### Interpreting Staging Output
 
-The output includes:
+[`eegSleepStage()`](https://x-biosignal.github.io/PhysioEEG/reference/eegSleepStage.md)
+returns a data.frame with one row per 30-second epoch and the following
+columns:
 
-- `stage_sequence`: Vector of stage labels (W, N1, N2, N3, REM) for each
-  epoch
-- `probabilities`: Matrix of posterior probabilities for each stage per
-  epoch
-- `features`: Spectral power in delta, theta, alpha, sigma, beta bands
-- `epoch_times`: Start time of each epoch in seconds
+- `epoch`: Epoch index
+- `stage`: Stage label (W, N1, N2, N3, REM) assigned to the epoch
+- `start_sample`, `end_sample`: Sample indices spanning the epoch
+- `delta_power`, `theta_power`, `alpha_power`, `sigma_power`,
+  `beta_power`: Spectral power features used for classification
 
 Low-confidence epochs (no stage with \>60% probability) may require
 manual review.
@@ -191,25 +196,32 @@ AASM criteria for spindles:
 # Detect sleep spindles across all channels
 spindles <- eegSpindleDetect(
   eeg_filt,
-  freq_range = c(11, 16),  # Sigma band
-  duration_range = c(0.5, 2.0),  # Minimum and maximum duration
-  amplitude_threshold = 2.0,  # Relative to background
+  freq_range = c(11, 16),      # Sigma band
+  min_duration_ms = 500,       # Minimum duration
+  max_duration_ms = 2000,      # Maximum duration
+  threshold_sd = 2.0,          # Amplitude threshold in SD of the background
   assay_name = "reref"
 )
 
-# Spindle events: onset time, duration, peak frequency, amplitude
-head(spindles$events)
+# eegSpindleDetect() returns a data.frame of spindle events
+# (channel, start/end sample, duration_ms, peak_sample, peak_amplitude,
+#  frequency_hz)
+head(spindles)
 
-# Spindle density (spindles per minute) by channel
-spindles$density_per_channel
+# Spindle count per channel (channel index)
+table(spindles$channel)
 
-# Spindle rate by sleep stage
-spindles$density_by_stage
+# Overall spindle density (spindles per minute of recording)
+rec_minutes <- nrow(assay(eeg_filt, "reref")) / samplingRate(eeg_filt) / 60
+nrow(spindles) / rec_minutes
 
-# Visualize spindle distribution over time
-plot(spindles$timeline, type = "h",
-     xlab = "Time (hours)", ylab = "Spindle Count per Minute",
-     main = "Sleep Spindle Density Throughout Night")
+# Visualize spindle onsets over time (hours)
+if (nrow(spindles) > 0) {
+  onset_hours <- spindles$start_sample / samplingRate(eeg_filt) / 3600
+  hist(onset_hours,
+       xlab = "Time (hours)", ylab = "Spindle Count",
+       main = "Sleep Spindle Distribution")
+}
 ```
 
 ### Clinical Significance
@@ -238,23 +250,24 @@ function identifies K-complexes based on:
 
 ``` r
 
-# Detect K-complexes in central channels (C3, C4)
+# Detect K-complexes (most prominent in central leads C3/C4)
 kcomplexes <- eegKcomplexDetect(
   eeg_filt,
-  channels = c("C3", "C4"),  # Most prominent in central leads
-  amplitude_threshold = 75,  # μV
-  duration_range = c(0.5, 1.5),
+  min_neg_amplitude = 75,   # μV negative deflection
+  min_duration_ms = 500,
+  max_duration_ms = 1500,
   assay_name = "reref"
 )
 
-# K-complex events
-head(kcomplexes$events)
+# eegKcomplexDetect() returns a data.frame of K-complex events
+# (channel, negative/positive peak samples and amplitudes, duration_ms)
+head(kcomplexes)
 
-# Distribution across sleep stages (primarily N2)
-table(kcomplexes$events$sleep_stage)
+# Count per channel (channel index; C3/C4 are indices 1/2)
+table(kcomplexes$channel)
 
-# K-complex density
-kcomplexes$density_per_minute
+# K-complex density (events per minute of recording)
+nrow(kcomplexes) / rec_minutes
 ```
 
 ### Clinical Applications
@@ -276,29 +289,28 @@ homeostatic sleep pressure.
 
 ``` r
 
-# Detect slow waves in frontal channels (F3, F4)
-# Slow waves have maximum amplitude in frontal regions
+# Detect slow waves (maximum amplitude is over frontal regions, F3/F4)
 slow_waves <- eegSlowWaveDetect(
   eeg_filt,
-  channels = c("F3", "F4"),
-  freq_range = c(0.5, 2.0),  # Delta band slow waves
-  amplitude_threshold = 75,  # μV (AASM criterion)
-  negative_peak = TRUE,  # Detect negative-going slow waves
-  slope_threshold = 0.5,  # Minimum downslope steepness
+  freq_range = c(0.5, 2.0),   # Delta band slow waves
+  min_amplitude = 75,         # μV (AASM criterion)
   assay_name = "reref"
 )
 
-# Slow wave characteristics
-head(slow_waves$events)
+# eegSlowWaveDetect() returns a data.frame of slow-wave events
+# (channel, start/end sample, negative_peak, positive_peak, duration_ms, slope)
+head(slow_waves)
 
-# Slow wave density (waves per minute)
-slow_waves$density
+# Slow wave density (waves per minute of recording)
+slow_waves_density <- nrow(slow_waves) / rec_minutes
+slow_waves_density
 
-# SWA: Average slow wave amplitude
-slow_waves$mean_amplitude
+# SWA: mean negative-peak amplitude
+mean_amplitude <- mean(abs(slow_waves$negative_peak))
+mean_amplitude
 
 # Slow wave slope (marker of sleep depth)
-mean(slow_waves$events$max_slope)
+mean(slow_waves$slope)
 ```
 
 ### SWA Dynamics Across the Night
@@ -307,17 +319,20 @@ Slow wave activity exhibits characteristic temporal dynamics:
 
 ``` r
 
-# Compute SWA in consecutive NREM periods
-# SWA typically declines exponentially across sleep cycles
-swa_by_cycle <- slow_waves$swa_by_cycle
+# Full-night SWA dynamics (an exponential decline across sleep cycles) require
+# a complete overnight recording. Here we summarise slow-wave amplitude over
+# time by binning slow-wave events into successive segments of the recording.
+if (nrow(slow_waves) > 0) {
+  sw_time_min <- slow_waves$start_sample / samplingRate(eeg_filt) / 60
+  n_bins <- 5
+  bin <- cut(sw_time_min, breaks = n_bins, labels = FALSE)
+  swa_by_bin <- tapply(abs(slow_waves$negative_peak), bin, mean)
 
-# Plot SWA decline
-plot(swa_by_cycle$cycle, swa_by_cycle$swa,
-     type = "b", pch = 19,
-     xlab = "Sleep Cycle", ylab = "SWA (μV²)",
-     main = "Slow Wave Activity Dissipation Across Night")
-
-# Exponential decay indicates normal homeostatic process
+  plot(seq_along(swa_by_bin), swa_by_bin,
+       type = "b", pch = 19,
+       xlab = "Recording segment", ylab = "Mean slow-wave amplitude (uV)",
+       main = "Slow Wave Amplitude Across the Recording")
+}
 ```
 
 ### Clinical Interpretation
@@ -337,13 +352,10 @@ and continuity.
 
 ``` r
 
-# Calculate comprehensive sleep metrics
-metrics <- eegSleepMetrics(
-  eeg_filt,
-  stages = metadata(eeg_filt)$sleep_stages,
-  lights_off = 0,  # Recording start = lights off
-  lights_on = n_hours * 3600  # Recording end
-)
+# Calculate comprehensive sleep metrics.
+# eegSleepMetrics() reads the staging data.frame from metadata(x)$sleep_stages
+# (set above), so it takes only the PhysioExperiment object.
+metrics <- eegSleepMetrics(eeg_filt)
 
 # Print standardized sleep report
 print(metrics)
@@ -383,7 +395,7 @@ sleep depth across the night.
 # Create a hypnogram with custom colors
 eegPlotHypnogram(
   eeg_filt,
-  stages = metadata(eeg_filt)$sleep_stages$stage_sequence,
+  stages = metadata(eeg_filt)$sleep_stages,
   epoch_sec = 30,
   colors = c(
     "W" = "#FF6B6B",    # Red for wake
@@ -391,25 +403,15 @@ eegPlotHypnogram(
     "N2" = "#45B7D1",   # Blue for N2
     "N3" = "#1A535C",   # Dark blue for N3
     "REM" = "#FFE66D"   # Yellow for REM
-  ),
-  show_cycles = TRUE  # Mark sleep cycles
+  )
 )
 
-# Overlay spindle density
+# The hypnogram accepts a stage vector directly; spindle- or SWA-density
+# overlays can be layered on top with custom ggplot2 geoms if desired.
 eegPlotHypnogram(
   eeg_filt,
-  stages = metadata(eeg_filt)$sleep_stages$stage_sequence,
-  overlay = spindles$timeline,
-  overlay_label = "Spindle Density"
-)
-
-# Hypnogram with SWA
-eegPlotHypnogram(
-  eeg_filt,
-  stages = metadata(eeg_filt)$sleep_stages$stage_sequence,
-  overlay = slow_waves$swa_by_epoch,
-  overlay_label = "SWA (μV²)",
-  overlay_color = "#FF6B6B"
+  stages = metadata(eeg_filt)$sleep_stages,
+  epoch_sec = 30
 )
 ```
 
@@ -421,38 +423,38 @@ Here’s an integrated workflow for clinical sleep EEG analysis:
 
 ``` r
 
-# 1. Load and preprocess data
-eeg <- make_eeg_sleep(n_time = 8*60*60*256, n_channels = 6, sr = 256)
+# 1. Load and preprocess data (short excerpt for a fast demo)
+eeg <- make_eeg_sleep(n_time = 20 * 60 * 256, n_channels = 6, sr = 256)
 eeg <- eegFilter(eeg, lowcut = 0.3, highcut = 35)
-eeg <- eegReReference(eeg, ref_type = "average")
+eeg <- eegRereference(eeg, ref_type = "average")
 
 # 2. Automatic sleep staging
 stages <- eegSleepStage(eeg, epoch_sec = 30)
 metadata(eeg)$sleep_stages <- stages
 
-# 3. Detect sleep-specific waveforms
+# 3. Detect sleep-specific waveforms (each returns an event data.frame)
 spindles <- eegSpindleDetect(eeg, freq_range = c(11, 16))
-kcomplexes <- eegKcomplexDetect(eeg, channels = c("C3", "C4"))
-slow_waves <- eegSlowWaveDetect(eeg, channels = c("F3", "F4"))
+kcomplexes <- eegKcomplexDetect(eeg, min_neg_amplitude = 75)
+slow_waves <- eegSlowWaveDetect(eeg, freq_range = c(0.5, 2.0), min_amplitude = 75)
 
-# 4. Compute sleep architecture metrics
-metrics <- eegSleepMetrics(eeg, stages = stages)
+# 4. Compute sleep architecture metrics (reads metadata$sleep_stages)
+metrics <- eegSleepMetrics(eeg)
 
 # 5. Generate visualization
-eegPlotHypnogram(eeg, stages = stages$stage_sequence)
+eegPlotHypnogram(eeg, stages = stages)
 
 # 6. Export comprehensive report
 report <- list(
   demographics = list(age = 35, sex = "M"),
   sleep_metrics = metrics,
-  spindle_density = spindles$density_per_channel,
-  kcomplex_count = nrow(kcomplexes$events),
-  swa_mean = slow_waves$mean_amplitude,
-  staging_quality = mean(apply(stages$probabilities, 1, max))
+  spindle_count = nrow(spindles),
+  kcomplex_count = nrow(kcomplexes),
+  swa_mean = mean(abs(slow_waves$negative_peak)),
+  n_epochs_scored = nrow(stages)
 )
 
 # Save report for clinical review
-saveRDS(report, "sleep_study_report.rds")
+saveRDS(report, file.path(tempdir(), "sleep_study_report.rds"))
 ```
 
 ### Abnormalities to Look For

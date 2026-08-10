@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,7 @@
                         <h4 data-toc-skip class="author">PhysioEEG
 Development Team</h4>
             
-            <h4 data-toc-skip class="date">2026-08-09</h4>
+            <h4 data-toc-skip class="date">2026-08-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/vignettes/bci-classification.Rmd" class="external-link"><code>vignettes/bci-classification.Rmd</code></a></small>
       <div class="d-none name"><code>bci-classification.Rmd</code></div>
@@ -136,26 +136,31 @@ rate)</p>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/x-biosignal/PhysioEEG" class="external-link">PhysioEEG</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment" class="external-link">SummarizedExperiment</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></code></pre></div>
 <p>Create simulated BCI data with motor imagery trials (left vs. right
 hand):</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate 80 trials: 40 left hand, 40 right hand</span></span>
+<span><span class="co"># make_eeg_bci() creates n_trials PER class, so n_trials = 40 yields 80 total</span></span>
 <span><span class="co"># 16 channels, 250 Hz sampling rate, 4-second trials</span></span>
 <span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_eeg_bci.html">make_eeg_bci</a></span><span class="op">(</span></span>
-<span>  n_trials <span class="op">=</span> <span class="fl">80</span>,</span>
+<span>  n_trials <span class="op">=</span> <span class="fl">40</span>,</span>
 <span>  n_channels <span class="op">=</span> <span class="fl">16</span>,</span>
 <span>  sr <span class="op">=</span> <span class="fl">250</span>,</span>
 <span>  trial_sec <span class="op">=</span> <span class="fl">4</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Trial condition labels ("left"/"right") are stored in metadata</span></span>
+<span><span class="va">condition</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">labels</span></span>
+<span></span>
 <span><span class="co"># Examine data structure</span></span>
 <span><span class="va">eeg</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">assay</span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"raw"</span><span class="op">)</span><span class="op">)</span>  <span class="co"># 1000 timepoints x 16 channels x 80 trials</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"raw"</span><span class="op">)</span><span class="op">)</span>  <span class="co"># 1000 timepoints x 16 channels x 80 trials</span></span>
 <span></span>
 <span><span class="co"># Check trial labels</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">$</span><span class="va">condition</span><span class="op">)</span>  <span class="co"># Should show balanced left/right classes</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">condition</span><span class="op">)</span>  <span class="co"># Should show balanced left/right classes</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="motor-imagery-analysis">Motor Imagery Analysis<a class="anchor" aria-label="anchor" href="#motor-imagery-analysis"></a>
@@ -165,55 +170,65 @@ task completion. The <code><a href="../reference/eegMotorImagery.html">eegMotorI
 power changes in motor-related frequency bands.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Compute ERD/ERS in mu and beta bands</span></span>
-<span><span class="co"># Focus on sensorimotor channels (C3, Cz, C4)</span></span>
 <span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegMotorImagery.html">eegMotorImagery</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  bands <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>    mu <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">12</span><span class="op">)</span>,</span>
 <span>    beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">13</span>, <span class="fl">30</span><span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  laterality_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C3"</span>, <span class="st">"C4"</span><span class="op">)</span>,</span>
 <span>  assay_name <span class="op">=</span> <span class="st">"raw"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># ERD/ERS results stored in metadata</span></span>
-<span><span class="va">erd_results</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">motor_imagery</span></span>
+<span><span class="co"># ERD/ERS results stored in metadata as an n_trials x (n_channels * n_bands)</span></span>
+<span><span class="co"># matrix with column names "&lt;channel&gt;_&lt;band&gt;" (e.g. "C3_mu")</span></span>
+<span><span class="va">erd_results</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">erd_ers</span></span>
 <span></span>
-<span><span class="co"># Examine mu-band power changes</span></span>
-<span><span class="va">mu_power</span> <span class="op">&lt;-</span> <span class="va">erd_results</span><span class="op">$</span><span class="va">mu</span></span>
+<span><span class="co"># Examine mu-band power changes (one column per channel)</span></span>
+<span><span class="va">mu_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"_mu$"</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">erd_results</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">mu_power</span> <span class="op">&lt;-</span> <span class="va">erd_results</span><span class="op">[</span>, <span class="va">mu_cols</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">mu_power</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Compute laterality index: (C4 - C3) / (C4 + C3)</span></span>
-<span><span class="co"># Positive values indicate right hemisphere dominance (left hand imagery)</span></span>
-<span><span class="co"># Negative values indicate left hemisphere dominance (right hand imagery)</span></span>
-<span><span class="va">laterality</span> <span class="op">&lt;-</span> <span class="va">erd_results</span><span class="op">$</span><span class="va">laterality_index</span></span></code></pre></div>
+<span><span class="co"># Laterality index LI = (R - L) / (|R| + |L|) from C4 (right) vs C3 (left).</span></span>
+<span><span class="co"># Positive values indicate right-hemisphere dominance (left hand imagery),</span></span>
+<span><span class="co"># negative values indicate left-hemisphere dominance (right hand imagery).</span></span>
+<span><span class="va">lat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegLateralization.html">eegLateralization</a></span><span class="op">(</span></span>
+<span>  <span class="va">eeg</span>,</span>
+<span>  left_ch <span class="op">=</span> <span class="st">"C3"</span>,</span>
+<span>  right_ch <span class="op">=</span> <span class="st">"C4"</span>,</span>
+<span>  band <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">12</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"power"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">laterality</span> <span class="op">&lt;-</span> <span class="va">lat</span><span class="op">$</span><span class="va">per_trial</span>   <span class="co"># per-trial LI (n_trials x 1)</span></span>
+<span><span class="va">lat</span><span class="op">$</span><span class="va">summary</span>                   <span class="co"># biomarker summary (mean LI with CI)</span></span></code></pre></div>
 <p>Visualize ERD/ERS patterns:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Plot time-course of ERD for left vs. right conditions</span></span>
+<code class="sourceCode R"><span><span class="co"># Plot per-channel mu-band ERD/ERS for left vs. right conditions</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Average mu-band power for each condition</span></span>
-<span><span class="va">mu_left</span> <span class="op">&lt;-</span> <span class="va">mu_power</span><span class="op">[</span><span class="va">eeg</span><span class="op">$</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"left"</span>, <span class="op">]</span></span>
-<span><span class="va">mu_right</span> <span class="op">&lt;-</span> <span class="va">mu_power</span><span class="op">[</span><span class="va">eeg</span><span class="op">$</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"right"</span>, <span class="op">]</span></span>
+<span><span class="co"># Channel labels for the mu-band columns</span></span>
+<span><span class="va">ch_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"_mu$"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">mu_power</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create data frame for plotting</span></span>
-<span><span class="va">time_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">4</span>, length.out <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">mu_left</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Average mu-band power change per channel for each condition</span></span>
+<span><span class="va">mu_left</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MatrixGenerics/man/rowMeans.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">mu_power</span><span class="op">[</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"left"</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">mu_right</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MatrixGenerics/man/rowMeans.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">mu_power</span><span class="op">[</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"right"</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">df_plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">time_points</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span>  power <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">mu_left</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">mu_right</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Left"</span>, <span class="st">"Right"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">time_points</span><span class="op">)</span><span class="op">)</span></span>
+<span>  channel <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="va">ch_names</span>, <span class="fl">2</span><span class="op">)</span>, levels <span class="op">=</span> <span class="va">ch_names</span><span class="op">)</span>,</span>
+<span>  power <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">mu_left</span>, <span class="va">mu_right</span><span class="op">)</span>,</span>
+<span>  condition <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Left"</span>, <span class="st">"Right"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">ch_names</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_plot</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">time</span>, y <span class="op">=</span> <span class="va">power</span>, color <span class="op">=</span> <span class="va">condition</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span>linewidth <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">df_plot</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">channel</span>, y <span class="op">=</span> <span class="va">power</span>, fill <span class="op">=</span> <span class="va">condition</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>position <span class="op">=</span> <span class="st">"dodge"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_hline</a></span><span class="op">(</span>yintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    title <span class="op">=</span> <span class="st">"Motor Imagery ERD/ERS (Mu Band)"</span>,</span>
-<span>    x <span class="op">=</span> <span class="st">"Time (s)"</span>,</span>
+<span>    x <span class="op">=</span> <span class="st">"Channel"</span>,</span>
 <span>    y <span class="op">=</span> <span class="st">"Power Change (%)"</span>,</span>
-<span>    color <span class="op">=</span> <span class="st">"Condition"</span></span>
+<span>    fill <span class="op">=</span> <span class="st">"Condition"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">45</span>, hjust <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="common-spatial-patterns-csp">Common Spatial Patterns (CSP)<a class="anchor" aria-label="anchor" href="#common-spatial-patterns-csp"></a>
@@ -222,24 +237,33 @@ power changes in motor-related frequency bands.</p>
 maximize variance differences between two classes. It finds projections
 where one class has high variance and the other has low variance.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Apply bandpass filter to isolate mu+beta band</span></span>
-<span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, lowcut <span class="op">=</span> <span class="fl">8</span>, highcut <span class="op">=</span> <span class="fl">30</span>, assay_name <span class="op">=</span> <span class="st">"raw"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Apply bandpass filter to isolate the mu+beta band.</span></span>
+<span><span class="co"># eegFilter() operates on continuous (2D) data, so band-pass each epoch's</span></span>
+<span><span class="co"># channels (8-30 Hz, zero-phase Butterworth) into a new "filtered" assay.</span></span>
+<span><span class="va">sr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/samplingRate.html" class="external-link">samplingRate</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span></span>
+<span><span class="va">bf</span> <span class="op">&lt;-</span> <span class="fu">signal</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/signal/man/butter.html" class="external-link">butter</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">30</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">sr</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"pass"</span><span class="op">)</span></span>
+<span><span class="va">raw3d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"raw"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"filtered"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">raw3d</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">sig</span><span class="op">)</span> <span class="fu">signal</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/signal/man/filtfilt.html" class="external-link">filtfilt</a></span><span class="op">(</span><span class="va">bf</span>, <span class="va">sig</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">raw3d</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Extract CSP features</span></span>
-<span><span class="co"># Typically use 3-6 components (first and last pairs)</span></span>
+<span><span class="co"># n_filters = 3 selects the 3 top + 3 bottom eigenvectors = 6 components</span></span>
 <span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegCSP.html">eegCSP</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
-<span>  n_components <span class="op">=</span> <span class="fl">6</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
+<span>  n_filters <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  assay_name <span class="op">=</span> <span class="st">"filtered"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># CSP spatial filters stored in metadata</span></span>
-<span><span class="va">csp_filters</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">csp</span><span class="op">$</span><span class="va">filters</span></span>
+<span><span class="co"># CSP spatial filters stored in metadata as (n_components x n_channels);</span></span>
+<span><span class="co"># transpose to view as channels x components</span></span>
+<span><span class="va">csp_filters</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">csp</span><span class="op">$</span><span class="va">filters</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">csp_filters</span><span class="op">)</span>  <span class="co"># 16 channels x 6 components</span></span>
 <span></span>
-<span><span class="co"># Projected data (features for classification)</span></span>
-<span><span class="va">csp_features</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">csp</span><span class="op">$</span><span class="va">features</span></span>
+<span><span class="co"># Projected data (log-variance features for classification)</span></span>
+<span><span class="va">csp_features</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">csp_features</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">csp_features</span><span class="op">)</span>  <span class="co"># 80 trials x 6 features</span></span></code></pre></div>
 <p>Understanding CSP components:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
@@ -248,7 +272,7 @@ where one class has high variance and the other has low variance.</p>
 <span></span>
 <span><span class="co"># Visualize first CSP filter (most discriminative for left)</span></span>
 <span><span class="va">filter_1</span> <span class="op">&lt;-</span> <span class="va">csp_filters</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">filter_1</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">filter_1</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">label</span></span>
 <span></span>
 <span><span class="co"># Create topographic visualization data</span></span>
 <span><span class="va">topo_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -260,14 +284,14 @@ where one class has high variance and the other has low variance.</p>
 <span></span>
 <span><span class="co"># Examine CSP feature distributions</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span></span>
-<span>  <span class="va">csp_features</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">~</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  <span class="va">csp_features</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">~</span> <span class="va">condition</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"CSP Component 1 (Left-specific)"</span>,</span>
 <span>  xlab <span class="op">=</span> <span class="st">"Condition"</span>,</span>
 <span>  ylab <span class="op">=</span> <span class="st">"Log Variance"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/boxplot.html" class="external-link">boxplot</a></span><span class="op">(</span></span>
-<span>  <span class="va">csp_features</span><span class="op">[</span>, <span class="fl">6</span><span class="op">]</span> <span class="op">~</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  <span class="va">csp_features</span><span class="op">[</span>, <span class="fl">6</span><span class="op">]</span> <span class="op">~</span> <span class="va">condition</span>,</span>
 <span>  main <span class="op">=</span> <span class="st">"CSP Component 6 (Right-specific)"</span>,</span>
 <span>  xlab <span class="op">=</span> <span class="st">"Condition"</span>,</span>
 <span>  ylab <span class="op">=</span> <span class="st">"Log Variance"</span></span>
@@ -279,15 +303,18 @@ where one class has high variance and the other has low variance.</p>
 <p>The <code><a href="../reference/eegBCIfeatures.html">eegBCIfeatures()</a></code> function provides multiple feature
 extraction methods that can be combined for robust classification.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Extract features using multiple methods</span></span>
-<span><span class="va">features_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIfeatures.html">eegBCIfeatures</a></span><span class="op">(</span></span>
-<span>  <span class="va">eeg</span>,</span>
-<span>  methods <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bandpower"</span>, <span class="st">"csp"</span>, <span class="st">"riemannian"</span><span class="op">)</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
-<span>  assay_name <span class="op">=</span> <span class="st">"filtered"</span></span>
+<code class="sourceCode R"><span><span class="co"># eegBCIfeatures() extracts one method per call and returns a matrix.</span></span>
+<span><span class="co"># Collect the three feature families into a named list.</span></span>
+<span><span class="va">features_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  bandpower  <span class="op">=</span> <span class="fu"><a href="../reference/eegBCIfeatures.html">eegBCIfeatures</a></span><span class="op">(</span><span class="va">eeg</span>, method <span class="op">=</span> <span class="st">"bandpower"</span>,  labels <span class="op">=</span> <span class="va">condition</span>,</span>
+<span>                              assay_name <span class="op">=</span> <span class="st">"filtered"</span><span class="op">)</span>,</span>
+<span>  csp        <span class="op">=</span> <span class="fu"><a href="../reference/eegBCIfeatures.html">eegBCIfeatures</a></span><span class="op">(</span><span class="va">eeg</span>, method <span class="op">=</span> <span class="st">"csp"</span>,        labels <span class="op">=</span> <span class="va">condition</span>,</span>
+<span>                              assay_name <span class="op">=</span> <span class="st">"filtered"</span><span class="op">)</span>,</span>
+<span>  riemannian <span class="op">=</span> <span class="fu"><a href="../reference/eegBCIfeatures.html">eegBCIfeatures</a></span><span class="op">(</span><span class="va">eeg</span>, method <span class="op">=</span> <span class="st">"riemannian"</span>, labels <span class="op">=</span> <span class="va">condition</span>,</span>
+<span>                              assay_name <span class="op">=</span> <span class="st">"filtered"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Features is a list with each method's output</span></span>
+<span><span class="co"># Each list element is a feature matrix</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">features_all</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Bandpower features: power in specified frequency bands per channel</span></span>
@@ -303,23 +330,22 @@ extraction methods that can be combined for robust classification.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">riem_features</span><span class="op">)</span>  <span class="co"># 80 trials x n_tangent_features</span></span></code></pre></div>
 <p>Bandpower-specific feature extraction:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Extract power in multiple frequency bands</span></span>
+<code class="sourceCode R"><span><span class="co"># Extract power in the default mu/beta frequency bands</span></span>
 <span><span class="va">features_bp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIfeatures.html">eegBCIfeatures</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
-<span>  methods <span class="op">=</span> <span class="st">"bandpower"</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"bandpower"</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
 <span>  assay_name <span class="op">=</span> <span class="st">"raw"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Typically computed for:</span></span>
-<span><span class="co"># - Delta (1-4 Hz), Theta (4-8 Hz), Alpha (8-13 Hz)</span></span>
-<span><span class="co"># - Beta (13-30 Hz), Gamma (30-50 Hz)</span></span>
+<span><span class="co"># Bandpower features are log band power per channel and band</span></span>
+<span><span class="co"># (default bands: mu 8-13 Hz, beta 13-30 Hz)</span></span>
 <span></span>
 <span><span class="co"># Normalize features (z-score per feature dimension)</span></span>
-<span><span class="va">features_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">features_bp</span><span class="op">$</span><span class="va">bandpower</span><span class="op">)</span></span>
+<span><span class="va">features_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">features_bp</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Examine feature importance via correlation with labels</span></span>
-<span><span class="va">label_numeric</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">$</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"left"</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">label_numeric</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">condition</span> <span class="op">==</span> <span class="st">"left"</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">correlations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">features_norm</span>, <span class="va">label_numeric</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">correlations</span><span class="op">)</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Riemannian geometry features:</p>
@@ -329,8 +355,8 @@ extraction methods that can be combined for robust classification.</p>
 <span></span>
 <span><span class="va">features_riem</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIfeatures.html">eegBCIfeatures</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
-<span>  methods <span class="op">=</span> <span class="st">"riemannian"</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"riemannian"</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
 <span>  assay_name <span class="op">=</span> <span class="st">"filtered"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -338,7 +364,7 @@ extraction methods that can be combined for robust classification.</p>
 <span><span class="co"># for BCI classification due to better handling of</span></span>
 <span><span class="co"># non-Euclidean structure of covariance matrices</span></span>
 <span></span>
-<span><span class="va">riem_data</span> <span class="op">&lt;-</span> <span class="va">features_riem</span><span class="op">$</span><span class="va">riemannian</span></span>
+<span><span class="va">riem_data</span> <span class="op">&lt;-</span> <span class="va">features_riem</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">riem_data</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -347,42 +373,40 @@ extraction methods that can be combined for robust classification.</p>
 <p>For frequency-tagged visual stimuli, SSVEP analysis identifies the
 target frequency in the EEG spectrum.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Detect SSVEP at 12 Hz (common flicker frequency)</span></span>
-<span><span class="co"># Include 2nd and 3rd harmonics (24 Hz, 36 Hz)</span></span>
+<code class="sourceCode R"><span><span class="co"># Detect SSVEP across candidate flicker frequencies using CCA.</span></span>
+<span><span class="co"># Each candidate uses 3 harmonics in its reference signals.</span></span>
 <span><span class="va">ssvep_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSSVEP.html">eegSSVEP</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
-<span>  target_freq <span class="op">=</span> <span class="fl">12</span>,</span>
-<span>  harmonics <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  frequencies <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">12</span>, <span class="fl">15</span>, <span class="fl">20</span><span class="op">)</span>,</span>
+<span>  n_harmonics <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  assay_name <span class="op">=</span> <span class="st">"raw"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Results contain SNR at target frequency and harmonics</span></span>
-<span><span class="va">snr_fundamental</span> <span class="op">&lt;-</span> <span class="va">ssvep_results</span><span class="op">$</span><span class="va">snr</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>  <span class="co"># 12 Hz</span></span>
-<span><span class="va">snr_2nd_harmonic</span> <span class="op">&lt;-</span> <span class="va">ssvep_results</span><span class="op">$</span><span class="va">snr</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>  <span class="co"># 24 Hz</span></span>
-<span><span class="va">snr_3rd_harmonic</span> <span class="op">&lt;-</span> <span class="va">ssvep_results</span><span class="op">$</span><span class="va">snr</span><span class="op">[</span>, <span class="fl">3</span><span class="op">]</span>  <span class="co"># 36 Hz</span></span>
+<span><span class="co"># Results: one row per candidate frequency with CCA correlation and SNR</span></span>
+<span><span class="va">ssvep_results</span></span>
 <span></span>
-<span><span class="co"># High SNR indicates strong SSVEP response</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">snr_fundamental</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">snr_fundamental</span><span class="op">)</span></span>
+<span><span class="co"># SNR at each candidate frequency (named by frequency)</span></span>
+<span><span class="va">snr_values</span> <span class="op">&lt;-</span> <span class="va">ssvep_results</span><span class="op">$</span><span class="va">snr</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">snr_values</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">ssvep_results</span><span class="op">$</span><span class="va">frequency</span></span>
 <span></span>
-<span><span class="co"># Binary classification: SSVEP present vs. absent</span></span>
-<span><span class="va">ssvep_detected</span> <span class="op">&lt;-</span> <span class="va">snr_fundamental</span> <span class="op">&gt;</span> <span class="fl">3</span>  <span class="co"># Threshold at SNR = 3</span></span>
+<span><span class="co"># High SNR indicates a strong SSVEP response</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">snr_values</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">snr_values</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Binary detection: SSVEP present vs. absent (threshold at SNR = 3)</span></span>
+<span><span class="va">ssvep_detected</span> <span class="op">&lt;-</span> <span class="va">snr_values</span> <span class="op">&gt;</span> <span class="fl">3</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">ssvep_detected</span><span class="op">)</span></span></code></pre></div>
 <p>Multi-frequency SSVEP (for multi-class BCI):</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># In real multi-class SSVEP BCI, test multiple target frequencies</span></span>
+<code class="sourceCode R"><span><span class="co"># In a multi-class SSVEP BCI, test several candidate target frequencies at once</span></span>
 <span><span class="va">target_freqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7</span>, <span class="fl">9</span>, <span class="fl">11</span>, <span class="fl">13</span><span class="op">)</span>  <span class="co"># 4-class BCI</span></span>
 <span></span>
-<span><span class="va">ssvep_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">target_freqs</span>, <span class="kw">function</span><span class="op">(</span><span class="va">freq</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/eegSSVEP.html">eegSSVEP</a></span><span class="op">(</span><span class="va">eeg</span>, target_freq <span class="op">=</span> <span class="va">freq</span>, harmonics <span class="op">=</span> <span class="fl">2</span>, assay_name <span class="op">=</span> <span class="st">"raw"</span><span class="op">)</span></span>
-<span><span class="op">}</span><span class="op">)</span></span>
+<span><span class="va">ssvep_all</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSSVEP.html">eegSSVEP</a></span><span class="op">(</span><span class="va">eeg</span>, frequencies <span class="op">=</span> <span class="va">target_freqs</span>, n_harmonics <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>                      assay_name <span class="op">=</span> <span class="st">"raw"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># For each trial, select frequency with highest SNR</span></span>
-<span><span class="va">snr_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">ssvep_all</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">snr</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="va">predicted_class</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">snr_matrix</span>, <span class="fl">1</span>, <span class="va">which.max</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># predicted_class now contains 1-4 indicating detected frequency</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">predicted_class</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># The candidate frequency with the highest SNR is the detected class</span></span>
+<span><span class="va">predicted_freq</span> <span class="op">&lt;-</span> <span class="va">ssvep_all</span><span class="op">$</span><span class="va">frequency</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="va">ssvep_all</span><span class="op">$</span><span class="va">snr</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="va">predicted_freq</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="classification">Classification<a class="anchor" aria-label="anchor" href="#classification"></a>
@@ -390,20 +414,36 @@ target frequency in the EEG spectrum.</p>
 <p>The <code><a href="../reference/eegBCIclassify.html">eegBCIclassify()</a></code> function performs classification
 with cross-validation to estimate generalization performance.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Classify using CSP features and LDA</span></span>
+<code class="sourceCode R"><span><span class="co"># eegBCIclassify() returns a per-trial data.frame of predictions</span></span>
+<span><span class="co"># (columns: trial, predicted_class, confidence, true_class). Derive</span></span>
+<span><span class="co"># accuracy, Cohen's kappa, and the confusion matrix from those predictions.</span></span>
+<span><span class="va">bci_metrics</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">lv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">true_class</span>, <span class="va">res</span><span class="op">$</span><span class="va">predicted_class</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">cm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span></span>
+<span>    true <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">true_class</span>, levels <span class="op">=</span> <span class="va">lv</span><span class="op">)</span>,</span>
+<span>    predicted <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">predicted_class</span>, levels <span class="op">=</span> <span class="va">lv</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="va">acc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span></span>
+<span>  <span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/MatrixGenerics/man/rowSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/pkg/MatrixGenerics/man/rowSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span></span>
+<span>  <span class="va">kappa</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="va">pe</span> <span class="op">&lt;</span> <span class="fl">1</span><span class="op">)</span> <span class="op">(</span><span class="va">acc</span> <span class="op">-</span> <span class="va">pe</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">pe</span><span class="op">)</span> <span class="kw">else</span> <span class="cn">NA_real_</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>accuracy <span class="op">=</span> <span class="va">acc</span>, kappa <span class="op">=</span> <span class="va">kappa</span>, confusion_matrix <span class="op">=</span> <span class="va">cm</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># Classify using CSP features and LDA</span></span>
 <span><span class="co"># 5-fold cross-validation for robust performance estimation</span></span>
 <span><span class="va">results_lda</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  features <span class="op">=</span> <span class="va">csp_features</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"lda"</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Extract performance metrics</span></span>
-<span><span class="va">accuracy_lda</span> <span class="op">&lt;-</span> <span class="va">results_lda</span><span class="op">$</span><span class="va">accuracy</span></span>
-<span><span class="va">kappa_lda</span> <span class="op">&lt;-</span> <span class="va">results_lda</span><span class="op">$</span><span class="va">kappa</span></span>
-<span><span class="va">confusion_lda</span> <span class="op">&lt;-</span> <span class="va">results_lda</span><span class="op">$</span><span class="va">confusion_matrix</span></span>
+<span><span class="va">m_lda</span> <span class="op">&lt;-</span> <span class="fu">bci_metrics</span><span class="op">(</span><span class="va">results_lda</span><span class="op">)</span></span>
+<span><span class="va">accuracy_lda</span> <span class="op">&lt;-</span> <span class="va">m_lda</span><span class="op">$</span><span class="va">accuracy</span></span>
+<span><span class="va">kappa_lda</span> <span class="op">&lt;-</span> <span class="va">m_lda</span><span class="op">$</span><span class="va">kappa</span></span>
+<span><span class="va">confusion_lda</span> <span class="op">&lt;-</span> <span class="va">m_lda</span><span class="op">$</span><span class="va">confusion_matrix</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"LDA Accuracy: %.2f%%\n"</span>, <span class="va">accuracy_lda</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Cohen's Kappa: %.3f\n"</span>, <span class="va">kappa_lda</span><span class="op">)</span><span class="op">)</span></span>
@@ -414,25 +454,28 @@ with cross-validation to estimate generalization performance.</p>
 <span><span class="va">results_lda</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  features <span class="op">=</span> <span class="va">csp_features</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"lda"</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fl">10</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># SVM: Support Vector Machine (non-linear decision boundaries)</span></span>
-<span><span class="va">results_svm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
+<span><span class="co"># Shrinkage LDA: regularized covariance estimate, robust for high-dimensional</span></span>
+<span><span class="co"># feature spaces with limited trials</span></span>
+<span><span class="va">results_slda</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  features <span class="op">=</span> <span class="va">csp_features</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"svm"</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"shrinkage_lda"</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fl">10</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Compare performance</span></span>
+<span><span class="va">m_lda</span> <span class="op">&lt;-</span> <span class="fu">bci_metrics</span><span class="op">(</span><span class="va">results_lda</span><span class="op">)</span></span>
+<span><span class="va">m_slda</span> <span class="op">&lt;-</span> <span class="fu">bci_metrics</span><span class="op">(</span><span class="va">results_slda</span><span class="op">)</span></span>
 <span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LDA"</span>, <span class="st">"SVM"</span><span class="op">)</span>,</span>
-<span>  Accuracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">results_lda</span><span class="op">$</span><span class="va">accuracy</span>, <span class="va">results_svm</span><span class="op">$</span><span class="va">accuracy</span><span class="op">)</span>,</span>
-<span>  Kappa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">results_lda</span><span class="op">$</span><span class="va">kappa</span>, <span class="va">results_svm</span><span class="op">$</span><span class="va">kappa</span><span class="op">)</span></span>
+<span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"LDA"</span>, <span class="st">"Shrinkage-LDA"</span><span class="op">)</span>,</span>
+<span>  Accuracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">m_lda</span><span class="op">$</span><span class="va">accuracy</span>, <span class="va">m_slda</span><span class="op">$</span><span class="va">accuracy</span><span class="op">)</span>,</span>
+<span>  Kappa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">m_lda</span><span class="op">$</span><span class="va">kappa</span>, <span class="va">m_slda</span><span class="op">$</span><span class="va">kappa</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comparison</span><span class="op">)</span></span></code></pre></div>
@@ -440,31 +483,31 @@ with cross-validation to estimate generalization performance.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Classify using different feature sets</span></span>
 <span><span class="co"># 1. CSP features</span></span>
-<span><span class="va">acc_csp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
+<span><span class="va">acc_csp</span> <span class="op">&lt;-</span> <span class="fu">bci_metrics</span><span class="op">(</span><span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  features <span class="op">=</span> <span class="va">features_all</span><span class="op">$</span><span class="va">csp</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"lda"</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="op">)</span><span class="op">$</span><span class="va">accuracy</span></span>
+<span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">accuracy</span></span>
 <span></span>
 <span><span class="co"># 2. Bandpower features</span></span>
-<span><span class="va">acc_bp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
+<span><span class="va">acc_bp</span> <span class="op">&lt;-</span> <span class="fu">bci_metrics</span><span class="op">(</span><span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  features <span class="op">=</span> <span class="va">features_all</span><span class="op">$</span><span class="va">bandpower</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"lda"</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="op">)</span><span class="op">$</span><span class="va">accuracy</span></span>
+<span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">accuracy</span></span>
 <span></span>
 <span><span class="co"># 3. Riemannian features</span></span>
-<span><span class="va">acc_riem</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
+<span><span class="va">acc_riem</span> <span class="op">&lt;-</span> <span class="fu">bci_metrics</span><span class="op">(</span><span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  features <span class="op">=</span> <span class="va">features_all</span><span class="op">$</span><span class="va">riemannian</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"lda"</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="op">)</span><span class="op">$</span><span class="va">accuracy</span></span>
+<span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">accuracy</span></span>
 <span></span>
 <span><span class="co"># Compare feature sets</span></span>
 <span><span class="va">feature_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -487,17 +530,18 @@ balanced two-class problems, chance level is 50%.</p>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  features <span class="op">=</span> <span class="va">csp_features</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"lda"</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">overall_acc</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">$</span><span class="va">accuracy</span></span>
+<span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">bci_metrics</span><span class="op">(</span><span class="va">results</span><span class="op">)</span></span>
+<span><span class="va">overall_acc</span> <span class="op">&lt;-</span> <span class="va">m</span><span class="op">$</span><span class="va">accuracy</span></span>
 <span></span>
 <span><span class="co"># Per-class accuracy (sensitivity/recall)</span></span>
-<span><span class="va">conf_mat</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">$</span><span class="va">confusion_matrix</span></span>
-<span><span class="va">class_acc_left</span> <span class="op">&lt;-</span> <span class="va">conf_mat</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">conf_mat</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span><span class="op">)</span></span>
-<span><span class="va">class_acc_right</span> <span class="op">&lt;-</span> <span class="va">conf_mat</span><span class="op">[</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">]</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">conf_mat</span><span class="op">[</span><span class="fl">2</span>, <span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">conf_mat</span> <span class="op">&lt;-</span> <span class="va">m</span><span class="op">$</span><span class="va">confusion_matrix</span></span>
+<span><span class="va">class_acc_left</span> <span class="op">&lt;-</span> <span class="va">conf_mat</span><span class="op">[</span><span class="st">"left"</span>, <span class="st">"left"</span><span class="op">]</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">conf_mat</span><span class="op">[</span><span class="st">"left"</span>, <span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">class_acc_right</span> <span class="op">&lt;-</span> <span class="va">conf_mat</span><span class="op">[</span><span class="st">"right"</span>, <span class="st">"right"</span><span class="op">]</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">conf_mat</span><span class="op">[</span><span class="st">"right"</span>, <span class="op">]</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Overall Accuracy: %.2f%%\n"</span>, <span class="va">overall_acc</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Left Hand Accuracy: %.2f%%\n"</span>, <span class="va">class_acc_left</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
@@ -509,7 +553,7 @@ balanced two-class problems, chance level is 50%.</p>
 <p>Kappa accounts for chance agreement and is more informative than raw
 accuracy for imbalanced datasets.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">kappa</span> <span class="op">&lt;-</span> <span class="va">results</span><span class="op">$</span><span class="va">kappa</span></span>
+<code class="sourceCode R"><span><span class="va">kappa</span> <span class="op">&lt;-</span> <span class="va">m</span><span class="op">$</span><span class="va">kappa</span></span>
 <span></span>
 <span><span class="co"># Interpretation:</span></span>
 <span><span class="co"># &lt; 0.00: Poor agreement (worse than chance)</span></span>
@@ -595,7 +639,7 @@ estimation.</p>
 <span><span class="va">cv5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  features <span class="op">=</span> <span class="va">csp_features</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"lda"</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span></span>
@@ -604,7 +648,7 @@ estimation.</p>
 <span><span class="va">cv10</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  features <span class="op">=</span> <span class="va">csp_features</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"lda"</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fl">10</span></span>
 <span><span class="op">)</span></span>
@@ -614,15 +658,17 @@ estimation.</p>
 <span><span class="va">cv_loo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBCIclassify.html">eegBCIclassify</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  features <span class="op">=</span> <span class="va">csp_features</span>,</span>
-<span>  labels <span class="op">=</span> <span class="va">eeg</span><span class="op">$</span><span class="va">condition</span>,</span>
+<span>  labels <span class="op">=</span> <span class="va">condition</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"lda"</span>,</span>
 <span>  cv_folds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">csp_features</span><span class="op">)</span>  <span class="co"># 80 folds = leave-one-out</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">cv_comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  Method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"5-Fold"</span>, <span class="st">"10-Fold"</span>, <span class="st">"Leave-One-Out"</span><span class="op">)</span>,</span>
-<span>  Accuracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cv5</span><span class="op">$</span><span class="va">accuracy</span>, <span class="va">cv10</span><span class="op">$</span><span class="va">accuracy</span>, <span class="va">cv_loo</span><span class="op">$</span><span class="va">accuracy</span><span class="op">)</span>,</span>
-<span>  Kappa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">cv5</span><span class="op">$</span><span class="va">kappa</span>, <span class="va">cv10</span><span class="op">$</span><span class="va">kappa</span>, <span class="va">cv_loo</span><span class="op">$</span><span class="va">kappa</span><span class="op">)</span></span>
+<span>  Accuracy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">bci_metrics</span><span class="op">(</span><span class="va">cv5</span><span class="op">)</span><span class="op">$</span><span class="va">accuracy</span>, <span class="fu">bci_metrics</span><span class="op">(</span><span class="va">cv10</span><span class="op">)</span><span class="op">$</span><span class="va">accuracy</span>,</span>
+<span>               <span class="fu">bci_metrics</span><span class="op">(</span><span class="va">cv_loo</span><span class="op">)</span><span class="op">$</span><span class="va">accuracy</span><span class="op">)</span>,</span>
+<span>  Kappa <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu">bci_metrics</span><span class="op">(</span><span class="va">cv5</span><span class="op">)</span><span class="op">$</span><span class="va">kappa</span>, <span class="fu">bci_metrics</span><span class="op">(</span><span class="va">cv10</span><span class="op">)</span><span class="op">$</span><span class="va">kappa</span>,</span>
+<span>            <span class="fu">bci_metrics</span><span class="op">(</span><span class="va">cv_loo</span><span class="op">)</span><span class="op">$</span><span class="va">kappa</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cv_comparison</span><span class="op">)</span></span></code></pre></div>

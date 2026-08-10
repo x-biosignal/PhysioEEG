@@ -23,13 +23,22 @@ demonstration purposes.
 ``` r
 
 library(PhysioEEG)
+library(SummarizedExperiment)
 
 eeg <- make_eeg(
-  n_channels = 64,
+  n_channels = 19,
   n_time = 60000,
-  sampling_rate = 500,
-  add_noise = TRUE
+  sr = 500
 )
+
+# Assign standard 10-20 electrode positions so montage-dependent steps
+# (bad-channel interpolation) have electrode coordinates to work with.
+eeg <- eegMontage(eeg, system = "10-20")
+
+# Relabel two channels as mastoids (TP9/TP10) so the mastoid-referencing
+# example below can target named electrodes; Cz is already present in the
+# 10-20 layout for the single-channel reference example.
+colData(eeg)$label[1:2] <- c("TP9", "TP10")
 ```
 
 The
@@ -52,7 +61,7 @@ studies, while 1 Hz may be appropriate for resting-state analysis.
 
 ``` r
 
-eeg_hp <- eegFilter(eeg, lowcut = 0.1, type = "butter", order = 4)
+eeg_hp <- eegFilter(eeg, lowcut = 0.1, method = "iir", order = 4)
 ```
 
 ### Lowpass Filtering
@@ -64,7 +73,7 @@ cutoff.
 
 ``` r
 
-eeg_lp <- eegFilter(eeg, highcut = 40, type = "butter", order = 4)
+eeg_lp <- eegFilter(eeg, highcut = 40, method = "iir", order = 4)
 ```
 
 ### Bandpass Filtering
@@ -75,7 +84,7 @@ approach for EEG preprocessing.
 
 ``` r
 
-eeg_bp <- eegFilter(eeg, lowcut = 1, highcut = 40, type = "butter", order = 4)
+eeg_bp <- eegFilter(eeg, lowcut = 1, highcut = 40, method = "iir", order = 4)
 ```
 
 ### Notch Filtering
@@ -86,7 +95,7 @@ results.
 
 ``` r
 
-eeg_notch <- eegFilter(eeg, notch = 60, notch_width = 2)
+eeg_notch <- eegFilter(eeg, notch = 60)
 ```
 
 ### FIR vs IIR Filters
@@ -94,13 +103,13 @@ eeg_notch <- eegFilter(eeg, notch = 60, notch_width = 2)
 The package supports both finite impulse response (FIR) and infinite
 impulse response (IIR) filters. FIR filters (type = “fir”) have linear
 phase characteristics and no phase distortion, making them ideal for ERP
-analysis. IIR filters (type = “butter”, “cheby1”, etc.) are
+analysis. IIR filters (method = “iir”, “cheby1”, etc.) are
 computationally efficient but introduce phase shifts.
 
 ``` r
 
-eeg_fir <- eegFilter(eeg, lowcut = 1, highcut = 40, type = "fir", order = 100)
-eeg_iir <- eegFilter(eeg, lowcut = 1, highcut = 40, type = "butter", order = 4)
+eeg_fir <- eegFilter(eeg, lowcut = 1, highcut = 40, method = "fir", order = 100)
+eeg_iir <- eegFilter(eeg, lowcut = 1, highcut = 40, method = "iir", order = 4)
 ```
 
 For most applications, a 4th-order Butterworth filter provides an
@@ -122,7 +131,7 @@ source localization methods.
 
 ``` r
 
-eeg_avg <- eegRereference(eeg_bp, method = "average")
+eeg_avg <- eegRereference(eeg_bp, ref_type = "average")
 ```
 
 ### Mastoid Reference
@@ -133,7 +142,7 @@ TP9 and TP10) are relatively inactive during most cognitive tasks.
 
 ``` r
 
-eeg_mast <- eegRereference(eeg_bp, method = "mastoid", ref_channels = c("TP9", "TP10"))
+eeg_mast <- eegRereference(eeg_bp, ref_type = "mastoids")  # finds TP9/TP10 (or M1/M2, A1/A2)
 ```
 
 ### Single Channel Reference
@@ -143,7 +152,7 @@ comparing to older literature or for specific experimental designs.
 
 ``` r
 
-eeg_cz <- eegRereference(eeg_bp, method = "single", ref_channels = "Cz")
+eeg_cz <- eegRereference(eeg_bp, ref_type = "channel", ref_channels = "Cz")
 ```
 
 ### When to Use Each Type
@@ -173,14 +182,15 @@ with neighboring channels.
 
 bad_info <- eegBadChannels(
   eeg_avg,
+  method = c("flat", "noise"),
   flat_threshold = 0.1,
-  noise_threshold = 4,
-  correlation_threshold = 0.4,
-  correlation_window = 1.0
+  noise_threshold = 4
 )
 
-print(bad_info$bad_channels)
-print(bad_info$reasons)
+# eegBadChannels() returns a data.frame with columns: channel, is_bad, reason
+bad_channels <- bad_info$channel[bad_info$is_bad]
+print(bad_channels)
+print(bad_info$reason[bad_info$is_bad])
 ```
 
 ### Interpolating Bad Channels
@@ -193,8 +203,8 @@ assumes that scalp potentials vary smoothly across the head surface.
 
 eeg_interp <- eegInterpolate(
   eeg_avg,
-  bad_channels = bad_info$bad_channels,
-  method = "spherical"
+  bad_channels = bad_channels,
+  method = "spline"
 )
 ```
 
@@ -226,7 +236,7 @@ algorithm. Run ICA on filtered, re-referenced data before epoching.
 
 ``` r
 
-eeg_ica <- eegICA(eeg_interp, n_components = 30, method = "fastica")
+eeg_ica <- eegICA(eeg_interp, n_components = 15, method = "fastica")
 ```
 
 ### Detecting Artifact Components
@@ -239,12 +249,15 @@ properties.
 
 artifact_comps <- eegICAdetect(
   eeg_ica,
-  types = c("eye", "muscle", "heart"),
+  method = "correlation",
   threshold = 0.8
 )
 
-print(artifact_comps$eye_components)
-print(artifact_comps$muscle_components)
+# eegICAdetect() returns a data.frame with columns: component, type, method, score.
+# Components flagged as artifacts have type == "artifact".
+print(artifact_comps)
+artifact_ids <- artifact_comps$component[artifact_comps$type == "artifact"]
+print(artifact_ids)
 ```
 
 ### Removing Artifact Components
@@ -279,7 +292,7 @@ times (in samples or seconds) and condition labels.
 ``` r
 
 events <- data.frame(
-  onset = seq(1000, 55000, by = 2000),
+  onset_sec = seq(2, 110, by = 4),   # event onset times in seconds
   duration = 0,
   type = rep(c("stimulus_A", "stimulus_B"), length.out = 28)
 )
@@ -295,8 +308,8 @@ pre-stimulus interval (-200 to 0 ms) for baseline correction.
 eeg_epochs <- eegEpoch(
   eeg_clean,
   events = events,
-  epoch_limits = c(-0.2, 0.8),
-  baseline_limits = c(-0.2, 0)
+  limits = c(-0.2, 0.8),
+  baseline = c(-0.2, 0)
 )
 ```
 
@@ -312,16 +325,20 @@ baseline windows for different analyses.
 
 ``` r
 
+# Epoch without baseline correction (baseline = NULL)
 eeg_epochs_nobl <- eegEpoch(
   eeg_clean,
   events = events,
-  epoch_limits = c(-0.5, 1.5),
-  baseline_limits = NULL
+  limits = c(-0.5, 1.5),
+  baseline = NULL
 )
 
-eeg_epochs_bl <- eegBaselineCorrect(
-  eeg_epochs_nobl,
-  baseline_limits = c(-0.5, -0.1)
+# Epoch with a custom baseline window (in seconds) applied during epoching
+eeg_epochs_bl <- eegEpoch(
+  eeg_clean,
+  events = events,
+  limits = c(-0.5, 1.5),
+  baseline = c(-0.5, -0.1)
 )
 ```
 
@@ -340,8 +357,7 @@ absolute voltage threshold (typically ±100 μV for scalp EEG).
 eeg_clean_thresh <- eegArtifactReject(
   eeg_epochs,
   method = "threshold",
-  threshold = 100,
-  unit = "uV"
+  threshold_uv = 100
 )
 ```
 
@@ -355,8 +371,7 @@ characteristic of muscle artifacts or electrode pops.
 eeg_clean_grad <- eegArtifactReject(
   eeg_epochs,
   method = "gradient",
-  threshold = 50,
-  unit = "uV"
+  gradient_uv_ms = 50
 )
 ```
 
@@ -369,9 +384,8 @@ the distribution of values across all trials, rejecting outliers.
 
 eeg_clean_prob <- eegArtifactReject(
   eeg_epochs,
-  method = "probability",
-  local_threshold = 5,
-  global_threshold = 3
+  method = "joint_probability",
+  jp_threshold = 3
 )
 ```
 
@@ -397,25 +411,27 @@ removal, epoching, and artifact rejection.
 
 ``` r
 
+# Bad-channel detection/interpolation are demonstrated separately above; they
+# are disabled here because correlation-based detection is uninformative on
+# spatially uncorrelated simulated data (it flags every channel).
 eeg_final <- eegPreprocess(
   eeg,
-  filter_lowcut = 1,
-  filter_highcut = 40,
-  filter_order = 4,
-  filter_type = "butter",
+  filter = TRUE,
+  lowcut = 1,
+  highcut = 40,
   notch = 60,
-  reref_method = "average",
-  bad_channel_detect = TRUE,
-  bad_channel_interp = TRUE,
-  ica_method = "fastica",
-  ica_components = 30,
-  ica_artifact_types = c("eye", "muscle"),
+  rereference = TRUE,
+  ref_type = "average",
+  bad_channels = FALSE,
+  interpolate = FALSE,
+  ica = TRUE,
+  epoch = TRUE,
   events = events,
   epoch_limits = c(-0.2, 0.8),
-  baseline_limits = c(-0.2, 0),
+  baseline = c(-0.2, 0),
   artifact_reject = TRUE,
-  artifact_method = "threshold",
-  artifact_threshold = 100
+  threshold_uv = 100,
+  verbose = FALSE
 )
 ```
 
@@ -485,7 +501,7 @@ history in the metadata slot of the returned object.
 
 ``` r
 
-preprocessing_log <- metadata(eeg_final)$processing_history
+preprocessing_log <- metadata(eeg_final)$preprocess_log
 print(preprocessing_log)
 ```
 

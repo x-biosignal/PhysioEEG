@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,7 @@
                         <h4 data-toc-skip class="author">PhysioEEG
 Development Team</h4>
             
-            <h4 data-toc-skip class="date">2026-08-09</h4>
+            <h4 data-toc-skip class="date">2026-08-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/vignettes/sleep-analysis.Rmd" class="external-link"><code>vignettes/sleep-analysis.Rmd</code></a></small>
       <div class="d-none name"><code>sleep-analysis.Rmd</code></div>
@@ -136,14 +136,16 @@ data. The <code><a href="../reference/make_eeg_sleep.html">make_eeg_sleep()</a><
 data with realistic spectral characteristics for each sleep stage.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/x-biosignal/PhysioEEG" class="external-link">PhysioEEG</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment" class="external-link">SummarizedExperiment</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create 8 hours of simulated sleep EEG data</span></span>
+<span><span class="co"># Create a short excerpt of simulated sleep EEG for a fast, self-contained demo.</span></span>
+<span><span class="co"># Real polysomnography scores a full ~8-hour night; the API is identical at scale.</span></span>
 <span><span class="co"># Sampling rate: 256 Hz (common for clinical polysomnography)</span></span>
 <span><span class="co"># Channels: 6 standard EEG derivations</span></span>
-<span><span class="va">n_hours</span> <span class="op">&lt;-</span> <span class="fl">8</span></span>
 <span><span class="va">sr</span> <span class="op">&lt;-</span> <span class="fl">256</span></span>
-<span><span class="va">n_time</span> <span class="op">&lt;-</span> <span class="va">n_hours</span> <span class="op">*</span> <span class="fl">60</span> <span class="op">*</span> <span class="fl">60</span> <span class="op">*</span> <span class="va">sr</span>  <span class="co"># 7,372,800 samples</span></span>
+<span><span class="va">n_minutes</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
+<span><span class="va">n_time</span> <span class="op">&lt;-</span> <span class="va">n_minutes</span> <span class="op">*</span> <span class="fl">60</span> <span class="op">*</span> <span class="va">sr</span></span>
 <span></span>
 <span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_eeg_sleep.html">make_eeg_sleep</a></span><span class="op">(</span></span>
 <span>  n_time <span class="op">=</span> <span class="va">n_time</span>,</span>
@@ -153,8 +155,8 @@ data with realistic spectral characteristics for each sleep stage.</p>
 <span></span>
 <span><span class="co"># Inspect the data structure</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">assay</span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"raw"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu">colData</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">channel_name</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"raw"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">label</span></span></code></pre></div>
 <p>The simulated dataset includes channels typically used in clinical
 sleep studies: F3, F4 (frontal), C3, C4 (central), O1, O2 (occipital).
 Real sleep EEG would also include EOG (eye movements) and EMG (muscle
@@ -193,7 +195,7 @@ electrical noise while preserving beta activity</li>
 <span><span class="co"># Re-referencing to linked mastoids (A1+A2)/2 is common for sleep</span></span>
 <span><span class="co"># This would require mastoid channels in real data</span></span>
 <span><span class="co"># For this example, we'll use the average reference</span></span>
-<span><span class="va">eeg_filt</span> <span class="op">&lt;-</span> <span class="fu">eegReReference</span><span class="op">(</span></span>
+<span><span class="va">eeg_filt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegRereference.html">eegRereference</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_filt</span>,</span>
 <span>  ref_type <span class="op">=</span> <span class="st">"average"</span>,</span>
 <span>  assay_name <span class="op">=</span> <span class="st">"filtered"</span>,</span>
@@ -206,16 +208,18 @@ electrical noise while preserving beta activity</li>
 <p>Before automated staging, it’s crucial to identify and handle
 artifacts that could confound results.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Detect high-amplitude artifacts (movement, electrode issues)</span></span>
-<span><span class="va">artifacts</span> <span class="op">&lt;-</span> <span class="fu">eegArtifactDetect</span><span class="op">(</span></span>
-<span>  <span class="va">eeg_filt</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"amplitude"</span>,</span>
-<span>  threshold_uv <span class="op">=</span> <span class="fl">150</span>,  <span class="co"># ±150 μV threshold</span></span>
-<span>  assay_name <span class="op">=</span> <span class="st">"reref"</span></span>
-<span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Flag 30-second epochs whose peak amplitude exceeds +/-150 uV as artifacts</span></span>
+<span><span class="va">reref</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">eeg_filt</span>, <span class="st">"reref"</span><span class="op">)</span></span>
+<span><span class="va">epoch_len</span> <span class="op">&lt;-</span> <span class="fl">30</span> <span class="op">*</span> <span class="fu"><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/samplingRate.html" class="external-link">samplingRate</a></span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span></span>
+<span><span class="va">n_epochs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">reref</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/Arithmetic.html" class="external-link">%/%</a></span> <span class="va">epoch_len</span></span>
+<span><span class="va">artifact_epochs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/funprog.html" class="external-link">Filter</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">seg</span> <span class="op">&lt;-</span> <span class="va">reref</span><span class="op">[</span><span class="op">(</span><span class="op">(</span><span class="va">e</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span> <span class="op">*</span> <span class="va">epoch_len</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span><span class="op">:</span><span class="op">(</span><span class="va">e</span> <span class="op">*</span> <span class="va">epoch_len</span><span class="op">)</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">seg</span><span class="op">)</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">150</span></span>
+<span><span class="op">}</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">n_epochs</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">artifact_epochs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="va">artifact_epochs</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Mark artifact epochs for exclusion from analysis</span></span>
-<span><span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span><span class="op">$</span><span class="va">artifact_epochs</span> <span class="op">&lt;-</span> <span class="va">artifacts</span><span class="op">$</span><span class="va">epochs</span></span></code></pre></div>
+<span><span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span><span class="op">$</span><span class="va">artifact_epochs</span> <span class="op">&lt;-</span> <span class="va">artifact_epochs</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -252,35 +256,38 @@ sawtooth waves</li>
 <span>  assay_name <span class="op">=</span> <span class="st">"reref"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Examine staging results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">stages</span><span class="op">$</span><span class="va">stage_sequence</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">stages</span><span class="op">$</span><span class="va">stage_sequence</span><span class="op">)</span></span>
+<span><span class="co"># eegSleepStage() returns a data.frame with one row per epoch</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">stages</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Stage probabilities for each epoch</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">stages</span><span class="op">$</span><span class="va">probabilities</span><span class="op">)</span></span>
+<span><span class="co"># Sequence of stage labels and their distribution</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">stages</span><span class="op">$</span><span class="va">stage</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">stages</span><span class="op">$</span><span class="va">stage</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Spectral features used for classification</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">stages</span><span class="op">$</span><span class="va">features</span><span class="op">)</span></span>
+<span><span class="co"># Spectral power features used for classification</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"_power$"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">stages</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Store staging results in metadata</span></span>
+<span><span class="co"># Store staging results in metadata (used by eegSleepMetrics)</span></span>
 <span><span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span><span class="op">$</span><span class="va">sleep_stages</span> <span class="op">&lt;-</span> <span class="va">stages</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="interpreting-staging-output">Interpreting Staging Output<a class="anchor" aria-label="anchor" href="#interpreting-staging-output"></a>
 </h3>
-<p>The output includes:</p>
+<p><code><a href="../reference/eegSleepStage.html">eegSleepStage()</a></code> returns a data.frame with one row per
+30-second epoch and the following columns:</p>
 <ul>
 <li>
-<code>stage_sequence</code>: Vector of stage labels (W, N1, N2, N3,
-REM) for each epoch</li>
+<code>epoch</code>: Epoch index</li>
 <li>
-<code>probabilities</code>: Matrix of posterior probabilities for
-each stage per epoch</li>
+<code>stage</code>: Stage label (W, N1, N2, N3, REM) assigned to the
+epoch</li>
 <li>
-<code>features</code>: Spectral power in delta, theta, alpha, sigma,
-beta bands</li>
+<code>start_sample</code>, <code>end_sample</code>: Sample indices
+spanning the epoch</li>
 <li>
-<code>epoch_times</code>: Start time of each epoch in seconds</li>
+<code>delta_power</code>, <code>theta_power</code>,
+<code>alpha_power</code>, <code>sigma_power</code>,
+<code>beta_power</code>: Spectral power features used for
+classification</li>
 </ul>
 <p>Low-confidence epochs (no stage with &gt;60% probability) may require
 manual review.</p>
@@ -309,25 +316,32 @@ assessment.</p>
 <code class="sourceCode R"><span><span class="co"># Detect sleep spindles across all channels</span></span>
 <span><span class="va">spindles</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSpindleDetect.html">eegSpindleDetect</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_filt</span>,</span>
-<span>  freq_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">11</span>, <span class="fl">16</span><span class="op">)</span>,  <span class="co"># Sigma band</span></span>
-<span>  duration_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2.0</span><span class="op">)</span>,  <span class="co"># Minimum and maximum duration</span></span>
-<span>  amplitude_threshold <span class="op">=</span> <span class="fl">2.0</span>,  <span class="co"># Relative to background</span></span>
+<span>  freq_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">11</span>, <span class="fl">16</span><span class="op">)</span>,      <span class="co"># Sigma band</span></span>
+<span>  min_duration_ms <span class="op">=</span> <span class="fl">500</span>,       <span class="co"># Minimum duration</span></span>
+<span>  max_duration_ms <span class="op">=</span> <span class="fl">2000</span>,      <span class="co"># Maximum duration</span></span>
+<span>  threshold_sd <span class="op">=</span> <span class="fl">2.0</span>,          <span class="co"># Amplitude threshold in SD of the background</span></span>
 <span>  assay_name <span class="op">=</span> <span class="st">"reref"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Spindle events: onset time, duration, peak frequency, amplitude</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">spindles</span><span class="op">$</span><span class="va">events</span><span class="op">)</span></span>
+<span><span class="co"># eegSpindleDetect() returns a data.frame of spindle events</span></span>
+<span><span class="co"># (channel, start/end sample, duration_ms, peak_sample, peak_amplitude,</span></span>
+<span><span class="co">#  frequency_hz)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">spindles</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Spindle density (spindles per minute) by channel</span></span>
-<span><span class="va">spindles</span><span class="op">$</span><span class="va">density_per_channel</span></span>
+<span><span class="co"># Spindle count per channel (channel index)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">spindles</span><span class="op">$</span><span class="va">channel</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Spindle rate by sleep stage</span></span>
-<span><span class="va">spindles</span><span class="op">$</span><span class="va">density_by_stage</span></span>
+<span><span class="co"># Overall spindle density (spindles per minute of recording)</span></span>
+<span><span class="va">rec_minutes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">eeg_filt</span>, <span class="st">"reref"</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/samplingRate.html" class="external-link">samplingRate</a></span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span> <span class="op">/</span> <span class="fl">60</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">spindles</span><span class="op">)</span> <span class="op">/</span> <span class="va">rec_minutes</span></span>
 <span></span>
-<span><span class="co"># Visualize spindle distribution over time</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">spindles</span><span class="op">$</span><span class="va">timeline</span>, type <span class="op">=</span> <span class="st">"h"</span>,</span>
-<span>     xlab <span class="op">=</span> <span class="st">"Time (hours)"</span>, ylab <span class="op">=</span> <span class="st">"Spindle Count per Minute"</span>,</span>
-<span>     main <span class="op">=</span> <span class="st">"Sleep Spindle Density Throughout Night"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># Visualize spindle onsets over time (hours)</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">spindles</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">onset_hours</span> <span class="op">&lt;-</span> <span class="va">spindles</span><span class="op">$</span><span class="va">start_sample</span> <span class="op">/</span> <span class="fu"><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/samplingRate.html" class="external-link">samplingRate</a></span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span> <span class="op">/</span> <span class="fl">3600</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">onset_hours</span>,</span>
+<span>       xlab <span class="op">=</span> <span class="st">"Time (hours)"</span>, ylab <span class="op">=</span> <span class="st">"Spindle Count"</span>,</span>
+<span>       main <span class="op">=</span> <span class="st">"Sleep Spindle Distribution"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="clinical-significance">Clinical Significance<a class="anchor" aria-label="anchor" href="#clinical-significance"></a>
@@ -367,23 +381,24 @@ positive component</li>
 <strong>Duration</strong>: 0.5-1.5 seconds total</li>
 </ul>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Detect K-complexes in central channels (C3, C4)</span></span>
+<code class="sourceCode R"><span><span class="co"># Detect K-complexes (most prominent in central leads C3/C4)</span></span>
 <span><span class="va">kcomplexes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegKcomplexDetect.html">eegKcomplexDetect</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_filt</span>,</span>
-<span>  channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C3"</span>, <span class="st">"C4"</span><span class="op">)</span>,  <span class="co"># Most prominent in central leads</span></span>
-<span>  amplitude_threshold <span class="op">=</span> <span class="fl">75</span>,  <span class="co"># μV</span></span>
-<span>  duration_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1.5</span><span class="op">)</span>,</span>
+<span>  min_neg_amplitude <span class="op">=</span> <span class="fl">75</span>,   <span class="co"># μV negative deflection</span></span>
+<span>  min_duration_ms <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  max_duration_ms <span class="op">=</span> <span class="fl">1500</span>,</span>
 <span>  assay_name <span class="op">=</span> <span class="st">"reref"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># K-complex events</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">kcomplexes</span><span class="op">$</span><span class="va">events</span><span class="op">)</span></span>
+<span><span class="co"># eegKcomplexDetect() returns a data.frame of K-complex events</span></span>
+<span><span class="co"># (channel, negative/positive peak samples and amplitudes, duration_ms)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">kcomplexes</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Distribution across sleep stages (primarily N2)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">kcomplexes</span><span class="op">$</span><span class="va">events</span><span class="op">$</span><span class="va">sleep_stage</span><span class="op">)</span></span>
+<span><span class="co"># Count per channel (channel index; C3/C4 are indices 1/2)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">kcomplexes</span><span class="op">$</span><span class="va">channel</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># K-complex density</span></span>
-<span><span class="va">kcomplexes</span><span class="op">$</span><span class="va">density_per_minute</span></span></code></pre></div>
+<span><span class="co"># K-complex density (events per minute of recording)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">kcomplexes</span><span class="op">)</span> <span class="op">/</span> <span class="va">rec_minutes</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="clinical-applications">Clinical Applications<a class="anchor" aria-label="anchor" href="#clinical-applications"></a>
@@ -415,46 +430,48 @@ homeostatic sleep pressure.</p>
 <h3 id="slow-wave-detection">Slow Wave Detection<a class="anchor" aria-label="anchor" href="#slow-wave-detection"></a>
 </h3>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Detect slow waves in frontal channels (F3, F4)</span></span>
-<span><span class="co"># Slow waves have maximum amplitude in frontal regions</span></span>
+<code class="sourceCode R"><span><span class="co"># Detect slow waves (maximum amplitude is over frontal regions, F3/F4)</span></span>
 <span><span class="va">slow_waves</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSlowWaveDetect.html">eegSlowWaveDetect</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_filt</span>,</span>
-<span>  channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F3"</span>, <span class="st">"F4"</span><span class="op">)</span>,</span>
-<span>  freq_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2.0</span><span class="op">)</span>,  <span class="co"># Delta band slow waves</span></span>
-<span>  amplitude_threshold <span class="op">=</span> <span class="fl">75</span>,  <span class="co"># μV (AASM criterion)</span></span>
-<span>  negative_peak <span class="op">=</span> <span class="cn">TRUE</span>,  <span class="co"># Detect negative-going slow waves</span></span>
-<span>  slope_threshold <span class="op">=</span> <span class="fl">0.5</span>,  <span class="co"># Minimum downslope steepness</span></span>
+<span>  freq_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2.0</span><span class="op">)</span>,   <span class="co"># Delta band slow waves</span></span>
+<span>  min_amplitude <span class="op">=</span> <span class="fl">75</span>,         <span class="co"># μV (AASM criterion)</span></span>
 <span>  assay_name <span class="op">=</span> <span class="st">"reref"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Slow wave characteristics</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">slow_waves</span><span class="op">$</span><span class="va">events</span><span class="op">)</span></span>
+<span><span class="co"># eegSlowWaveDetect() returns a data.frame of slow-wave events</span></span>
+<span><span class="co"># (channel, start/end sample, negative_peak, positive_peak, duration_ms, slope)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">slow_waves</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Slow wave density (waves per minute)</span></span>
-<span><span class="va">slow_waves</span><span class="op">$</span><span class="va">density</span></span>
+<span><span class="co"># Slow wave density (waves per minute of recording)</span></span>
+<span><span class="va">slow_waves_density</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">slow_waves</span><span class="op">)</span> <span class="op">/</span> <span class="va">rec_minutes</span></span>
+<span><span class="va">slow_waves_density</span></span>
 <span></span>
-<span><span class="co"># SWA: Average slow wave amplitude</span></span>
-<span><span class="va">slow_waves</span><span class="op">$</span><span class="va">mean_amplitude</span></span>
+<span><span class="co"># SWA: mean negative-peak amplitude</span></span>
+<span><span class="va">mean_amplitude</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">slow_waves</span><span class="op">$</span><span class="va">negative_peak</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">mean_amplitude</span></span>
 <span></span>
 <span><span class="co"># Slow wave slope (marker of sleep depth)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">slow_waves</span><span class="op">$</span><span class="va">events</span><span class="op">$</span><span class="va">max_slope</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">slow_waves</span><span class="op">$</span><span class="va">slope</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="swa-dynamics-across-the-night">SWA Dynamics Across the Night<a class="anchor" aria-label="anchor" href="#swa-dynamics-across-the-night"></a>
 </h3>
 <p>Slow wave activity exhibits characteristic temporal dynamics:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compute SWA in consecutive NREM periods</span></span>
-<span><span class="co"># SWA typically declines exponentially across sleep cycles</span></span>
-<span><span class="va">swa_by_cycle</span> <span class="op">&lt;-</span> <span class="va">slow_waves</span><span class="op">$</span><span class="va">swa_by_cycle</span></span>
+<code class="sourceCode R"><span><span class="co"># Full-night SWA dynamics (an exponential decline across sleep cycles) require</span></span>
+<span><span class="co"># a complete overnight recording. Here we summarise slow-wave amplitude over</span></span>
+<span><span class="co"># time by binning slow-wave events into successive segments of the recording.</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">slow_waves</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">sw_time_min</span> <span class="op">&lt;-</span> <span class="va">slow_waves</span><span class="op">$</span><span class="va">start_sample</span> <span class="op">/</span> <span class="fu"><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/samplingRate.html" class="external-link">samplingRate</a></span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span> <span class="op">/</span> <span class="fl">60</span></span>
+<span>  <span class="va">n_bins</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
+<span>  <span class="va">bin</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cut.html" class="external-link">cut</a></span><span class="op">(</span><span class="va">sw_time_min</span>, breaks <span class="op">=</span> <span class="va">n_bins</span>, labels <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>  <span class="va">swa_by_bin</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">slow_waves</span><span class="op">$</span><span class="va">negative_peak</span><span class="op">)</span>, <span class="va">bin</span>, <span class="va">mean</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Plot SWA decline</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">swa_by_cycle</span><span class="op">$</span><span class="va">cycle</span>, <span class="va">swa_by_cycle</span><span class="op">$</span><span class="va">swa</span>,</span>
-<span>     type <span class="op">=</span> <span class="st">"b"</span>, pch <span class="op">=</span> <span class="fl">19</span>,</span>
-<span>     xlab <span class="op">=</span> <span class="st">"Sleep Cycle"</span>, ylab <span class="op">=</span> <span class="st">"SWA (μV²)"</span>,</span>
-<span>     main <span class="op">=</span> <span class="st">"Slow Wave Activity Dissipation Across Night"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Exponential decay indicates normal homeostatic process</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">swa_by_bin</span><span class="op">)</span>, <span class="va">swa_by_bin</span>,</span>
+<span>       type <span class="op">=</span> <span class="st">"b"</span>, pch <span class="op">=</span> <span class="fl">19</span>,</span>
+<span>       xlab <span class="op">=</span> <span class="st">"Recording segment"</span>, ylab <span class="op">=</span> <span class="st">"Mean slow-wave amplitude (uV)"</span>,</span>
+<span>       main <span class="op">=</span> <span class="st">"Slow Wave Amplitude Across the Recording"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="clinical-interpretation">Clinical Interpretation<a class="anchor" aria-label="anchor" href="#clinical-interpretation"></a>
@@ -480,13 +497,10 @@ cognition</li>
 <p>The <code><a href="../reference/eegSleepMetrics.html">eegSleepMetrics()</a></code> function computes standard
 polysomnographic measures of sleep quality and continuity.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Calculate comprehensive sleep metrics</span></span>
-<span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSleepMetrics.html">eegSleepMetrics</a></span><span class="op">(</span></span>
-<span>  <span class="va">eeg_filt</span>,</span>
-<span>  stages <span class="op">=</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span><span class="op">$</span><span class="va">sleep_stages</span>,</span>
-<span>  lights_off <span class="op">=</span> <span class="fl">0</span>,  <span class="co"># Recording start = lights off</span></span>
-<span>  lights_on <span class="op">=</span> <span class="va">n_hours</span> <span class="op">*</span> <span class="fl">3600</span>  <span class="co"># Recording end</span></span>
-<span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Calculate comprehensive sleep metrics.</span></span>
+<span><span class="co"># eegSleepMetrics() reads the staging data.frame from metadata(x)$sleep_stages</span></span>
+<span><span class="co"># (set above), so it takes only the PhysioExperiment object.</span></span>
+<span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSleepMetrics.html">eegSleepMetrics</a></span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Print standardized sleep report</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">metrics</span><span class="op">)</span></span>
@@ -533,7 +547,7 @@ sleep depth across the night.</p>
 <code class="sourceCode R"><span><span class="co"># Create a hypnogram with custom colors</span></span>
 <span><span class="fu"><a href="../reference/eegPlotHypnogram.html">eegPlotHypnogram</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_filt</span>,</span>
-<span>  stages <span class="op">=</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span><span class="op">$</span><span class="va">sleep_stages</span><span class="op">$</span><span class="va">stage_sequence</span>,</span>
+<span>  stages <span class="op">=</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span><span class="op">$</span><span class="va">sleep_stages</span>,</span>
 <span>  epoch_sec <span class="op">=</span> <span class="fl">30</span>,</span>
 <span>  colors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">"W"</span> <span class="op">=</span> <span class="st">"#FF6B6B"</span>,    <span class="co"># Red for wake</span></span>
@@ -541,25 +555,15 @@ sleep depth across the night.</p>
 <span>    <span class="st">"N2"</span> <span class="op">=</span> <span class="st">"#45B7D1"</span>,   <span class="co"># Blue for N2</span></span>
 <span>    <span class="st">"N3"</span> <span class="op">=</span> <span class="st">"#1A535C"</span>,   <span class="co"># Dark blue for N3</span></span>
 <span>    <span class="st">"REM"</span> <span class="op">=</span> <span class="st">"#FFE66D"</span>   <span class="co"># Yellow for REM</span></span>
-<span>  <span class="op">)</span>,</span>
-<span>  show_cycles <span class="op">=</span> <span class="cn">TRUE</span>  <span class="co"># Mark sleep cycles</span></span>
+<span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Overlay spindle density</span></span>
+<span><span class="co"># The hypnogram accepts a stage vector directly; spindle- or SWA-density</span></span>
+<span><span class="co"># overlays can be layered on top with custom ggplot2 geoms if desired.</span></span>
 <span><span class="fu"><a href="../reference/eegPlotHypnogram.html">eegPlotHypnogram</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_filt</span>,</span>
-<span>  stages <span class="op">=</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span><span class="op">$</span><span class="va">sleep_stages</span><span class="op">$</span><span class="va">stage_sequence</span>,</span>
-<span>  overlay <span class="op">=</span> <span class="va">spindles</span><span class="op">$</span><span class="va">timeline</span>,</span>
-<span>  overlay_label <span class="op">=</span> <span class="st">"Spindle Density"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Hypnogram with SWA</span></span>
-<span><span class="fu"><a href="../reference/eegPlotHypnogram.html">eegPlotHypnogram</a></span><span class="op">(</span></span>
-<span>  <span class="va">eeg_filt</span>,</span>
-<span>  stages <span class="op">=</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span><span class="op">$</span><span class="va">sleep_stages</span><span class="op">$</span><span class="va">stage_sequence</span>,</span>
-<span>  overlay <span class="op">=</span> <span class="va">slow_waves</span><span class="op">$</span><span class="va">swa_by_epoch</span>,</span>
-<span>  overlay_label <span class="op">=</span> <span class="st">"SWA (μV²)"</span>,</span>
-<span>  overlay_color <span class="op">=</span> <span class="st">"#FF6B6B"</span></span>
+<span>  stages <span class="op">=</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_filt</span><span class="op">)</span><span class="op">$</span><span class="va">sleep_stages</span>,</span>
+<span>  epoch_sec <span class="op">=</span> <span class="fl">30</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -570,38 +574,38 @@ sleep depth across the night.</p>
 </h3>
 <p>Here’s an integrated workflow for clinical sleep EEG analysis:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># 1. Load and preprocess data</span></span>
-<span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_eeg_sleep.html">make_eeg_sleep</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">8</span><span class="op">*</span><span class="fl">60</span><span class="op">*</span><span class="fl">60</span><span class="op">*</span><span class="fl">256</span>, n_channels <span class="op">=</span> <span class="fl">6</span>, sr <span class="op">=</span> <span class="fl">256</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># 1. Load and preprocess data (short excerpt for a fast demo)</span></span>
+<span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_eeg_sleep.html">make_eeg_sleep</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">20</span> <span class="op">*</span> <span class="fl">60</span> <span class="op">*</span> <span class="fl">256</span>, n_channels <span class="op">=</span> <span class="fl">6</span>, sr <span class="op">=</span> <span class="fl">256</span><span class="op">)</span></span>
 <span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, lowcut <span class="op">=</span> <span class="fl">0.3</span>, highcut <span class="op">=</span> <span class="fl">35</span><span class="op">)</span></span>
-<span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu">eegReReference</span><span class="op">(</span><span class="va">eeg</span>, ref_type <span class="op">=</span> <span class="st">"average"</span><span class="op">)</span></span>
+<span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegRereference.html">eegRereference</a></span><span class="op">(</span><span class="va">eeg</span>, ref_type <span class="op">=</span> <span class="st">"average"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 2. Automatic sleep staging</span></span>
 <span><span class="va">stages</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSleepStage.html">eegSleepStage</a></span><span class="op">(</span><span class="va">eeg</span>, epoch_sec <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span>
 <span><span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">sleep_stages</span> <span class="op">&lt;-</span> <span class="va">stages</span></span>
 <span></span>
-<span><span class="co"># 3. Detect sleep-specific waveforms</span></span>
+<span><span class="co"># 3. Detect sleep-specific waveforms (each returns an event data.frame)</span></span>
 <span><span class="va">spindles</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSpindleDetect.html">eegSpindleDetect</a></span><span class="op">(</span><span class="va">eeg</span>, freq_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">11</span>, <span class="fl">16</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">kcomplexes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegKcomplexDetect.html">eegKcomplexDetect</a></span><span class="op">(</span><span class="va">eeg</span>, channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"C3"</span>, <span class="st">"C4"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">slow_waves</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSlowWaveDetect.html">eegSlowWaveDetect</a></span><span class="op">(</span><span class="va">eeg</span>, channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"F3"</span>, <span class="st">"F4"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">kcomplexes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegKcomplexDetect.html">eegKcomplexDetect</a></span><span class="op">(</span><span class="va">eeg</span>, min_neg_amplitude <span class="op">=</span> <span class="fl">75</span><span class="op">)</span></span>
+<span><span class="va">slow_waves</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSlowWaveDetect.html">eegSlowWaveDetect</a></span><span class="op">(</span><span class="va">eeg</span>, freq_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">2.0</span><span class="op">)</span>, min_amplitude <span class="op">=</span> <span class="fl">75</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># 4. Compute sleep architecture metrics</span></span>
-<span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSleepMetrics.html">eegSleepMetrics</a></span><span class="op">(</span><span class="va">eeg</span>, stages <span class="op">=</span> <span class="va">stages</span><span class="op">)</span></span>
+<span><span class="co"># 4. Compute sleep architecture metrics (reads metadata$sleep_stages)</span></span>
+<span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSleepMetrics.html">eegSleepMetrics</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 5. Generate visualization</span></span>
-<span><span class="fu"><a href="../reference/eegPlotHypnogram.html">eegPlotHypnogram</a></span><span class="op">(</span><span class="va">eeg</span>, stages <span class="op">=</span> <span class="va">stages</span><span class="op">$</span><span class="va">stage_sequence</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/eegPlotHypnogram.html">eegPlotHypnogram</a></span><span class="op">(</span><span class="va">eeg</span>, stages <span class="op">=</span> <span class="va">stages</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># 6. Export comprehensive report</span></span>
 <span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  demographics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>age <span class="op">=</span> <span class="fl">35</span>, sex <span class="op">=</span> <span class="st">"M"</span><span class="op">)</span>,</span>
 <span>  sleep_metrics <span class="op">=</span> <span class="va">metrics</span>,</span>
-<span>  spindle_density <span class="op">=</span> <span class="va">spindles</span><span class="op">$</span><span class="va">density_per_channel</span>,</span>
-<span>  kcomplex_count <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">kcomplexes</span><span class="op">$</span><span class="va">events</span><span class="op">)</span>,</span>
-<span>  swa_mean <span class="op">=</span> <span class="va">slow_waves</span><span class="op">$</span><span class="va">mean_amplitude</span>,</span>
-<span>  staging_quality <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">stages</span><span class="op">$</span><span class="va">probabilities</span>, <span class="fl">1</span>, <span class="va">max</span><span class="op">)</span><span class="op">)</span></span>
+<span>  spindle_count <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">spindles</span><span class="op">)</span>,</span>
+<span>  kcomplex_count <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">kcomplexes</span><span class="op">)</span>,</span>
+<span>  swa_mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">slow_waves</span><span class="op">$</span><span class="va">negative_peak</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  n_epochs_scored <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">stages</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Save report for clinical review</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">report</span>, <span class="st">"sleep_study_report.rds"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="va">report</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"sleep_study_report.rds"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="abnormalities-to-look-for">Abnormalities to Look For<a class="anchor" aria-label="anchor" href="#abnormalities-to-look-for"></a>

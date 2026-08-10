@@ -35,6 +35,7 @@ Riemannian geometry) 3. Classification (LDA, SVM with cross-validation)
 ``` r
 
 library(PhysioEEG)
+library(SummarizedExperiment)
 library(ggplot2)
 library(dplyr)
 ```
@@ -45,20 +46,24 @@ hand):
 ``` r
 
 # Generate 80 trials: 40 left hand, 40 right hand
+# make_eeg_bci() creates n_trials PER class, so n_trials = 40 yields 80 total
 # 16 channels, 250 Hz sampling rate, 4-second trials
 eeg <- make_eeg_bci(
-  n_trials = 80,
+  n_trials = 40,
   n_channels = 16,
   sr = 250,
   trial_sec = 4
 )
+
+# Trial condition labels ("left"/"right") are stored in metadata
+condition <- metadata(eeg)$labels
 
 # Examine data structure
 eeg
 dim(assay(eeg, "raw"))  # 1000 timepoints x 16 channels x 80 trials
 
 # Check trial labels
-table(eeg$condition)  # Should show balanced left/right classes
+table(condition)  # Should show balanced left/right classes
 ```
 
 ## Motor Imagery Analysis
@@ -71,59 +76,69 @@ function computes power changes in motor-related frequency bands.
 ``` r
 
 # Compute ERD/ERS in mu and beta bands
-# Focus on sensorimotor channels (C3, Cz, C4)
 eeg <- eegMotorImagery(
   eeg,
   bands = list(
     mu = c(8, 12),
     beta = c(13, 30)
   ),
-  laterality_channels = c("C3", "C4"),
   assay_name = "raw"
 )
 
-# ERD/ERS results stored in metadata
-erd_results <- metadata(eeg)$motor_imagery
+# ERD/ERS results stored in metadata as an n_trials x (n_channels * n_bands)
+# matrix with column names "<channel>_<band>" (e.g. "C3_mu")
+erd_results <- metadata(eeg)$erd_ers
 
-# Examine mu-band power changes
-mu_power <- erd_results$mu
+# Examine mu-band power changes (one column per channel)
+mu_cols <- grep("_mu$", colnames(erd_results))
+mu_power <- erd_results[, mu_cols, drop = FALSE]
 head(mu_power)
 
-# Compute laterality index: (C4 - C3) / (C4 + C3)
-# Positive values indicate right hemisphere dominance (left hand imagery)
-# Negative values indicate left hemisphere dominance (right hand imagery)
-laterality <- erd_results$laterality_index
+# Laterality index LI = (R - L) / (|R| + |L|) from C4 (right) vs C3 (left).
+# Positive values indicate right-hemisphere dominance (left hand imagery),
+# negative values indicate left-hemisphere dominance (right hand imagery).
+lat <- eegLateralization(
+  eeg,
+  left_ch = "C3",
+  right_ch = "C4",
+  band = c(8, 12),
+  method = "power"
+)
+laterality <- lat$per_trial   # per-trial LI (n_trials x 1)
+lat$summary                   # biomarker summary (mean LI with CI)
 ```
 
 Visualize ERD/ERS patterns:
 
 ``` r
 
-# Plot time-course of ERD for left vs. right conditions
+# Plot per-channel mu-band ERD/ERS for left vs. right conditions
 library(ggplot2)
 
-# Average mu-band power for each condition
-mu_left <- mu_power[eeg$condition == "left", ]
-mu_right <- mu_power[eeg$condition == "right", ]
+# Channel labels for the mu-band columns
+ch_names <- sub("_mu$", "", colnames(mu_power))
 
-# Create data frame for plotting
-time_points <- seq(0, 4, length.out = ncol(mu_left))
+# Average mu-band power change per channel for each condition
+mu_left <- colMeans(mu_power[condition == "left", , drop = FALSE])
+mu_right <- colMeans(mu_power[condition == "right", , drop = FALSE])
+
 df_plot <- data.frame(
-  time = rep(time_points, 2),
-  power = c(colMeans(mu_left), colMeans(mu_right)),
-  condition = rep(c("Left", "Right"), each = length(time_points))
+  channel = factor(rep(ch_names, 2), levels = ch_names),
+  power = c(mu_left, mu_right),
+  condition = rep(c("Left", "Right"), each = length(ch_names))
 )
 
-ggplot(df_plot, aes(x = time, y = power, color = condition)) +
-  geom_line(linewidth = 1) +
+ggplot(df_plot, aes(x = channel, y = power, fill = condition)) +
+  geom_col(position = "dodge") +
   geom_hline(yintercept = 0, linetype = "dashed") +
   labs(
     title = "Motor Imagery ERD/ERS (Mu Band)",
-    x = "Time (s)",
+    x = "Channel",
     y = "Power Change (%)",
-    color = "Condition"
+    fill = "Condition"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 ## Common Spatial Patterns (CSP)
@@ -134,24 +149,33 @@ class has high variance and the other has low variance.
 
 ``` r
 
-# Apply bandpass filter to isolate mu+beta band
-eeg <- eegFilter(eeg, lowcut = 8, highcut = 30, assay_name = "raw")
+# Apply bandpass filter to isolate the mu+beta band.
+# eegFilter() operates on continuous (2D) data, so band-pass each epoch's
+# channels (8-30 Hz, zero-phase Butterworth) into a new "filtered" assay.
+sr <- samplingRate(eeg)
+bf <- signal::butter(4, c(8, 30) / (sr / 2), type = "pass")
+raw3d <- assay(eeg, "raw")
+assay(eeg, "filtered") <- array(
+  apply(raw3d, c(2, 3), function(sig) signal::filtfilt(bf, sig)),
+  dim = dim(raw3d)
+)
 
 # Extract CSP features
-# Typically use 3-6 components (first and last pairs)
+# n_filters = 3 selects the 3 top + 3 bottom eigenvectors = 6 components
 eeg <- eegCSP(
   eeg,
-  labels = eeg$condition,
-  n_components = 6,
+  labels = condition,
+  n_filters = 3,
   assay_name = "filtered"
 )
 
-# CSP spatial filters stored in metadata
-csp_filters <- metadata(eeg)$csp$filters
+# CSP spatial filters stored in metadata as (n_components x n_channels);
+# transpose to view as channels x components
+csp_filters <- t(metadata(eeg)$csp$filters)
 dim(csp_filters)  # 16 channels x 6 components
 
-# Projected data (features for classification)
-csp_features <- metadata(eeg)$csp$features
+# Projected data (log-variance features for classification)
+csp_features <- metadata(eeg)$csp_features
 dim(csp_features)  # 80 trials x 6 features
 ```
 
@@ -164,7 +188,7 @@ Understanding CSP components:
 
 # Visualize first CSP filter (most discriminative for left)
 filter_1 <- csp_filters[, 1]
-names(filter_1) <- colnames(eeg)
+names(filter_1) <- colData(eeg)$label
 
 # Create topographic visualization data
 topo_data <- data.frame(
@@ -176,14 +200,14 @@ print(topo_data)
 
 # Examine CSP feature distributions
 boxplot(
-  csp_features[, 1] ~ eeg$condition,
+  csp_features[, 1] ~ condition,
   main = "CSP Component 1 (Left-specific)",
   xlab = "Condition",
   ylab = "Log Variance"
 )
 
 boxplot(
-  csp_features[, 6] ~ eeg$condition,
+  csp_features[, 6] ~ condition,
   main = "CSP Component 6 (Right-specific)",
   xlab = "Condition",
   ylab = "Log Variance"
@@ -199,15 +223,18 @@ combined for robust classification.
 
 ``` r
 
-# Extract features using multiple methods
-features_all <- eegBCIfeatures(
-  eeg,
-  methods = c("bandpower", "csp", "riemannian"),
-  labels = eeg$condition,
-  assay_name = "filtered"
+# eegBCIfeatures() extracts one method per call and returns a matrix.
+# Collect the three feature families into a named list.
+features_all <- list(
+  bandpower  = eegBCIfeatures(eeg, method = "bandpower",  labels = condition,
+                              assay_name = "filtered"),
+  csp        = eegBCIfeatures(eeg, method = "csp",        labels = condition,
+                              assay_name = "filtered"),
+  riemannian = eegBCIfeatures(eeg, method = "riemannian", labels = condition,
+                              assay_name = "filtered")
 )
 
-# Features is a list with each method's output
+# Each list element is a feature matrix
 names(features_all)
 
 # Bandpower features: power in specified frequency bands per channel
@@ -227,23 +254,22 @@ Bandpower-specific feature extraction:
 
 ``` r
 
-# Extract power in multiple frequency bands
+# Extract power in the default mu/beta frequency bands
 features_bp <- eegBCIfeatures(
   eeg,
-  methods = "bandpower",
-  labels = eeg$condition,
+  method = "bandpower",
+  labels = condition,
   assay_name = "raw"
 )
 
-# Typically computed for:
-# - Delta (1-4 Hz), Theta (4-8 Hz), Alpha (8-13 Hz)
-# - Beta (13-30 Hz), Gamma (30-50 Hz)
+# Bandpower features are log band power per channel and band
+# (default bands: mu 8-13 Hz, beta 13-30 Hz)
 
 # Normalize features (z-score per feature dimension)
-features_norm <- scale(features_bp$bandpower)
+features_norm <- scale(features_bp)
 
 # Examine feature importance via correlation with labels
-label_numeric <- ifelse(eeg$condition == "left", 0, 1)
+label_numeric <- ifelse(condition == "left", 0, 1)
 correlations <- cor(features_norm, label_numeric)
 head(sort(abs(correlations), decreasing = TRUE))
 ```
@@ -257,8 +283,8 @@ Riemannian geometry features:
 
 features_riem <- eegBCIfeatures(
   eeg,
-  methods = "riemannian",
-  labels = eeg$condition,
+  method = "riemannian",
+  labels = condition,
   assay_name = "filtered"
 )
 
@@ -266,7 +292,7 @@ features_riem <- eegBCIfeatures(
 # for BCI classification due to better handling of
 # non-Euclidean structure of covariance matrices
 
-riem_data <- features_riem$riemannian
+riem_data <- features_riem
 dim(riem_data)
 ```
 
@@ -277,26 +303,28 @@ target frequency in the EEG spectrum.
 
 ``` r
 
-# Detect SSVEP at 12 Hz (common flicker frequency)
-# Include 2nd and 3rd harmonics (24 Hz, 36 Hz)
+# Detect SSVEP across candidate flicker frequencies using CCA.
+# Each candidate uses 3 harmonics in its reference signals.
 ssvep_results <- eegSSVEP(
   eeg,
-  target_freq = 12,
-  harmonics = 3,
+  frequencies = c(12, 15, 20),
+  n_harmonics = 3,
   assay_name = "raw"
 )
 
-# Results contain SNR at target frequency and harmonics
-snr_fundamental <- ssvep_results$snr[, 1]  # 12 Hz
-snr_2nd_harmonic <- ssvep_results$snr[, 2]  # 24 Hz
-snr_3rd_harmonic <- ssvep_results$snr[, 3]  # 36 Hz
+# Results: one row per candidate frequency with CCA correlation and SNR
+ssvep_results
 
-# High SNR indicates strong SSVEP response
-mean(snr_fundamental)
-sd(snr_fundamental)
+# SNR at each candidate frequency (named by frequency)
+snr_values <- ssvep_results$snr
+names(snr_values) <- ssvep_results$frequency
 
-# Binary classification: SSVEP present vs. absent
-ssvep_detected <- snr_fundamental > 3  # Threshold at SNR = 3
+# High SNR indicates a strong SSVEP response
+mean(snr_values)
+sd(snr_values)
+
+# Binary detection: SSVEP present vs. absent (threshold at SNR = 3)
+ssvep_detected <- snr_values > 3
 table(ssvep_detected)
 ```
 
@@ -304,19 +332,15 @@ Multi-frequency SSVEP (for multi-class BCI):
 
 ``` r
 
-# In real multi-class SSVEP BCI, test multiple target frequencies
+# In a multi-class SSVEP BCI, test several candidate target frequencies at once
 target_freqs <- c(7, 9, 11, 13)  # 4-class BCI
 
-ssvep_all <- lapply(target_freqs, function(freq) {
-  eegSSVEP(eeg, target_freq = freq, harmonics = 2, assay_name = "raw")
-})
+ssvep_all <- eegSSVEP(eeg, frequencies = target_freqs, n_harmonics = 2,
+                      assay_name = "raw")
 
-# For each trial, select frequency with highest SNR
-snr_matrix <- sapply(ssvep_all, function(x) x$snr[, 1])
-predicted_class <- apply(snr_matrix, 1, which.max)
-
-# predicted_class now contains 1-4 indicating detected frequency
-table(predicted_class)
+# The candidate frequency with the highest SNR is the detected class
+predicted_freq <- ssvep_all$frequency[which.max(ssvep_all$snr)]
+predicted_freq
 ```
 
 ## Classification
@@ -328,20 +352,36 @@ generalization performance.
 
 ``` r
 
+# eegBCIclassify() returns a per-trial data.frame of predictions
+# (columns: trial, predicted_class, confidence, true_class). Derive
+# accuracy, Cohen's kappa, and the confusion matrix from those predictions.
+bci_metrics <- function(res) {
+  lv <- sort(unique(c(res$true_class, res$predicted_class)))
+  cm <- table(
+    true = factor(res$true_class, levels = lv),
+    predicted = factor(res$predicted_class, levels = lv)
+  )
+  acc <- sum(diag(cm)) / sum(cm)
+  pe <- sum(rowSums(cm) * colSums(cm)) / sum(cm)^2
+  kappa <- if (pe < 1) (acc - pe) / (1 - pe) else NA_real_
+  list(accuracy = acc, kappa = kappa, confusion_matrix = cm)
+}
+
 # Classify using CSP features and LDA
 # 5-fold cross-validation for robust performance estimation
 results_lda <- eegBCIclassify(
   eeg,
   features = csp_features,
-  labels = eeg$condition,
+  labels = condition,
   method = "lda",
   cv_folds = 5
 )
 
 # Extract performance metrics
-accuracy_lda <- results_lda$accuracy
-kappa_lda <- results_lda$kappa
-confusion_lda <- results_lda$confusion_matrix
+m_lda <- bci_metrics(results_lda)
+accuracy_lda <- m_lda$accuracy
+kappa_lda <- m_lda$kappa
+confusion_lda <- m_lda$confusion_matrix
 
 cat(sprintf("LDA Accuracy: %.2f%%\n", accuracy_lda * 100))
 cat(sprintf("Cohen's Kappa: %.3f\n", kappa_lda))
@@ -356,25 +396,28 @@ Compare multiple classifiers:
 results_lda <- eegBCIclassify(
   eeg,
   features = csp_features,
-  labels = eeg$condition,
+  labels = condition,
   method = "lda",
   cv_folds = 10
 )
 
-# SVM: Support Vector Machine (non-linear decision boundaries)
-results_svm <- eegBCIclassify(
+# Shrinkage LDA: regularized covariance estimate, robust for high-dimensional
+# feature spaces with limited trials
+results_slda <- eegBCIclassify(
   eeg,
   features = csp_features,
-  labels = eeg$condition,
-  method = "svm",
+  labels = condition,
+  method = "shrinkage_lda",
   cv_folds = 10
 )
 
 # Compare performance
+m_lda <- bci_metrics(results_lda)
+m_slda <- bci_metrics(results_slda)
 comparison <- data.frame(
-  Method = c("LDA", "SVM"),
-  Accuracy = c(results_lda$accuracy, results_svm$accuracy),
-  Kappa = c(results_lda$kappa, results_svm$kappa)
+  Method = c("LDA", "Shrinkage-LDA"),
+  Accuracy = c(m_lda$accuracy, m_slda$accuracy),
+  Kappa = c(m_lda$kappa, m_slda$kappa)
 )
 
 print(comparison)
@@ -386,31 +429,31 @@ Feature comparison for classification:
 
 # Classify using different feature sets
 # 1. CSP features
-acc_csp <- eegBCIclassify(
+acc_csp <- bci_metrics(eegBCIclassify(
   eeg,
   features = features_all$csp,
-  labels = eeg$condition,
+  labels = condition,
   method = "lda",
   cv_folds = 5
-)$accuracy
+))$accuracy
 
 # 2. Bandpower features
-acc_bp <- eegBCIclassify(
+acc_bp <- bci_metrics(eegBCIclassify(
   eeg,
   features = features_all$bandpower,
-  labels = eeg$condition,
+  labels = condition,
   method = "lda",
   cv_folds = 5
-)$accuracy
+))$accuracy
 
 # 3. Riemannian features
-acc_riem <- eegBCIclassify(
+acc_riem <- bci_metrics(eegBCIclassify(
   eeg,
   features = features_all$riemannian,
-  labels = eeg$condition,
+  labels = condition,
   method = "lda",
   cv_folds = 5
-)$accuracy
+))$accuracy
 
 # Compare feature sets
 feature_comparison <- data.frame(
@@ -434,17 +477,18 @@ two-class problems, chance level is 50%.
 results <- eegBCIclassify(
   eeg,
   features = csp_features,
-  labels = eeg$condition,
+  labels = condition,
   method = "lda",
   cv_folds = 5
 )
 
-overall_acc <- results$accuracy
+m <- bci_metrics(results)
+overall_acc <- m$accuracy
 
 # Per-class accuracy (sensitivity/recall)
-conf_mat <- results$confusion_matrix
-class_acc_left <- conf_mat[1, 1] / sum(conf_mat[1, ])
-class_acc_right <- conf_mat[2, 2] / sum(conf_mat[2, ])
+conf_mat <- m$confusion_matrix
+class_acc_left <- conf_mat["left", "left"] / sum(conf_mat["left", ])
+class_acc_right <- conf_mat["right", "right"] / sum(conf_mat["right", ])
 
 cat(sprintf("Overall Accuracy: %.2f%%\n", overall_acc * 100))
 cat(sprintf("Left Hand Accuracy: %.2f%%\n", class_acc_left * 100))
@@ -458,7 +502,7 @@ accuracy for imbalanced datasets.
 
 ``` r
 
-kappa <- results$kappa
+kappa <- m$kappa
 
 # Interpretation:
 # < 0.00: Poor agreement (worse than chance)
@@ -547,7 +591,7 @@ Proper cross-validation is critical for reliable performance estimation.
 cv5 <- eegBCIclassify(
   eeg,
   features = csp_features,
-  labels = eeg$condition,
+  labels = condition,
   method = "lda",
   cv_folds = 5
 )
@@ -556,7 +600,7 @@ cv5 <- eegBCIclassify(
 cv10 <- eegBCIclassify(
   eeg,
   features = csp_features,
-  labels = eeg$condition,
+  labels = condition,
   method = "lda",
   cv_folds = 10
 )
@@ -566,15 +610,17 @@ cv10 <- eegBCIclassify(
 cv_loo <- eegBCIclassify(
   eeg,
   features = csp_features,
-  labels = eeg$condition,
+  labels = condition,
   method = "lda",
   cv_folds = nrow(csp_features)  # 80 folds = leave-one-out
 )
 
 cv_comparison <- data.frame(
   Method = c("5-Fold", "10-Fold", "Leave-One-Out"),
-  Accuracy = c(cv5$accuracy, cv10$accuracy, cv_loo$accuracy),
-  Kappa = c(cv5$kappa, cv10$kappa, cv_loo$kappa)
+  Accuracy = c(bci_metrics(cv5)$accuracy, bci_metrics(cv10)$accuracy,
+               bci_metrics(cv_loo)$accuracy),
+  Kappa = c(bci_metrics(cv5)$kappa, bci_metrics(cv10)$kappa,
+            bci_metrics(cv_loo)$kappa)
 )
 
 print(cv_comparison)

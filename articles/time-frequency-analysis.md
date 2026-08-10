@@ -32,18 +32,27 @@ resolution.
 ``` r
 
 library(PhysioEEG)
+library(SummarizedExperiment)
 
-# Create example EEG data: 64 channels, 1000 ms epochs, 100 trials, 500 Hz sampling
-eeg <- make_eeg_erp(
-  n_channels = 64,
-  n_timepoints = 500,
-  n_trials = 100,
-  sampling_rate = 500
+# The single-signal transforms (Morlet, STFT, multitaper) operate on 2D
+# continuous data (time x channels); ERSP and ITC operate on 3D epoched data
+# (time x channels x trials) and compute the wavelet internally.
+
+# 2D continuous data (19-channel 10-20 layout, 4 s at 500 Hz)
+eeg <- make_eeg(n_channels = 19, n_time = 2000, sr = 500)
+
+# 3D epoched ERP data (40 trials of 1 s) for ERSP and ITC
+eeg_epochs <- make_eeg_erp(
+  n_channels = 19,
+  n_epochs = 40,
+  sr = 500,
+  epoch_sec = 1.0
 )
 
 # Inspect dimensions
-dim(assay(eeg, "raw"))  # channels x timepoints x trials
-samplingRate(eeg)       # 500 Hz
+dim(assay(eeg, "raw"))         # timepoints x channels (continuous)
+dim(assay(eeg_epochs, "raw"))  # timepoints x channels x trials (epoched)
+samplingRate(eeg)              # 500 Hz
 ```
 
 ## Morlet Wavelet Transform
@@ -68,27 +77,28 @@ frequencies, yielding both power and phase information.
 
 ``` r
 
-# Morlet wavelet transform with frequency-dependent resolution
-# Good for capturing both slow (theta) and fast (gamma) dynamics
-eeg <- eegMorletWavelet(
-  eeg,
-  frequencies = seq(4, 40, by = 2),    # 4-40 Hz in 2 Hz steps
-  n_cycles = seq(4, 40, by = 2) / 3,   # Frequency-dependent: f/3 cycles
-  assay_name = "raw",
-  output_assay = "morlet_power"
-)
-
-# Output dimensions: channels x frequencies x timepoints x trials
-dim(assay(eeg, "morlet_power"))
-
-# For detailed alpha band analysis with higher frequency resolution
+# Detailed alpha-band analysis with higher frequency resolution
 eeg <- eegMorletWavelet(
   eeg,
   frequencies = seq(8, 13, by = 0.5),  # Fine-grained alpha range
-  n_cycles = 7,                         # Fixed 7 cycles for good frequency precision
+  n_cycles = 7,                         # More cycles for sharper frequency precision
   assay_name = "raw",
   output_assay = "alpha_power"
 )
+
+# Broad-band Morlet transform (theta-gamma). eegMorletWavelet() uses a fixed
+# (scalar) number of cycles across frequencies. Stored under the default name
+# "wavelet_power", this is the product visualized in the spectrogram section.
+eeg <- eegMorletWavelet(
+  eeg,
+  frequencies = seq(4, 40, by = 2),    # 4-40 Hz in 2 Hz steps
+  n_cycles = 5,                         # good time-frequency compromise
+  assay_name = "raw",
+  output_assay = "wavelet_power"
+)
+
+# Output (stored in metadata): timepoints x frequencies x channels
+dim(metadata(eeg)$wavelet_power)
 ```
 
 **When to use Morlet wavelets:**
@@ -123,20 +133,20 @@ across all frequencies, determined by the window size.
 # Standard STFT with 250 ms windows (good balance for cognitive EEG)
 eeg <- eegSTFT(
   eeg,
-  window_size = 125,      # 250 ms at 500 Hz = 125 samples
+  window_sec = 0.25,      # 250 ms window
   overlap = 0.75,         # 75% overlap for smooth representation
   window_type = "hanning",
   assay_name = "raw",
   output_assay = "stft_power"
 )
 
-# Output: channels x frequencies x time_windows x trials
-dim(assay(eeg, "stft_power"))
+# Output (stored in metadata): timepoints x frequencies x channels
+dim(metadata(eeg)$stft_power)
 
 # For high temporal precision (e.g., rapid stimulus changes)
 eeg <- eegSTFT(
   eeg,
-  window_size = 50,       # 100 ms windows
+  window_sec = 0.1,       # 100 ms windows
   overlap = 0.50,         # 50% overlap
   window_type = "hanning",
   assay_name = "raw",
@@ -146,7 +156,7 @@ eeg <- eegSTFT(
 # For high frequency resolution (e.g., resting-state narrow-band analysis)
 eeg <- eegSTFT(
   eeg,
-  window_size = 500,      # 1000 ms windows
+  window_sec = 1.0,       # 1000 ms windows
   overlap = 0.90,         # High overlap to maintain some temporal detail
   window_type = "hamming",
   assay_name = "raw",
@@ -192,8 +202,8 @@ eeg <- eegMultitaper(
   output_assay = "multitaper_power"
 )
 
-# Output: channels x frequencies x timepoints x trials
-dim(assay(eeg, "multitaper_power"))
+# Output (stored in metadata): timepoints x frequencies x channels
+dim(metadata(eeg)$multitaper_power)
 
 # For high-frequency resolution (narrow-band analysis)
 eeg <- eegMultitaper(
@@ -232,25 +242,25 @@ strictly phase-locked to the stimulus.
 
 ``` r
 
-# Compute ERSP from Morlet wavelet power
-# Baseline: -200 to 0 ms pre-stimulus
-eeg <- eegERSP(
-  eeg,
-  baseline = c(-200, 0),  # Baseline time window in ms
-  assay_name = "morlet_power"
+# eegERSP() takes the 3D epoched data and computes the Morlet wavelet and
+# baseline normalization internally. The baseline window is given in samples.
+freqs <- seq(4, 40, by = 2)
+eeg_epochs <- eegERSP(
+  eeg_epochs,
+  baseline = c(1, 50),   # baseline = first 50 samples (100 ms) of each epoch
+  frequencies = freqs,
+  n_cycles = 5,
+  assay_name = "raw"
 )
 
-# ERSP stored in metadata
-ersp_data <- metadata(eeg)$ERSP
-dim(ersp_data)  # channels x frequencies x timepoints x trials
-
-# Average across trials to see mean ERSP
-mean_ersp <- apply(ersp_data, c(1, 2, 3), mean)
-dim(mean_ersp)  # channels x frequencies x timepoints
+# ERSP stored in metadata (already averaged across trials)
+ersp_data <- metadata(eeg_epochs)$ersp_data
+dim(ersp_data)  # timepoints x frequencies x channels
 
 # Extract single-channel ERSP for visualization
-pz_ersp <- mean_ersp[channelIndex(eeg, "Pz"), , ]
-dim(pz_ersp)  # frequencies x timepoints
+pz_idx <- match("Pz", colData(eeg_epochs)$label)
+pz_ersp <- ersp_data[, , pz_idx]
+dim(pz_ersp)  # timepoints x frequencies
 ```
 
 **Interpreting ERSP:**
@@ -284,25 +294,29 @@ phase-locked (evoked) oscillatory activity.
 
 ``` r
 
-# Compute ITC from Morlet wavelet transform
-# Uses complex wavelet coefficients to assess phase consistency
-eeg <- eegITC(
-  eeg,
-  assay_name = "morlet_power"  # Should be complex wavelet output
+# eegITC() computes the complex Morlet transform per trial internally and
+# measures phase consistency across trials from the 3D epoched data.
+eeg_epochs <- eegITC(
+  eeg_epochs,
+  frequencies = freqs,
+  n_cycles = 5,
+  assay_name = "raw"
 )
 
 # ITC stored in metadata
-itc_data <- metadata(eeg)$ITC
-dim(itc_data)  # channels x frequencies x timepoints
+itc_data <- metadata(eeg_epochs)$itc_data
+dim(itc_data)  # timepoints x frequencies x channels
 
-# Extract channel-specific ITC
-fcz_itc <- itc_data[channelIndex(eeg, "FCz"), , ]
-dim(fcz_itc)  # frequencies x timepoints
+# Extract channel-specific ITC (Cz is a central fronto-central lead)
+cz_idx <- match("Cz", colData(eeg_epochs)$label)
+cz_itc <- itc_data[, , cz_idx]
+dim(cz_itc)  # timepoints x frequencies
 
-# High ITC at low frequencies captures ERP phase-locking
-# Check theta band (4-8 Hz) ITC time course
-theta_itc <- apply(fcz_itc[4:8, ], 2, mean)
-plot(theta_itc, type = "l", xlab = "Time (ms)", ylab = "ITC")
+# High ITC at low frequencies captures ERP phase-locking.
+# Theta-band (4-8 Hz) ITC time course:
+theta_cols <- which(freqs >= 4 & freqs <= 8)
+theta_itc <- rowMeans(cz_itc[, theta_cols, drop = FALSE])
+plot(theta_itc, type = "l", xlab = "Time (samples)", ylab = "ITC")
 ```
 
 **Interpreting ITC:**
@@ -326,37 +340,37 @@ spectrogram plotting with sensible defaults.
 
 ``` r
 
-# Plot ERSP spectrogram for channel Pz
+# Plot the Morlet power spectrogram for channel Pz
 eegPlotSpectrogram(
   eeg,
   channel = "Pz",
   freq_range = c(4, 40),      # Focus on theta-gamma range
-  time_range = c(-200, 800),  # Pre-stimulus to 800 ms post-stimulus
-  log_power = FALSE,          # ERSP already in dB
-  palette = "RdBu",           # Red-blue diverging palette (blue=ERD, red=ERS)
-  assay_name = "morlet_power"
+  time_range = NULL,          # full time range (time axis is in seconds)
+  log_power = TRUE,           # convert power to dB scale
+  palette = "viridis",
+  assay_name = "wavelet_power"
 )
 
-# Plot ITC spectrogram
+# Plot the spectrogram for a central lead (Cz)
 eegPlotSpectrogram(
   eeg,
-  channel = "FCz",
+  channel = "Cz",
   freq_range = c(4, 30),
-  time_range = NULL,          # Use full time range
-  log_power = FALSE,
-  palette = "viridis",        # Sequential palette for ITC (0 to 1)
-  assay_name = "morlet_power"
+  time_range = NULL,
+  log_power = TRUE,
+  palette = "viridis",
+  assay_name = "wavelet_power"
 )
 
-# Plot raw power with log scaling
+# Zoom into the alpha band for an occipital channel
 eegPlotSpectrogram(
   eeg,
   channel = "O1",
   freq_range = c(8, 13),      # Alpha band detail
-  time_range = c(0, 500),
+  time_range = NULL,
   log_power = TRUE,           # Convert to dB scale
   palette = "magma",
-  assay_name = "morlet_power"
+  assay_name = "wavelet_power"
 )
 ```
 

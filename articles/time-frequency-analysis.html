@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,7 @@
                         <h4 data-toc-skip class="author">PhysioEEG
 Development Team</h4>
             
-            <h4 data-toc-skip class="date">2026-08-09</h4>
+            <h4 data-toc-skip class="date">2026-08-10</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/vignettes/time-frequency-analysis.Rmd" class="external-link"><code>vignettes/time-frequency-analysis.Rmd</code></a></small>
       <div class="d-none name"><code>time-frequency-analysis.Rmd</code></div>
@@ -134,18 +134,27 @@ resolution.</p>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/x-biosignal/PhysioEEG" class="external-link">PhysioEEG</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment" class="external-link">SummarizedExperiment</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Create example EEG data: 64 channels, 1000 ms epochs, 100 trials, 500 Hz sampling</span></span>
-<span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_eeg_erp.html">make_eeg_erp</a></span><span class="op">(</span></span>
-<span>  n_channels <span class="op">=</span> <span class="fl">64</span>,</span>
-<span>  n_timepoints <span class="op">=</span> <span class="fl">500</span>,</span>
-<span>  n_trials <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>  sampling_rate <span class="op">=</span> <span class="fl">500</span></span>
+<span><span class="co"># The single-signal transforms (Morlet, STFT, multitaper) operate on 2D</span></span>
+<span><span class="co"># continuous data (time x channels); ERSP and ITC operate on 3D epoched data</span></span>
+<span><span class="co"># (time x channels x trials) and compute the wavelet internally.</span></span>
+<span></span>
+<span><span class="co"># 2D continuous data (19-channel 10-20 layout, 4 s at 500 Hz)</span></span>
+<span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_eeg.html">make_eeg</a></span><span class="op">(</span>n_channels <span class="op">=</span> <span class="fl">19</span>, n_time <span class="op">=</span> <span class="fl">2000</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 3D epoched ERP data (40 trials of 1 s) for ERSP and ITC</span></span>
+<span><span class="va">eeg_epochs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_eeg_erp.html">make_eeg_erp</a></span><span class="op">(</span></span>
+<span>  n_channels <span class="op">=</span> <span class="fl">19</span>,</span>
+<span>  n_epochs <span class="op">=</span> <span class="fl">40</span>,</span>
+<span>  sr <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  epoch_sec <span class="op">=</span> <span class="fl">1.0</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Inspect dimensions</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">assay</span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"raw"</span><span class="op">)</span><span class="op">)</span>  <span class="co"># channels x timepoints x trials</span></span>
-<span><span class="fu"><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/samplingRate.html" class="external-link">samplingRate</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span>       <span class="co"># 500 Hz</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"raw"</span><span class="op">)</span><span class="op">)</span>         <span class="co"># timepoints x channels (continuous)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">eeg_epochs</span>, <span class="st">"raw"</span><span class="op">)</span><span class="op">)</span>  <span class="co"># timepoints x channels x trials (epoched)</span></span>
+<span><span class="fu"><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/samplingRate.html" class="external-link">samplingRate</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span>              <span class="co"># 500 Hz</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="morlet-wavelet-transform">Morlet Wavelet Transform<a class="anchor" aria-label="anchor" href="#morlet-wavelet-transform"></a>
@@ -171,27 +180,28 @@ compromise is to use frequency-dependent cycles:
 cycles).</li>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Morlet wavelet transform with frequency-dependent resolution</span></span>
-<span><span class="co"># Good for capturing both slow (theta) and fast (gamma) dynamics</span></span>
-<span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegMorletWavelet.html">eegMorletWavelet</a></span><span class="op">(</span></span>
-<span>  <span class="va">eeg</span>,</span>
-<span>  frequencies <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">40</span>, by <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,    <span class="co"># 4-40 Hz in 2 Hz steps</span></span>
-<span>  n_cycles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">40</span>, by <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">/</span> <span class="fl">3</span>,   <span class="co"># Frequency-dependent: f/3 cycles</span></span>
-<span>  assay_name <span class="op">=</span> <span class="st">"raw"</span>,</span>
-<span>  output_assay <span class="op">=</span> <span class="st">"morlet_power"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Output dimensions: channels x frequencies x timepoints x trials</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">assay</span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"morlet_power"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># For detailed alpha band analysis with higher frequency resolution</span></span>
+<code class="sourceCode R"><span><span class="co"># Detailed alpha-band analysis with higher frequency resolution</span></span>
 <span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegMorletWavelet.html">eegMorletWavelet</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  frequencies <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">13</span>, by <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,  <span class="co"># Fine-grained alpha range</span></span>
-<span>  n_cycles <span class="op">=</span> <span class="fl">7</span>,                         <span class="co"># Fixed 7 cycles for good frequency precision</span></span>
+<span>  n_cycles <span class="op">=</span> <span class="fl">7</span>,                         <span class="co"># More cycles for sharper frequency precision</span></span>
 <span>  assay_name <span class="op">=</span> <span class="st">"raw"</span>,</span>
 <span>  output_assay <span class="op">=</span> <span class="st">"alpha_power"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Broad-band Morlet transform (theta-gamma). eegMorletWavelet() uses a fixed</span></span>
+<span><span class="co"># (scalar) number of cycles across frequencies. Stored under the default name</span></span>
+<span><span class="co"># "wavelet_power", this is the product visualized in the spectrogram section.</span></span>
+<span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegMorletWavelet.html">eegMorletWavelet</a></span><span class="op">(</span></span>
+<span>  <span class="va">eeg</span>,</span>
+<span>  frequencies <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">40</span>, by <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,    <span class="co"># 4-40 Hz in 2 Hz steps</span></span>
+<span>  n_cycles <span class="op">=</span> <span class="fl">5</span>,                         <span class="co"># good time-frequency compromise</span></span>
+<span>  assay_name <span class="op">=</span> <span class="st">"raw"</span>,</span>
+<span>  output_assay <span class="op">=</span> <span class="st">"wavelet_power"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Output (stored in metadata): timepoints x frequencies x channels</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">wavelet_power</span><span class="op">)</span></span></code></pre></div>
 <p><strong>When to use Morlet wavelets:</strong></p>
 <ul>
 <li>Default choice for most EEG time-frequency analysis</li>
@@ -228,20 +238,20 @@ frequency resolution but more leakage.</li>
 <code class="sourceCode R"><span><span class="co"># Standard STFT with 250 ms windows (good balance for cognitive EEG)</span></span>
 <span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSTFT.html">eegSTFT</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
-<span>  window_size <span class="op">=</span> <span class="fl">125</span>,      <span class="co"># 250 ms at 500 Hz = 125 samples</span></span>
+<span>  window_sec <span class="op">=</span> <span class="fl">0.25</span>,      <span class="co"># 250 ms window</span></span>
 <span>  overlap <span class="op">=</span> <span class="fl">0.75</span>,         <span class="co"># 75% overlap for smooth representation</span></span>
 <span>  window_type <span class="op">=</span> <span class="st">"hanning"</span>,</span>
 <span>  assay_name <span class="op">=</span> <span class="st">"raw"</span>,</span>
 <span>  output_assay <span class="op">=</span> <span class="st">"stft_power"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Output: channels x frequencies x time_windows x trials</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">assay</span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"stft_power"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Output (stored in metadata): timepoints x frequencies x channels</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">stft_power</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># For high temporal precision (e.g., rapid stimulus changes)</span></span>
 <span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSTFT.html">eegSTFT</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
-<span>  window_size <span class="op">=</span> <span class="fl">50</span>,       <span class="co"># 100 ms windows</span></span>
+<span>  window_sec <span class="op">=</span> <span class="fl">0.1</span>,       <span class="co"># 100 ms windows</span></span>
 <span>  overlap <span class="op">=</span> <span class="fl">0.50</span>,         <span class="co"># 50% overlap</span></span>
 <span>  window_type <span class="op">=</span> <span class="st">"hanning"</span>,</span>
 <span>  assay_name <span class="op">=</span> <span class="st">"raw"</span>,</span>
@@ -251,7 +261,7 @@ frequency resolution but more leakage.</li>
 <span><span class="co"># For high frequency resolution (e.g., resting-state narrow-band analysis)</span></span>
 <span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegSTFT.html">eegSTFT</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
-<span>  window_size <span class="op">=</span> <span class="fl">500</span>,      <span class="co"># 1000 ms windows</span></span>
+<span>  window_sec <span class="op">=</span> <span class="fl">1.0</span>,       <span class="co"># 1000 ms windows</span></span>
 <span>  overlap <span class="op">=</span> <span class="fl">0.90</span>,         <span class="co"># High overlap to maintain some temporal detail</span></span>
 <span>  window_type <span class="op">=</span> <span class="st">"hamming"</span>,</span>
 <span>  assay_name <span class="op">=</span> <span class="st">"raw"</span>,</span>
@@ -298,8 +308,8 @@ duration in seconds.</li>
 <span>  output_assay <span class="op">=</span> <span class="st">"multitaper_power"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Output: channels x frequencies x timepoints x trials</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">assay</span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"multitaper_power"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Output (stored in metadata): timepoints x frequencies x channels</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">multitaper_power</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># For high-frequency resolution (narrow-band analysis)</span></span>
 <span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegMultitaper.html">eegMultitaper</a></span><span class="op">(</span></span>
@@ -344,25 +354,25 @@ asymmetric</li>
 variance, good for statistics</li>
 </ul>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compute ERSP from Morlet wavelet power</span></span>
-<span><span class="co"># Baseline: -200 to 0 ms pre-stimulus</span></span>
-<span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegERSP.html">eegERSP</a></span><span class="op">(</span></span>
-<span>  <span class="va">eeg</span>,</span>
-<span>  baseline <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">200</span>, <span class="fl">0</span><span class="op">)</span>,  <span class="co"># Baseline time window in ms</span></span>
-<span>  assay_name <span class="op">=</span> <span class="st">"morlet_power"</span></span>
+<code class="sourceCode R"><span><span class="co"># eegERSP() takes the 3D epoched data and computes the Morlet wavelet and</span></span>
+<span><span class="co"># baseline normalization internally. The baseline window is given in samples.</span></span>
+<span><span class="va">freqs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">40</span>, by <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">eeg_epochs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegERSP.html">eegERSP</a></span><span class="op">(</span></span>
+<span>  <span class="va">eeg_epochs</span>,</span>
+<span>  baseline <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">50</span><span class="op">)</span>,   <span class="co"># baseline = first 50 samples (100 ms) of each epoch</span></span>
+<span>  frequencies <span class="op">=</span> <span class="va">freqs</span>,</span>
+<span>  n_cycles <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  assay_name <span class="op">=</span> <span class="st">"raw"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># ERSP stored in metadata</span></span>
-<span><span class="va">ersp_data</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">ERSP</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ersp_data</span><span class="op">)</span>  <span class="co"># channels x frequencies x timepoints x trials</span></span>
-<span></span>
-<span><span class="co"># Average across trials to see mean ERSP</span></span>
-<span><span class="va">mean_ersp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">ersp_data</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">mean_ersp</span><span class="op">)</span>  <span class="co"># channels x frequencies x timepoints</span></span>
+<span><span class="co"># ERSP stored in metadata (already averaged across trials)</span></span>
+<span><span class="va">ersp_data</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_epochs</span><span class="op">)</span><span class="op">$</span><span class="va">ersp_data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ersp_data</span><span class="op">)</span>  <span class="co"># timepoints x frequencies x channels</span></span>
 <span></span>
 <span><span class="co"># Extract single-channel ERSP for visualization</span></span>
-<span><span class="va">pz_ersp</span> <span class="op">&lt;-</span> <span class="va">mean_ersp</span><span class="op">[</span><span class="fu">channelIndex</span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"Pz"</span><span class="op">)</span>, , <span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">pz_ersp</span><span class="op">)</span>  <span class="co"># frequencies x timepoints</span></span></code></pre></div>
+<span><span class="va">pz_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="st">"Pz"</span>, <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">eeg_epochs</span><span class="op">)</span><span class="op">$</span><span class="va">label</span><span class="op">)</span></span>
+<span><span class="va">pz_ersp</span> <span class="op">&lt;-</span> <span class="va">ersp_data</span><span class="op">[</span>, , <span class="va">pz_idx</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">pz_ersp</span><span class="op">)</span>  <span class="co"># timepoints x frequencies</span></span></code></pre></div>
 <p><strong>Interpreting ERSP:</strong></p>
 <ul>
 <li>
@@ -402,25 +412,29 @@ to traditional ERP components. However, ITC can also detect phase-locked
 higher-frequency oscillations invisible in the averaged ERP.</li>
 </ul>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Compute ITC from Morlet wavelet transform</span></span>
-<span><span class="co"># Uses complex wavelet coefficients to assess phase consistency</span></span>
-<span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegITC.html">eegITC</a></span><span class="op">(</span></span>
-<span>  <span class="va">eeg</span>,</span>
-<span>  assay_name <span class="op">=</span> <span class="st">"morlet_power"</span>  <span class="co"># Should be complex wavelet output</span></span>
+<code class="sourceCode R"><span><span class="co"># eegITC() computes the complex Morlet transform per trial internally and</span></span>
+<span><span class="co"># measures phase consistency across trials from the 3D epoched data.</span></span>
+<span><span class="va">eeg_epochs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegITC.html">eegITC</a></span><span class="op">(</span></span>
+<span>  <span class="va">eeg_epochs</span>,</span>
+<span>  frequencies <span class="op">=</span> <span class="va">freqs</span>,</span>
+<span>  n_cycles <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  assay_name <span class="op">=</span> <span class="st">"raw"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># ITC stored in metadata</span></span>
-<span><span class="va">itc_data</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">ITC</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">itc_data</span><span class="op">)</span>  <span class="co"># channels x frequencies x timepoints</span></span>
+<span><span class="va">itc_data</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_epochs</span><span class="op">)</span><span class="op">$</span><span class="va">itc_data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">itc_data</span><span class="op">)</span>  <span class="co"># timepoints x frequencies x channels</span></span>
 <span></span>
-<span><span class="co"># Extract channel-specific ITC</span></span>
-<span><span class="va">fcz_itc</span> <span class="op">&lt;-</span> <span class="va">itc_data</span><span class="op">[</span><span class="fu">channelIndex</span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"FCz"</span><span class="op">)</span>, , <span class="op">]</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fcz_itc</span><span class="op">)</span>  <span class="co"># frequencies x timepoints</span></span>
+<span><span class="co"># Extract channel-specific ITC (Cz is a central fronto-central lead)</span></span>
+<span><span class="va">cz_idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="st">"Cz"</span>, <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">eeg_epochs</span><span class="op">)</span><span class="op">$</span><span class="va">label</span><span class="op">)</span></span>
+<span><span class="va">cz_itc</span> <span class="op">&lt;-</span> <span class="va">itc_data</span><span class="op">[</span>, , <span class="va">cz_idx</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">cz_itc</span><span class="op">)</span>  <span class="co"># timepoints x frequencies</span></span>
 <span></span>
-<span><span class="co"># High ITC at low frequencies captures ERP phase-locking</span></span>
-<span><span class="co"># Check theta band (4-8 Hz) ITC time course</span></span>
-<span><span class="va">theta_itc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">fcz_itc</span><span class="op">[</span><span class="fl">4</span><span class="op">:</span><span class="fl">8</span>, <span class="op">]</span>, <span class="fl">2</span>, <span class="va">mean</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">theta_itc</span>, type <span class="op">=</span> <span class="st">"l"</span>, xlab <span class="op">=</span> <span class="st">"Time (ms)"</span>, ylab <span class="op">=</span> <span class="st">"ITC"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># High ITC at low frequencies captures ERP phase-locking.</span></span>
+<span><span class="co"># Theta-band (4-8 Hz) ITC time course:</span></span>
+<span><span class="va">theta_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">freqs</span> <span class="op">&gt;=</span> <span class="fl">4</span> <span class="op">&amp;</span> <span class="va">freqs</span> <span class="op">&lt;=</span> <span class="fl">8</span><span class="op">)</span></span>
+<span><span class="va">theta_itc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/MatrixGenerics/man/rowMeans.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">cz_itc</span><span class="op">[</span>, <span class="va">theta_cols</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">theta_itc</span>, type <span class="op">=</span> <span class="st">"l"</span>, xlab <span class="op">=</span> <span class="st">"Time (samples)"</span>, ylab <span class="op">=</span> <span class="st">"ITC"</span><span class="op">)</span></span></code></pre></div>
 <p><strong>Interpreting ITC:</strong></p>
 <ul>
 <li>
@@ -448,37 +462,37 @@ sensory-evoked gamma or beta responses</li>
 for ERSP, ITC, and raw power. PhysioEEG provides customizable
 spectrogram plotting with sensible defaults.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Plot ERSP spectrogram for channel Pz</span></span>
+<code class="sourceCode R"><span><span class="co"># Plot the Morlet power spectrogram for channel Pz</span></span>
 <span><span class="fu"><a href="../reference/eegPlotSpectrogram.html">eegPlotSpectrogram</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  channel <span class="op">=</span> <span class="st">"Pz"</span>,</span>
 <span>  freq_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">40</span><span class="op">)</span>,      <span class="co"># Focus on theta-gamma range</span></span>
-<span>  time_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">200</span>, <span class="fl">800</span><span class="op">)</span>,  <span class="co"># Pre-stimulus to 800 ms post-stimulus</span></span>
-<span>  log_power <span class="op">=</span> <span class="cn">FALSE</span>,          <span class="co"># ERSP already in dB</span></span>
-<span>  palette <span class="op">=</span> <span class="st">"RdBu"</span>,           <span class="co"># Red-blue diverging palette (blue=ERD, red=ERS)</span></span>
-<span>  assay_name <span class="op">=</span> <span class="st">"morlet_power"</span></span>
+<span>  time_range <span class="op">=</span> <span class="cn">NULL</span>,          <span class="co"># full time range (time axis is in seconds)</span></span>
+<span>  log_power <span class="op">=</span> <span class="cn">TRUE</span>,           <span class="co"># convert power to dB scale</span></span>
+<span>  palette <span class="op">=</span> <span class="st">"viridis"</span>,</span>
+<span>  assay_name <span class="op">=</span> <span class="st">"wavelet_power"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Plot ITC spectrogram</span></span>
+<span><span class="co"># Plot the spectrogram for a central lead (Cz)</span></span>
 <span><span class="fu"><a href="../reference/eegPlotSpectrogram.html">eegPlotSpectrogram</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
-<span>  channel <span class="op">=</span> <span class="st">"FCz"</span>,</span>
+<span>  channel <span class="op">=</span> <span class="st">"Cz"</span>,</span>
 <span>  freq_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">30</span><span class="op">)</span>,</span>
-<span>  time_range <span class="op">=</span> <span class="cn">NULL</span>,          <span class="co"># Use full time range</span></span>
-<span>  log_power <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  palette <span class="op">=</span> <span class="st">"viridis"</span>,        <span class="co"># Sequential palette for ITC (0 to 1)</span></span>
-<span>  assay_name <span class="op">=</span> <span class="st">"morlet_power"</span></span>
+<span>  time_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  log_power <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  palette <span class="op">=</span> <span class="st">"viridis"</span>,</span>
+<span>  assay_name <span class="op">=</span> <span class="st">"wavelet_power"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Plot raw power with log scaling</span></span>
+<span><span class="co"># Zoom into the alpha band for an occipital channel</span></span>
 <span><span class="fu"><a href="../reference/eegPlotSpectrogram.html">eegPlotSpectrogram</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
 <span>  channel <span class="op">=</span> <span class="st">"O1"</span>,</span>
 <span>  freq_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">13</span><span class="op">)</span>,      <span class="co"># Alpha band detail</span></span>
-<span>  time_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">500</span><span class="op">)</span>,</span>
+<span>  time_range <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  log_power <span class="op">=</span> <span class="cn">TRUE</span>,           <span class="co"># Convert to dB scale</span></span>
 <span>  palette <span class="op">=</span> <span class="st">"magma"</span>,</span>
-<span>  assay_name <span class="op">=</span> <span class="st">"morlet_power"</span></span>
+<span>  assay_name <span class="op">=</span> <span class="st">"wavelet_power"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><strong>Visualization tips:</strong></p>
 <ul>

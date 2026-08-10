@@ -30,6 +30,7 @@ regions:
 ``` r
 
 library(PhysioEEG)
+library(SummarizedExperiment)
 library(ggplot2)
 
 # Create 8-channel EEG data with 10-second epochs
@@ -37,7 +38,6 @@ library(ggplot2)
 eeg <- make_eeg(
   n_channels = 8,
   n_time = 2500,      # 10 seconds at 250 Hz
-  n_samples = 20,     # 20 trials
   sr = 250
 )
 
@@ -68,9 +68,9 @@ $`P_{yy}`$ are auto-spectral densities.
 # Expected to show strong coupling due to bilateral alpha rhythm
 coh_alpha <- eegCoherence(
   eeg,
-  method = "msc",
-  freq_range = c(8, 12),
-  window_size = 500,  # 2-second windows for spectral estimation
+  method = "coherence",  # magnitude-squared coherence
+  band = c(8, 12),
+  window_sec = 2,  # 2-second windows for spectral estimation
   assay_name = "raw"
 )
 
@@ -80,9 +80,9 @@ print(coh_alpha)
 # Compute broadband coherence for theta through gamma
 coh_broad <- eegCoherence(
   eeg,
-  method = "msc",
-  freq_range = c(4, 40),
-  window_size = 1000,  # Longer window for lower frequencies
+  method = "coherence",  # magnitude-squared coherence
+  band = c(4, 40),
+  window_sec = 4,  # Longer window for lower frequencies
   assay_name = "raw"
 )
 ```
@@ -103,8 +103,8 @@ eliminating zero-lag correlations introduced by volume conduction:
 icoh_alpha <- eegCoherence(
   eeg,
   method = "imaginary",
-  freq_range = c(8, 12),
-  window_size = 500,
+  band = c(8, 12),
+  window_sec = 2,
   assay_name = "raw"
 )
 
@@ -135,14 +135,14 @@ $`n`$.
 # Theta coupling reflects working memory and cognitive control processes
 plv_theta <- eegPLV(
   eeg,
-  freq_range = c(4, 8),
+  band = c(4, 8),
   assay_name = "raw"
 )
 
 # PLV in alpha band for posterior connectivity
 plv_alpha <- eegPLV(
   eeg,
-  freq_range = c(8, 12),
+  band = c(8, 12),
   assay_name = "raw"
 )
 
@@ -150,7 +150,7 @@ plv_alpha <- eegPLV(
 # Expected higher C3-C4 coupling during motor planning
 plv_beta <- eegPLV(
   eeg,
-  freq_range = c(13, 30),
+  band = c(13, 30),
   assay_name = "raw"
 )
 ```
@@ -183,14 +183,14 @@ maintaining statistical power better than imaginary coherence.
 # More conservative estimate of true neural coupling
 wpli_alpha <- eegWPLI(
   eeg,
-  freq_range = c(8, 12),
+  band = c(8, 12),
   assay_name = "raw"
 )
 
 # wPLI across multiple frequency bands for comparison
-wpli_theta <- eegWPLI(eeg, freq_range = c(4, 8))
-wpli_beta <- eegWPLI(eeg, freq_range = c(13, 30))
-wpli_gamma <- eegWPLI(eeg, freq_range = c(30, 50))
+wpli_theta <- eegWPLI(eeg, band = c(4, 8))
+wpli_beta <- eegWPLI(eeg, band = c(13, 30))
+wpli_gamma <- eegWPLI(eeg, band = c(30, 50))
 
 # Compare PLV vs wPLI to assess volume conduction impact
 # Large PLV but small wPLI suggests spurious connectivity
@@ -223,7 +223,7 @@ $`f`$.
 gc_frontal_parietal <- eegGrangerCausality(
   eeg,
   order = 10,          # Model order (typically 10-20 for EEG)
-  freq_range = c(4, 40),
+  band = c(4, 40),
   assay_name = "raw"
 )
 
@@ -238,7 +238,7 @@ gc_frontal_parietal <- eegGrangerCausality(
 gc_parietal_frontal <- eegGrangerCausality(
   eeg,
   order = 10,
-  freq_range = c(4, 40),
+  band = c(4, 40),
   assay_name = "raw"
 )
 ```
@@ -276,7 +276,7 @@ network topology.
 conn_matrix_alpha <- eegConnectivityMatrix(
   eeg,
   method = "wpli",
-  freq_range = c(8, 12),
+  band = c(8, 12),
   assay_name = "raw"
 )
 
@@ -284,7 +284,7 @@ conn_matrix_alpha <- eegConnectivityMatrix(
 conn_matrix_theta <- eegConnectivityMatrix(
   eeg,
   method = "wpli",
-  freq_range = c(4, 8),
+  band = c(4, 8),
   assay_name = "raw"
 )
 
@@ -292,7 +292,7 @@ conn_matrix_theta <- eegConnectivityMatrix(
 conn_matrix_plv <- eegConnectivityMatrix(
   eeg,
   method = "plv",
-  freq_range = c(8, 12),
+  band = c(8, 12),
   assay_name = "raw"
 )
 
@@ -300,7 +300,7 @@ conn_matrix_plv <- eegConnectivityMatrix(
 conn_matrix_coh <- eegConnectivityMatrix(
   eeg,
   method = "coherence",
-  freq_range = c(8, 12),
+  band = c(8, 12),
   assay_name = "raw"
 )
 ```
@@ -416,7 +416,7 @@ question, data quality, and analytical goals:
 ``` r
 
 # Start with wPLI to get robust, volume-conduction-free overview
-conn_explore <- eegConnectivityMatrix(eeg, method = "wpli", freq_range = c(4, 40))
+conn_explore <- eegConnectivityMatrix(eeg, method = "wpli", band = c(4, 40))
 eegPlotConnectivity(eeg, method = "heatmap", matrix = conn_explore, threshold = 0.3)
 ```
 
@@ -428,8 +428,8 @@ eegPlotConnectivity(eeg, method = "heatmap", matrix = conn_explore, threshold = 
 # Convergent evidence across methods strengthens conclusions
 
 # Compare PLV vs wPLI
-plv_result <- eegPLV(eeg, freq_range = c(8, 12))
-wpli_result <- eegWPLI(eeg, freq_range = c(8, 12))
+plv_result <- eegPLV(eeg, band = c(8, 12))
+wpli_result <- eegWPLI(eeg, band = c(8, 12))
 
 # If PLV >> wPLI, volume conduction likely present
 # If PLV ≈ wPLI, genuine phase coupling more likely
@@ -441,8 +441,8 @@ wpli_result <- eegWPLI(eeg, freq_range = c(8, 12))
 
 # Granger causality for testing information flow direction
 # Combine with non-directed metrics for comprehensive picture
-gc_forward <- eegGrangerCausality(eeg, order = 15, freq_range = c(4, 12))
-wpli_baseline <- eegWPLI(eeg, freq_range = c(4, 12))
+gc_forward <- eegGrangerCausality(eeg, order = 15, band = c(4, 12))
+wpli_baseline <- eegWPLI(eeg, band = c(4, 12))
 
 # Granger without corresponding wPLI suggests spurious causality
 # Granger with wPLI suggests genuine directed influence

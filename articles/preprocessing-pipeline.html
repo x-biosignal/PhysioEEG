@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -116,13 +116,22 @@ artifact rejection.</p>
 demonstration purposes.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/x-biosignal/PhysioEEG" class="external-link">PhysioEEG</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bioconductor.org/packages/SummarizedExperiment" class="external-link">SummarizedExperiment</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/make_eeg.html">make_eeg</a></span><span class="op">(</span></span>
-<span>  n_channels <span class="op">=</span> <span class="fl">64</span>,</span>
+<span>  n_channels <span class="op">=</span> <span class="fl">19</span>,</span>
 <span>  n_time <span class="op">=</span> <span class="fl">60000</span>,</span>
-<span>  sampling_rate <span class="op">=</span> <span class="fl">500</span>,</span>
-<span>  add_noise <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span>  sr <span class="op">=</span> <span class="fl">500</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Assign standard 10-20 electrode positions so montage-dependent steps</span></span>
+<span><span class="co"># (bad-channel interpolation) have electrode coordinates to work with.</span></span>
+<span><span class="va">eeg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegMontage.html">eegMontage</a></span><span class="op">(</span><span class="va">eeg</span>, system <span class="op">=</span> <span class="st">"10-20"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Relabel two channels as mastoids (TP9/TP10) so the mastoid-referencing</span></span>
+<span><span class="co"># example below can target named electrodes; Cz is already present in the</span></span>
+<span><span class="co"># 10-20 layout for the single-channel reference example.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span><span class="op">$</span><span class="va">label</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TP9"</span>, <span class="st">"TP10"</span><span class="op">)</span></span></code></pre></div>
 <p>The <code><a href="../reference/make_eeg.html">make_eeg()</a></code> function creates a simulated EEG dataset
 with realistic noise characteristics. In practice, you would load your
 data using <code>readEDF()</code>, <code>readBrainVision()</code>, or
@@ -141,7 +150,7 @@ and the characteristics of your data.</p>
 with subsequent processing steps. A cutoff of 0.1 Hz is common for ERP
 studies, while 1 Hz may be appropriate for resting-state analysis.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eeg_hp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, lowcut <span class="op">=</span> <span class="fl">0.1</span>, type <span class="op">=</span> <span class="st">"butter"</span>, order <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">eeg_hp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, lowcut <span class="op">=</span> <span class="fl">0.1</span>, method <span class="op">=</span> <span class="st">"iir"</span>, order <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="lowpass-filtering">Lowpass Filtering<a class="anchor" aria-label="anchor" href="#lowpass-filtering"></a>
@@ -151,7 +160,7 @@ artifacts and electrical interference above the frequency range of
 interest. For most cognitive EEG studies, 40-50 Hz is a reasonable
 cutoff.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eeg_lp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, highcut <span class="op">=</span> <span class="fl">40</span>, type <span class="op">=</span> <span class="st">"butter"</span>, order <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">eeg_lp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, highcut <span class="op">=</span> <span class="fl">40</span>, method <span class="op">=</span> <span class="st">"iir"</span>, order <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="bandpass-filtering">Bandpass Filtering<a class="anchor" aria-label="anchor" href="#bandpass-filtering"></a>
@@ -160,7 +169,7 @@ cutoff.</p>
 isolating the frequency band of interest. This is the most common
 approach for EEG preprocessing.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eeg_bp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, lowcut <span class="op">=</span> <span class="fl">1</span>, highcut <span class="op">=</span> <span class="fl">40</span>, type <span class="op">=</span> <span class="st">"butter"</span>, order <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">eeg_bp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, lowcut <span class="op">=</span> <span class="fl">1</span>, highcut <span class="op">=</span> <span class="fl">40</span>, method <span class="op">=</span> <span class="st">"iir"</span>, order <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="notch-filtering">Notch Filtering<a class="anchor" aria-label="anchor" href="#notch-filtering"></a>
@@ -169,7 +178,7 @@ approach for EEG preprocessing.</p>
 60 Hz (Americas). Apply notch filtering before bandpass filtering for
 best results.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eeg_notch</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, notch <span class="op">=</span> <span class="fl">60</span>, notch_width <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">eeg_notch</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, notch <span class="op">=</span> <span class="fl">60</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="fir-vs-iir-filters">FIR vs IIR Filters<a class="anchor" aria-label="anchor" href="#fir-vs-iir-filters"></a>
@@ -177,11 +186,11 @@ best results.</p>
 <p>The package supports both finite impulse response (FIR) and infinite
 impulse response (IIR) filters. FIR filters (type = “fir”) have linear
 phase characteristics and no phase distortion, making them ideal for ERP
-analysis. IIR filters (type = “butter”, “cheby1”, etc.) are
+analysis. IIR filters (method = “iir”, “cheby1”, etc.) are
 computationally efficient but introduce phase shifts.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eeg_fir</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, lowcut <span class="op">=</span> <span class="fl">1</span>, highcut <span class="op">=</span> <span class="fl">40</span>, type <span class="op">=</span> <span class="st">"fir"</span>, order <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
-<span><span class="va">eeg_iir</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, lowcut <span class="op">=</span> <span class="fl">1</span>, highcut <span class="op">=</span> <span class="fl">40</span>, type <span class="op">=</span> <span class="st">"butter"</span>, order <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">eeg_fir</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, lowcut <span class="op">=</span> <span class="fl">1</span>, highcut <span class="op">=</span> <span class="fl">40</span>, method <span class="op">=</span> <span class="st">"fir"</span>, order <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
+<span><span class="va">eeg_iir</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegFilter.html">eegFilter</a></span><span class="op">(</span><span class="va">eeg</span>, lowcut <span class="op">=</span> <span class="fl">1</span>, highcut <span class="op">=</span> <span class="fl">40</span>, method <span class="op">=</span> <span class="st">"iir"</span>, order <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
 <p>For most applications, a 4th-order Butterworth filter provides an
 excellent balance between roll-off characteristics and computational
 efficiency. Use FIR filters when precise timing is critical (e.g.,
@@ -201,7 +210,7 @@ recording reference to a new reference scheme.</p>
 This is the most common choice for high-density EEG and is required for
 source localization methods.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eeg_avg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegRereference.html">eegRereference</a></span><span class="op">(</span><span class="va">eeg_bp</span>, method <span class="op">=</span> <span class="st">"average"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">eeg_avg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegRereference.html">eegRereference</a></span><span class="op">(</span><span class="va">eeg_bp</span>, ref_type <span class="op">=</span> <span class="st">"average"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="mastoid-reference">Mastoid Reference<a class="anchor" aria-label="anchor" href="#mastoid-reference"></a>
@@ -210,7 +219,7 @@ source localization methods.</p>
 applications and sleep studies. Mastoid channels (typically A1 and A2 or
 TP9 and TP10) are relatively inactive during most cognitive tasks.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eeg_mast</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegRereference.html">eegRereference</a></span><span class="op">(</span><span class="va">eeg_bp</span>, method <span class="op">=</span> <span class="st">"mastoid"</span>, ref_channels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TP9"</span>, <span class="st">"TP10"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">eeg_mast</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegRereference.html">eegRereference</a></span><span class="op">(</span><span class="va">eeg_bp</span>, ref_type <span class="op">=</span> <span class="st">"mastoids"</span><span class="op">)</span>  <span class="co"># finds TP9/TP10 (or M1/M2, A1/A2)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="single-channel-reference">Single Channel Reference<a class="anchor" aria-label="anchor" href="#single-channel-reference"></a>
@@ -218,7 +227,7 @@ TP9 and TP10) are relatively inactive during most cognitive tasks.</p>
 <p>Re-referencing to a single electrode (commonly Cz) can be useful when
 comparing to older literature or for specific experimental designs.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eeg_cz</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegRereference.html">eegRereference</a></span><span class="op">(</span><span class="va">eeg_bp</span>, method <span class="op">=</span> <span class="st">"single"</span>, ref_channels <span class="op">=</span> <span class="st">"Cz"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">eeg_cz</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegRereference.html">eegRereference</a></span><span class="op">(</span><span class="va">eeg_bp</span>, ref_type <span class="op">=</span> <span class="st">"channel"</span>, ref_channels <span class="op">=</span> <span class="st">"Cz"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="when-to-use-each-type">When to Use Each Type<a class="anchor" aria-label="anchor" href="#when-to-use-each-type"></a>
@@ -251,14 +260,15 @@ noise levels, and low correlation with neighboring channels.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bad_info</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegBadChannels.html">eegBadChannels</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_avg</span>,</span>
+<span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"flat"</span>, <span class="st">"noise"</span><span class="op">)</span>,</span>
 <span>  flat_threshold <span class="op">=</span> <span class="fl">0.1</span>,</span>
-<span>  noise_threshold <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>  correlation_threshold <span class="op">=</span> <span class="fl">0.4</span>,</span>
-<span>  correlation_window <span class="op">=</span> <span class="fl">1.0</span></span>
+<span>  noise_threshold <span class="op">=</span> <span class="fl">4</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">bad_info</span><span class="op">$</span><span class="va">bad_channels</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">bad_info</span><span class="op">$</span><span class="va">reasons</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># eegBadChannels() returns a data.frame with columns: channel, is_bad, reason</span></span>
+<span><span class="va">bad_channels</span> <span class="op">&lt;-</span> <span class="va">bad_info</span><span class="op">$</span><span class="va">channel</span><span class="op">[</span><span class="va">bad_info</span><span class="op">$</span><span class="va">is_bad</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">bad_channels</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">bad_info</span><span class="op">$</span><span class="va">reason</span><span class="op">[</span><span class="va">bad_info</span><span class="op">$</span><span class="va">is_bad</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="interpolating-bad-channels">Interpolating Bad Channels<a class="anchor" aria-label="anchor" href="#interpolating-bad-channels"></a>
@@ -269,8 +279,8 @@ assumes that scalp potentials vary smoothly across the head surface.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">eeg_interp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegInterpolate.html">eegInterpolate</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_avg</span>,</span>
-<span>  bad_channels <span class="op">=</span> <span class="va">bad_info</span><span class="op">$</span><span class="va">bad_channels</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"spherical"</span></span>
+<span>  bad_channels <span class="op">=</span> <span class="va">bad_channels</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"spline"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -302,7 +312,7 @@ artifacts like eye blinks, eye movements, and muscle activity.</p>
 the FastICA or Infomax algorithm. Run ICA on filtered, re-referenced
 data before epoching.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eeg_ica</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegICA.html">eegICA</a></span><span class="op">(</span><span class="va">eeg_interp</span>, n_components <span class="op">=</span> <span class="fl">30</span>, method <span class="op">=</span> <span class="st">"fastica"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">eeg_ica</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegICA.html">eegICA</a></span><span class="op">(</span><span class="va">eeg_interp</span>, n_components <span class="op">=</span> <span class="fl">15</span>, method <span class="op">=</span> <span class="st">"fastica"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="detecting-artifact-components">Detecting Artifact Components<a class="anchor" aria-label="anchor" href="#detecting-artifact-components"></a>
@@ -313,12 +323,15 @@ spectral properties.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">artifact_comps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegICAdetect.html">eegICAdetect</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_ica</span>,</span>
-<span>  types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"eye"</span>, <span class="st">"muscle"</span>, <span class="st">"heart"</span><span class="op">)</span>,</span>
+<span>  method <span class="op">=</span> <span class="st">"correlation"</span>,</span>
 <span>  threshold <span class="op">=</span> <span class="fl">0.8</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">artifact_comps</span><span class="op">$</span><span class="va">eye_components</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">artifact_comps</span><span class="op">$</span><span class="va">muscle_components</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># eegICAdetect() returns a data.frame with columns: component, type, method, score.</span></span>
+<span><span class="co"># Components flagged as artifacts have type == "artifact".</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">artifact_comps</span><span class="op">)</span></span>
+<span><span class="va">artifact_ids</span> <span class="op">&lt;-</span> <span class="va">artifact_comps</span><span class="op">$</span><span class="va">component</span><span class="op">[</span><span class="va">artifact_comps</span><span class="op">$</span><span class="va">type</span> <span class="op">==</span> <span class="st">"artifact"</span><span class="op">]</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">artifact_ids</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="removing-artifact-components">Removing Artifact Components<a class="anchor" aria-label="anchor" href="#removing-artifact-components"></a>
@@ -351,7 +364,7 @@ events of interest. This step is essential for event-related potential
 times (in samples or seconds) and condition labels.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">events</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  onset <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1000</span>, <span class="fl">55000</span>, by <span class="op">=</span> <span class="fl">2000</span><span class="op">)</span>,</span>
+<span>  onset_sec <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">110</span>, by <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,   <span class="co"># event onset times in seconds</span></span>
 <span>  duration <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"stimulus_A"</span>, <span class="st">"stimulus_B"</span><span class="op">)</span>, length.out <span class="op">=</span> <span class="fl">28</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -365,8 +378,8 @@ pre-stimulus interval (-200 to 0 ms) for baseline correction.</p>
 <code class="sourceCode R"><span><span class="va">eeg_epochs</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegEpoch.html">eegEpoch</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_clean</span>,</span>
 <span>  events <span class="op">=</span> <span class="va">events</span>,</span>
-<span>  epoch_limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.2</span>, <span class="fl">0.8</span><span class="op">)</span>,</span>
-<span>  baseline_limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.2</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span>  limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.2</span>, <span class="fl">0.8</span><span class="op">)</span>,</span>
+<span>  baseline <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.2</span>, <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The <code>epoch_limits</code> parameter defines the time window
 around each event (in seconds). The <code>baseline_limits</code>
@@ -379,16 +392,20 @@ removes pre-stimulus voltage differences across trials.</p>
 <p>You can also apply baseline correction separately or use different
 baseline windows for different analyses.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eeg_epochs_nobl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegEpoch.html">eegEpoch</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="co"># Epoch without baseline correction (baseline = NULL)</span></span>
+<span><span class="va">eeg_epochs_nobl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegEpoch.html">eegEpoch</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_clean</span>,</span>
 <span>  events <span class="op">=</span> <span class="va">events</span>,</span>
-<span>  epoch_limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">1.5</span><span class="op">)</span>,</span>
-<span>  baseline_limits <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">1.5</span><span class="op">)</span>,</span>
+<span>  baseline <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">eeg_epochs_bl</span> <span class="op">&lt;-</span> <span class="fu">eegBaselineCorrect</span><span class="op">(</span></span>
-<span>  <span class="va">eeg_epochs_nobl</span>,</span>
-<span>  baseline_limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.1</span><span class="op">)</span></span>
+<span><span class="co"># Epoch with a custom baseline window (in seconds) applied during epoching</span></span>
+<span><span class="va">eeg_epochs_bl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegEpoch.html">eegEpoch</a></span><span class="op">(</span></span>
+<span>  <span class="va">eeg_clean</span>,</span>
+<span>  events <span class="op">=</span> <span class="va">events</span>,</span>
+<span>  limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">1.5</span><span class="op">)</span>,</span>
+<span>  baseline <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="op">-</span><span class="fl">0.1</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
@@ -406,8 +423,7 @@ absolute voltage threshold (typically ±100 μV for scalp EEG).</p>
 <code class="sourceCode R"><span><span class="va">eeg_clean_thresh</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegArtifactReject.html">eegArtifactReject</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_epochs</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"threshold"</span>,</span>
-<span>  threshold <span class="op">=</span> <span class="fl">100</span>,</span>
-<span>  unit <span class="op">=</span> <span class="st">"uV"</span></span>
+<span>  threshold_uv <span class="op">=</span> <span class="fl">100</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -419,8 +435,7 @@ characteristic of muscle artifacts or electrode pops.</p>
 <code class="sourceCode R"><span><span class="va">eeg_clean_grad</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegArtifactReject.html">eegArtifactReject</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_epochs</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"gradient"</span>,</span>
-<span>  threshold <span class="op">=</span> <span class="fl">50</span>,</span>
-<span>  unit <span class="op">=</span> <span class="st">"uV"</span></span>
+<span>  gradient_uv_ms <span class="op">=</span> <span class="fl">50</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -431,9 +446,8 @@ on the distribution of values across all trials, rejecting outliers.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">eeg_clean_prob</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegArtifactReject.html">eegArtifactReject</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg_epochs</span>,</span>
-<span>  method <span class="op">=</span> <span class="st">"probability"</span>,</span>
-<span>  local_threshold <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  global_threshold <span class="op">=</span> <span class="fl">3</span></span>
+<span>  method <span class="op">=</span> <span class="st">"joint_probability"</span>,</span>
+<span>  jp_threshold <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -462,25 +476,27 @@ complete pipeline in a single function call, applying filtering,
 re-referencing, bad channel interpolation, ICA artifact removal,
 epoching, and artifact rejection.</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">eeg_final</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegPreprocess.html">eegPreprocess</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="co"># Bad-channel detection/interpolation are demonstrated separately above; they</span></span>
+<span><span class="co"># are disabled here because correlation-based detection is uninformative on</span></span>
+<span><span class="co"># spatially uncorrelated simulated data (it flags every channel).</span></span>
+<span><span class="va">eeg_final</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/eegPreprocess.html">eegPreprocess</a></span><span class="op">(</span></span>
 <span>  <span class="va">eeg</span>,</span>
-<span>  filter_lowcut <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  filter_highcut <span class="op">=</span> <span class="fl">40</span>,</span>
-<span>  filter_order <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>  filter_type <span class="op">=</span> <span class="st">"butter"</span>,</span>
+<span>  filter <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  lowcut <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  highcut <span class="op">=</span> <span class="fl">40</span>,</span>
 <span>  notch <span class="op">=</span> <span class="fl">60</span>,</span>
-<span>  reref_method <span class="op">=</span> <span class="st">"average"</span>,</span>
-<span>  bad_channel_detect <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  bad_channel_interp <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  ica_method <span class="op">=</span> <span class="st">"fastica"</span>,</span>
-<span>  ica_components <span class="op">=</span> <span class="fl">30</span>,</span>
-<span>  ica_artifact_types <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"eye"</span>, <span class="st">"muscle"</span><span class="op">)</span>,</span>
+<span>  rereference <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  ref_type <span class="op">=</span> <span class="st">"average"</span>,</span>
+<span>  bad_channels <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  interpolate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  ica <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  epoch <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  events <span class="op">=</span> <span class="va">events</span>,</span>
 <span>  epoch_limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.2</span>, <span class="fl">0.8</span><span class="op">)</span>,</span>
-<span>  baseline_limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.2</span>, <span class="fl">0</span><span class="op">)</span>,</span>
+<span>  baseline <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.2</span>, <span class="fl">0</span><span class="op">)</span>,</span>
 <span>  artifact_reject <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  artifact_method <span class="op">=</span> <span class="st">"threshold"</span>,</span>
-<span>  artifact_threshold <span class="op">=</span> <span class="fl">100</span></span>
+<span>  threshold_uv <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="parameter-selection-for-different-paradigms">Parameter Selection for Different Paradigms<a class="anchor" aria-label="anchor" href="#parameter-selection-for-different-paradigms"></a>
@@ -566,7 +582,7 @@ research outputs. Parameter choices significantly impact results and
 must be reported for reproducibility. The PhysioEEG package stores
 preprocessing history in the metadata slot of the returned object.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">preprocessing_log</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_final</span><span class="op">)</span><span class="op">$</span><span class="va">processing_history</span></span>
+<code class="sourceCode R"><span><span class="va">preprocessing_log</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">eeg_final</span><span class="op">)</span><span class="op">$</span><span class="va">preprocess_log</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">preprocessing_log</span><span class="op">)</span></span></code></pre></div>
 <p>This vignette provides a foundation for EEG preprocessing with
 PhysioEEG. Adapt these workflows to your specific experimental design
