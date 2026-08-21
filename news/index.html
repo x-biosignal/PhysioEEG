@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,13 @@
       <small>Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.2" id="physioeeg-072">PhysioEEG 0.7.2<a class="anchor" aria-label="anchor" href="#physioeeg-072"></a></h2>
+<ul><li>
+<code>eegSourceEstimate(method = "dspm")</code> adds <strong>dSPM</strong> (dynamic statistical parametric mapping; Dale et al. 2000): the minimum-norm estimate noise-normalized by each source’s projected noise sensitivity (<code>sqrt(diag(K K'))</code> for an identity noise covariance). Verified to be MNE scaled per source by a time-invariant factor.</li>
+<li>
+<code><a href="../reference/eegDipoleFit.html">eegDipoleFit()</a></code> adds <strong>equivalent-current-dipole (ECD) fitting</strong> — the focal complement to the distributed inverses. It localizes the single dipole that best explains a scalp topography (grid search inside the head sphere refined with Nelder-Mead; the dipole moment is the closed-form least-squares fit at each position), using the same forward physics as <code><a href="../reference/eegForwardModel.html">eegForwardModel()</a></code>. Verified to recover a planted dipole’s position (&lt; 0.02 head radii), orientation, and &gt; 99.9% goodness of fit. Fits the peak global-field-power sample by default, or a chosen sample / window.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.1" id="physioeeg-071">PhysioEEG 0.7.1<a class="anchor" aria-label="anchor" href="#physioeeg-071"></a></h2>
 <ul><li>

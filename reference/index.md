@@ -38,6 +38,8 @@
   : Directed Transfer Function (DTF)
 - [`eegDecode()`](https://x-biosignal.github.io/PhysioEEG/reference/eegDecode.md)
   : Leakage-free MVPA Decoding of Epoched EEG
+- [`eegDipoleFit()`](https://x-biosignal.github.io/PhysioEEG/reference/eegDipoleFit.md)
+  : Fit an equivalent current dipole (ECD) to an EEG topography
 - [`eegERPbaseline()`](https://x-biosignal.github.io/PhysioEEG/reference/eegERPbaseline.md)
   : Baseline Correct ERP Data
 - [`eegERPdetect()`](https://x-biosignal.github.io/PhysioEEG/reference/eegERPdetect.md)

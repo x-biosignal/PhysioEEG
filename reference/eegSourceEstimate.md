@@ -10,7 +10,7 @@ source imaging methods. Requires a forward model from
 eegSourceEstimate(
   x,
   forward_model,
-  method = c("sloreta", "eloreta", "mne"),
+  method = c("sloreta", "eloreta", "mne", "dspm"),
   lambda = 0.05,
   assay_name = NULL,
   output_assay = "source"
@@ -31,8 +31,10 @@ eegSourceEstimate(
 - method:
 
   Source estimation method: `"sloreta"` (standardized low-resolution
-  tomography), `"eloreta"` (exact low-resolution tomography), or `"mne"`
-  (minimum norm estimate).
+  tomography), `"eloreta"` (exact low-resolution tomography), `"mne"`
+  (minimum norm estimate), or `"dspm"` (dynamic statistical parametric
+  mapping; MNE noise-normalized by each source's projected noise
+  sensitivity, Dale et al. 2000).
 
 - lambda:
 

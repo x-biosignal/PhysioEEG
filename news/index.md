@@ -1,5 +1,23 @@
 # Changelog
 
+## PhysioEEG 0.7.2
+
+- `eegSourceEstimate(method = "dspm")` adds **dSPM** (dynamic
+  statistical parametric mapping; Dale et al. 2000): the minimum-norm
+  estimate noise-normalized by each source’s projected noise sensitivity
+  (`sqrt(diag(K K'))` for an identity noise covariance). Verified to be
+  MNE scaled per source by a time-invariant factor.
+- [`eegDipoleFit()`](https://x-biosignal.github.io/PhysioEEG/reference/eegDipoleFit.md)
+  adds **equivalent-current-dipole (ECD) fitting** — the focal
+  complement to the distributed inverses. It localizes the single dipole
+  that best explains a scalp topography (grid search inside the head
+  sphere refined with Nelder-Mead; the dipole moment is the closed-form
+  least-squares fit at each position), using the same forward physics as
+  [`eegForwardModel()`](https://x-biosignal.github.io/PhysioEEG/reference/eegForwardModel.md).
+  Verified to recover a planted dipole’s position (\< 0.02 head radii),
+  orientation, and \> 99.9% goodness of fit. Fits the peak
+  global-field-power sample by default, or a chosen sample / window.
+
 ## PhysioEEG 0.7.1
 
 - [`eegSurfaceLaplacian()`](https://x-biosignal.github.io/PhysioEEG/reference/eegSurfaceLaplacian.md)
