@@ -1,5 +1,19 @@
 # Changelog
 
+## PhysioEEG 0.7.1
+
+- [`eegSurfaceLaplacian()`](https://x-biosignal.github.io/PhysioEEG/reference/eegSurfaceLaplacian.md)
+  adds the **surface Laplacian / current source density** (CSD) of
+  Perrin et al. (1989) — the spherical-spline scalp Laplacian (Kayser &
+  Tenke 2006). CSD is reference-free and a spatial high-pass, deblurring
+  volume conduction so each channel reflects the radial current beneath
+  it. Verified on its defining properties: invariance to a reference
+  constant (the spline constant term absorbs it) and spatial-high-pass
+  behaviour (focal topographies are emphasized over smooth ones ~8x).
+  Reuses the `.legendre_poly` recurrence and standard 10-10/10-20
+  position tables; needs electrode positions (`colData`
+  `pos_x/pos_y/pos_z`, else matched to a standard montage by label).
+
 ## PhysioEEG 0.7.0
 
 Three research-grade method families that were missing from the EEG

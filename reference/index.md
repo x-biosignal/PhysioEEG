@@ -158,6 +158,8 @@
   : Detect Sleep Spindles
 - [`eegSuppression()`](https://x-biosignal.github.io/PhysioEEG/reference/eegSuppression.md)
   : Burst-Suppression Detection
+- [`eegSurfaceLaplacian()`](https://x-biosignal.github.io/PhysioEEG/reference/eegSurfaceLaplacian.md)
+  : Surface Laplacian (current source density) of EEG
 - [`eegWPLI()`](https://x-biosignal.github.io/PhysioEEG/reference/eegWPLI.md)
   : EEG Weighted Phase Lag Index (wPLI)
 - [`make_eeg()`](https://x-biosignal.github.io/PhysioEEG/reference/make_eeg.md)

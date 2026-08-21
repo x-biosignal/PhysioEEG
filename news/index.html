@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,11 @@
       <small>Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.1" id="physioeeg-071">PhysioEEG 0.7.1<a class="anchor" aria-label="anchor" href="#physioeeg-071"></a></h2>
+<ul><li>
+<code><a href="../reference/eegSurfaceLaplacian.html">eegSurfaceLaplacian()</a></code> adds the <strong>surface Laplacian / current source density</strong> (CSD) of Perrin et al. (1989) — the spherical-spline scalp Laplacian (Kayser &amp; Tenke 2006). CSD is reference-free and a spatial high-pass, deblurring volume conduction so each channel reflects the radial current beneath it. Verified on its defining properties: invariance to a reference constant (the spline constant term absorbs it) and spatial-high-pass behaviour (focal topographies are emphasized over smooth ones ~8x). Reuses the <code>.legendre_poly</code> recurrence and standard 10-10/10-20 position tables; needs electrode positions (<code>colData</code> <code>pos_x/pos_y/pos_z</code>, else matched to a standard montage by label).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.0" id="physioeeg-070">PhysioEEG 0.7.0<a class="anchor" aria-label="anchor" href="#physioeeg-070"></a></h2>
 <p>Three research-grade method families that were missing from the EEG stack.</p>
