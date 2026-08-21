@@ -1,5 +1,21 @@
 # Changelog
 
+## PhysioEEG 0.7.3
+
+- `eegICLabel(backend = "iclabel")` runs the **genuine trained ICLabel
+  CNN** (Pion-Tonachini et al. 2019), replacing the need to trust the
+  pure-R heuristic when the real model is wanted. It delegates to the
+  validated `mne-icalabel` implementation through `reticulate` (carrying
+  the PhysioEEG ICA mixing/unmixing matrices into an MNE `ICA` object),
+  so it uses mne-icalabel’s exact EEGLAB-style feature extraction and
+  the trained weights rather than re-porting the network natively (which
+  would risk a plausible-but-wrong result). The default
+  `backend = "heuristic"` is unchanged and needs no Python; the trained
+  backend is optional (needs `reticulate` + a Python env with `mne` and
+  `mne-icalabel`, and standard 10-20/10-10 channel labels for the scalp
+  map). Verified to return valid 7-class probability distributions from
+  the real network.
+
 ## PhysioEEG 0.7.2
 
 - `eegSourceEstimate(method = "dspm")` adds **dSPM** (dynamic

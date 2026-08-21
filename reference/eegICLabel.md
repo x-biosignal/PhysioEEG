@@ -12,7 +12,13 @@ probabilities by a lightweight multinomial-logistic (softmax) head.
 ## Usage
 
 ``` r
-eegICLabel(x, ica_assay = "ica_components", assay_name = NULL, line_freq = 50)
+eegICLabel(
+  x,
+  ica_assay = "ica_components",
+  assay_name = NULL,
+  line_freq = 50,
+  backend = c("heuristic", "iclabel")
+)
 ```
 
 ## Arguments
@@ -35,7 +41,16 @@ eegICLabel(x, ica_assay = "ica_components", assay_name = NULL, line_freq = 50)
 - line_freq:
 
   Mains line frequency in Hz used for the line-noise features (default:
-  50).
+  50). Only used by the heuristic backend.
+
+- backend:
+
+  Which classifier to use: `"heuristic"` (default) is the self-contained
+  pure-R classifier (real features, hand-set multinomial weights);
+  `"iclabel"` runs the genuine trained ICLabel CNN (Pion-Tonachini et
+  al. 2019) by delegating to mne-icalabel via reticulate (needs a Python
+  env with `mne` and `mne-icalabel`; channel labels must match a
+  standard 10-20/10-10 montage for the scalp-map).
 
 ## Value
 

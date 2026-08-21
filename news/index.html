@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,11 @@
       <small>Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.3" id="physioeeg-073">PhysioEEG 0.7.3<a class="anchor" aria-label="anchor" href="#physioeeg-073"></a></h2>
+<ul><li>
+<code>eegICLabel(backend = "iclabel")</code> runs the <strong>genuine trained ICLabel CNN</strong> (Pion-Tonachini et al. 2019), replacing the need to trust the pure-R heuristic when the real model is wanted. It delegates to the validated <code>mne-icalabel</code> implementation through <code>reticulate</code> (carrying the PhysioEEG ICA mixing/unmixing matrices into an MNE <code>ICA</code> object), so it uses mne-icalabel’s exact EEGLAB-style feature extraction and the trained weights rather than re-porting the network natively (which would risk a plausible-but-wrong result). The default <code>backend = "heuristic"</code> is unchanged and needs no Python; the trained backend is optional (needs <code>reticulate</code> + a Python env with <code>mne</code> and <code>mne-icalabel</code>, and standard 10-20/10-10 channel labels for the scalp map). Verified to return valid 7-class probability distributions from the real network.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.2" id="physioeeg-072">PhysioEEG 0.7.2<a class="anchor" aria-label="anchor" href="#physioeeg-072"></a></h2>
 <ul><li>
