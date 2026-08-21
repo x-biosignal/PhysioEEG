@@ -8,7 +8,7 @@ bounded from 0 (symmetric) to 1 (one hemisphere silent). The
 pairwise-derived `pdbsi` averages the same relative difference per
 hemispheric pair; with `directed = TRUE` it keeps the sign (positive =
 right-dominant). Both are returned as reliability-characterised
-[`physioBiomarker`](https://x-biosignal.r-universe.dev/PhysioCore/reference/physioBiomarker-constructor.html)
+[`physioBiomarker`](https://x-biosignal.github.io/PhysioCore//reference/physioBiomarker-constructor.html)
 objects with provenance and, for the global BSI, a normative reference
 range.
 
@@ -73,7 +73,7 @@ eegBSI(
 ## Value
 
 A named list with two
-[`PhysioBiomarker`](https://x-biosignal.r-universe.dev/PhysioCore/reference/PhysioBiomarker.html)
+[`PhysioBiomarker`](https://x-biosignal.github.io/PhysioCore//reference/PhysioBiomarker.html)
 objects: `bsi` (global, from 0 to 1) and `pdbsi` (pairwise-derived,
 signed when `directed = TRUE`).
 
@@ -90,7 +90,7 @@ Neurophysiology, 122(5), 874-883.
 
 [`eegDAR()`](https://x-biosignal.github.io/PhysioEEG/reference/eegDAR.md),
 [`eegAsymmetry()`](https://x-biosignal.github.io/PhysioEEG/reference/eegAsymmetry.md),
-[`PhysioCore::physioBiomarker()`](https://x-biosignal.r-universe.dev/PhysioCore/reference/physioBiomarker-constructor.html)
+[`PhysioCore::physioBiomarker()`](https://x-biosignal.github.io/PhysioCore//reference/physioBiomarker-constructor.html)
 
 ## Examples
 

@@ -21,7 +21,7 @@ frequencies instead (Korzeniewska 2003)."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,7 +81,7 @@ frequencies instead (Korzeniewska 2003)."></head><body>
     <p>Estimates frequency-resolved directed connectivity between EEG channels with
 the Directed Transfer Function (Kaminski &amp; Blinowska 1991), computed from the
 transfer function \(H(f)\) of a multivariate autoregressive (MVAR) model
-fitted with <code><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/mvarFit.html" class="external-link">PhysioCore::mvarFit()</a></code>. Because \(H(f)\) inverts the whole VAR
+fitted with <code><a href="https://x-biosignal.github.io/PhysioCore//reference/mvarFit.html" class="external-link">PhysioCore::mvarFit()</a></code>. Because \(H(f)\) inverts the whole VAR
 system, DTF reflects both direct and indirect pathways. The (default)
 normalized DTF satisfies \(\sum_j \mathrm{DTF}_{ij}(f)^2 = 1\) for each
 target \(i\) (inflow normalization); <code>ffDTF</code> normalizes across all
@@ -133,7 +133,7 @@ stored connectivity matrix (default: all frequencies).</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>MVAR estimator passed to <code><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/mvarFit.html" class="external-link">PhysioCore::mvarFit()</a></code>
+<dd><p>MVAR estimator passed to <code><a href="https://x-biosignal.github.io/PhysioCore//reference/mvarFit.html" class="external-link">PhysioCore::mvarFit()</a></code>
 (default: <code>"ols"</code>).</p></dd>
 
 
@@ -158,7 +158,7 @@ of the information flow in the brain structures. Biological Cybernetics,
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="eegPDC.html">eegPDC()</a></code>, <code><a href="eegConditionalGC.html">eegConditionalGC()</a></code>, <code><a href="eegConnectivityMatrix.html">eegConnectivityMatrix()</a></code>,
-<code><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/mvarFit.html" class="external-link">PhysioCore::mvarFit()</a></code></p></div>
+<code><a href="https://x-biosignal.github.io/PhysioCore//reference/mvarFit.html" class="external-link">PhysioCore::mvarFit()</a></code></p></div>
     </div>
 
     <div class="section level2">

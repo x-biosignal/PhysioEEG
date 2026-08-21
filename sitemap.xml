@@ -76,6 +76,7 @@
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/dot-welch_psd.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eeg-connectivity.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eeg-vis.html</loc></url>
+<url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegAperiodic.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegArtifactReject.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegAsymmetry.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegAutoReject.html</loc></url>
@@ -86,6 +87,8 @@
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegBeamformer.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegCSP.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegCoherence.html</loc></url>
+<url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegComodulogram.html</loc></url>
+<url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegComplexity.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegConditionalGC.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegConnectivityMatrix.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegDAR.html</loc></url>
@@ -121,6 +124,7 @@
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegMorletWavelet.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegMotorImagery.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegMultitaper.html</loc></url>
+<url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegPAC.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegPDC.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegPLV.html</loc></url>
 <url><loc>https://x-biosignal.github.io/PhysioEEG/reference/eegPlotButterflyGFP.html</loc></url>

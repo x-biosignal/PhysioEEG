@@ -5,11 +5,11 @@ region), a quantitative-EEG stroke marker whose elevation tracks
 ischaemic slowing (Finnigan et al. 2016). Band powers use a Welch
 estimator for a stable spectrum. Each ratio is returned as a
 reliability-characterised
-[`physioBiomarker`](https://x-biosignal.r-universe.dev/PhysioCore/reference/physioBiomarker-constructor.html)
+[`physioBiomarker`](https://x-biosignal.github.io/PhysioCore//reference/physioBiomarker-constructor.html)
 carrying provenance (band, method, software version), reliability
 placeholders, and - when age (and montage) are supplied - a published
 reference range from
-[`normativeLookup`](https://x-biosignal.r-universe.dev/PhysioCore/reference/normativeLookup.html)
+[`normativeLookup`](https://x-biosignal.github.io/PhysioCore//reference/normativeLookup.html)
 so the value prints its normative percentile.
 
 ## Usage
@@ -73,7 +73,7 @@ eegDAR(
 ## Value
 
 A named list of
-[`PhysioBiomarker`](https://x-biosignal.r-universe.dev/PhysioCore/reference/PhysioBiomarker.html)
+[`PhysioBiomarker`](https://x-biosignal.github.io/PhysioCore//reference/PhysioBiomarker.html)
 objects, one per channel or region.
 
 ## References
@@ -87,8 +87,8 @@ index. Clinical Neurophysiology, 127(2), 1452-1459.
 [`eegBSI()`](https://x-biosignal.github.io/PhysioEEG/reference/eegBSI.md),
 [`eegSlowing()`](https://x-biosignal.github.io/PhysioEEG/reference/eegSlowing.md),
 [`eegQEEG()`](https://x-biosignal.github.io/PhysioEEG/reference/eegQEEG.md),
-[`PhysioCore::physioBiomarker()`](https://x-biosignal.r-universe.dev/PhysioCore/reference/physioBiomarker-constructor.html),
-[`PhysioCore::normativeLookup()`](https://x-biosignal.r-universe.dev/PhysioCore/reference/normativeLookup.html)
+[`PhysioCore::physioBiomarker()`](https://x-biosignal.github.io/PhysioCore//reference/physioBiomarker-constructor.html),
+[`PhysioCore::normativeLookup()`](https://x-biosignal.github.io/PhysioCore//reference/normativeLookup.html)
 
 ## Examples
 

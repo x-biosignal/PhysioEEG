@@ -3,7 +3,7 @@
 Estimates frequency-resolved directed connectivity with Partial Directed
 Coherence (Baccala & Sameshima 2001), computed from the frequency-domain
 coefficient matrix \\\bar{A}(f)\\ of an MVAR model
-([`PhysioCore::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioCore/reference/mvarFit.html)).
+([`PhysioCore::mvarFit()`](https://x-biosignal.github.io/PhysioCore//reference/mvarFit.html)).
 Unlike DTF, PDC reflects only *direct* channel-to-channel influences, so
 a purely indirect pathway gives PDC near zero. The (default) generalized
 PDC weights each row by the inverse residual standard deviation to make
@@ -52,7 +52,7 @@ eegPDC(
 - method:
 
   MVAR estimator passed to
-  [`PhysioCore::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioCore/reference/mvarFit.html)
+  [`PhysioCore::mvarFit()`](https://x-biosignal.github.io/PhysioCore//reference/mvarFit.html)
   (default: `"ols"`).
 
 - assay_name:

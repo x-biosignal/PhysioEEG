@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,7 @@
                         <h4 data-toc-skip class="author">PhysioEEG
 Development Team</h4>
             
-            <h4 data-toc-skip class="date">2026-08-10</h4>
+            <h4 data-toc-skip class="date">2026-08-21</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/vignettes/bci-classification.Rmd" class="external-link"><code>vignettes/bci-classification.Rmd</code></a></small>
       <div class="d-none name"><code>bci-classification.Rmd</code></div>
@@ -240,7 +240,7 @@ where one class has high variance and the other has low variance.</p>
 <code class="sourceCode R"><span><span class="co"># Apply bandpass filter to isolate the mu+beta band.</span></span>
 <span><span class="co"># eegFilter() operates on continuous (2D) data, so band-pass each epoch's</span></span>
 <span><span class="co"># channels (8-30 Hz, zero-phase Butterworth) into a new "filtered" assay.</span></span>
-<span><span class="va">sr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/samplingRate.html" class="external-link">samplingRate</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span></span>
+<span><span class="va">sr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://x-biosignal.github.io/PhysioCore//reference/samplingRate.html" class="external-link">samplingRate</a></span><span class="op">(</span><span class="va">eeg</span><span class="op">)</span></span>
 <span><span class="va">bf</span> <span class="op">&lt;-</span> <span class="fu">signal</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/signal/man/butter.html" class="external-link">butter</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">30</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">sr</span> <span class="op">/</span> <span class="fl">2</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"pass"</span><span class="op">)</span></span>
 <span><span class="va">raw3d</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"raw"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">eeg</span>, <span class="st">"filtered"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/array.html" class="external-link">array</a></span><span class="op">(</span></span>

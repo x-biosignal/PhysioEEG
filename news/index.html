@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,181 +63,22 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.0" id="physioeeg-070">PhysioEEG 0.7.0<a class="anchor" aria-label="anchor" href="#physioeeg-070"></a></h2>
+<p>Three research-grade method families that were missing from the EEG stack.</p>
+<ul><li>
+<code><a href="../reference/eegComplexity.html">eegComplexity()</a></code> adds the <strong>nonlinear / complexity</strong> family (previously absent ecosystem-wide for EEG): per-channel sample &amp; approximate entropy (Richman–Moorman, Pincus), permutation entropy (Bandt–Pompe), multiscale entropy (Costa), Lempel–Ziv complexity, Higuchi &amp; Katz fractal dimension, detrended fluctuation analysis (alpha), Hurst (R/S), Hjorth parameters, and spectral entropy. The numeric cores are validated against known values (white noise Higuchi FD → 2, Brownian → 1.5; white-noise DFA/Hurst → 0.5). Entropy measures are O(N^2) and cap long channels via <code>max_samples</code>.</li>
+<li>
+<code><a href="../reference/eegAperiodic.html">eegAperiodic()</a></code> adds <strong>aperiodic / 1-f spectral parameterization</strong> (specparam / FOOOF; Donoghue 2020): per-channel aperiodic exponent / offset / knee plus separated oscillatory peaks, ready for a topomap or a qEEG biomarker. Delegates the fit to <code><a href="https://x-biosignal.r-universe.dev/PhysioAnalysis/reference/specparam.html" class="external-link">PhysioAnalysis::specparam()</a></code>.</li>
+<li>
+<code><a href="../reference/eegPAC.html">eegPAC()</a></code> and <code><a href="../reference/eegComodulogram.html">eegComodulogram()</a></code> add <strong>phase-amplitude / cross-frequency coupling</strong> (Tort modulation index, Canolty mean-vector-length, Ozkurt, PLV), within a channel or across two channels, plus the comodulogram grid. Delegate the estimators to <code><a href="https://x-biosignal.github.io/PhysioCrossModal/reference/phaseAmplitudeCoupling.html" class="external-link">PhysioCrossModal::phaseAmplitudeCoupling()</a></code> / <code>comodulogram()</code>.</li>
+</ul><p>These reuse the existing specparam and PAC engines (new <code>PhysioAnalysis</code> Suggests; <code>PhysioCrossModal</code> already suggested) rather than reimplementing them, and add the genuinely new complexity module natively. No existing behaviour changed.</p>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.5" id="physioeeg-065">PhysioEEG 0.6.5<a class="anchor" aria-label="anchor" href="#physioeeg-065"></a></h2>
 <ul><li>
 <code><a href="../reference/make_eeg_bci.html">make_eeg_bci()</a></code> now pads channel labels with generic names when more channels than the eight-entry motor/occipital pool are requested (previously <code>n_channels &gt; 8</code> produced <code>NA</code> labels, which made the per-channel artifact tests error with “missing value where TRUE/FALSE needed”).</li>
 <li>Documentation: the <code>bci-classification</code>, <code>connectivity-analysis</code>, <code>preprocessing-pipeline</code>, <code>sleep-analysis</code>, and <code>time-frequency-analysis</code> vignettes were modernized to the current package API. They had drifted from the code (stale/renamed arguments and functions, changed return structures, and 2D-vs-3D data-shape assumptions) and no longer ran. Fixes attach <code>SummarizedExperiment</code>, use the current <code>make_eeg*()</code> signatures and the real accessor/analysis functions (<code>eegFilter(method=)</code>, <code>eegRereference</code>, <code>eegMontage</code>, <code>eegBadChannels</code>, <code>eegInterpolate</code>, <code>eegICA</code>, <code>eegMorletWavelet</code>, <code>eegSTFT</code>, <code>eegSleepStage</code>, the spindle/K-complex/slow-wave detectors, etc.), and read time-frequency/staging output from <code>metadata()</code>. All package vignettes now run clean under <code>R CMD check</code>. No package behaviour changed.</li>
 </ul></div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.6.4" id="physioeeg-064">PhysioEEG 0.6.4<a class="anchor" aria-label="anchor" href="#physioeeg-064"></a></h2>
-<ul><li>
-<code><a href="../reference/eegICA.html">eegICA()</a></code> and <code><a href="../reference/eegCoherence.html">eegCoherence()</a></code> now record a W3C-PROV provenance activity (shared <code>.recordProv</code> helper), so the ICA decomposition and coherence steps are visible to the reproducibility substrate run-tracing. No change to the computed components/connectivity.</li>
-</ul></div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.6.3" id="physioeeg-063">PhysioEEG 0.6.3<a class="anchor" aria-label="anchor" href="#physioeeg-063"></a></h2>
-<ul><li>Made the glass-brain outline hash-governance test portable across the r-universe build matrix. It previously shelled out to <code>sha256sum</code> and compared the tool’s whole output line; Windows Rtools’ <code>sha256sum</code> prints a binary-mode ’ *’ separator vs coreutils’ ’ ’, so the byte-identical hashes mismatched and the check ERRORed on Windows. The SHA-256 is now computed in-process with <code>digest::digest(file=)</code> and compared hash-only. Added <code>digest</code> to Suggests and a <code>.gitattributes</code> pinning the sealed artifacts so no checkout can EOL-rewrite them. Governance intent (offline, closed, tamper-evident) is unchanged.</li>
-</ul></div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.6.2" id="physioeeg-062">PhysioEEG 0.6.2<a class="anchor" aria-label="anchor" href="#physioeeg-062"></a></h2>
-<div class="section level3">
-<h3 id="bug-fixes-0-6-2">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-6-2"></a></h3>
-<ul><li>Added the missing <code>tests/testthat.R</code> harness. The package’s 26 testthat files (including the MNE parity, connectivity ground-truth, and golden suites) existed but were never executed by <code>R CMD check</code> or coverage tooling, so checks passed with zero tests run. The full suite passes (0 failures); no package code changed.</li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.6.1" id="physioeeg-061">PhysioEEG 0.6.1<a class="anchor" aria-label="anchor" href="#physioeeg-061"></a></h2>
-<div class="section level3">
-<h3 id="validation-0-6-1">Validation<a class="anchor" aria-label="anchor" href="#validation-0-6-1"></a></h3>
-<ul><li>Added ground-truth validation of phase-based connectivity (VAL-09): <code><a href="../reference/eegPLV.html">eegPLV()</a></code> returns ~1 for phase-locked oscillators and decreases when signals decouple; <code><a href="../reference/eegWPLI.html">eegWPLI()</a></code> rejects zero-lag volume conduction (wPLI ~ 0) while detecting genuine lagged coupling (wPLI ~ 1). These analytic checks replace raw numeric parity with MNE-Python for phase connectivity, since PhysioEEG’s continuous-Hilbert estimator and MNE’s epoch-spectral estimator differ by construction (structural agreement r ~ 0.95).</li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.6.0" id="physioeeg-060">PhysioEEG 0.6.0<a class="anchor" aria-label="anchor" href="#physioeeg-060"></a></h2>
-<div class="section level3">
-<h3 id="new-features-0-6-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-6-0"></a></h3>
-<ul><li>
-<code><a href="../reference/eegPlotConnectogram.html">eegPlotConnectogram()</a></code> adds deterministic circular connectivity views with hemisphere, lobe, or stable hierarchical-cluster ordering; contiguous module-run arcs; and optional cubic Bezier edge bundling.</li>
-<li>Symmetric matrices emit one canonical unordered edge. Asymmetric matrices retain every ordered entry and follow the package convention of matrix rows as targets and columns as sources.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="validation-and-interpretation-0-6-0">Validation and Interpretation<a class="anchor" aria-label="anchor" href="#validation-and-interpretation-0-6-0"></a></h3>
-<ul><li>Strict <code>abs(value) &gt; threshold</code> filtering is a descriptive display choice, not a p-value or corrected significance mask. Exact node, edge, path, module arc, method, band, symmetry, and diagnostic data remain inspectable on the returned plot.</li>
-<li>EEG anatomy is inferred only from recognized 10-20/10-10 labels. Unknown device labels remain explicitly <code>unknown</code>, and tied cluster layouts fall back to stable UTF-8 byte order with a diagnostic. Length-prefixed edge identifiers remain unique even when channel labels contain display separators.</li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.5.0" id="physioeeg-050">PhysioEEG 0.5.0<a class="anchor" aria-label="anchor" href="#physioeeg-050"></a></h2>
-<div class="section level3">
-<h3 id="new-features-0-5-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-5-0"></a></h3>
-<ul><li>
-<code><a href="../reference/eegPlotGlassBrain.html">eegPlotGlassBrain()</a></code> creates deterministic sagittal, axial, and coronal maximum-intensity projections from finite three-dimensional source coordinates. It uses one complete-cloud display transform, a shared type-8 absolute-amplitude threshold, stable collision tie-breaking, and a provenance-labelled schematic outline.</li>
-<li>New source-estimate and beamformer results retain the source positions, output name, reduction contract, and coordinate provenance needed for glass-brain plotting. Free orientations are summarized by root-sum-square within time and RMS across time without changing the stored inverse output.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="internal-improvements-0-5-0">Internal Improvements<a class="anchor" aria-label="anchor" href="#internal-improvements-0-5-0"></a></h3>
-<ul><li>Source plotting metadata names are reserved so a caller-supplied output name cannot silently overwrite source values. Legacy source objects without real three-dimensional positions now fail with an explicit remediation message.</li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.4.0" id="physioeeg-040">PhysioEEG 0.4.0<a class="anchor" aria-label="anchor" href="#physioeeg-040"></a></h2>
-<div class="section level3">
-<h3 id="new-features-0-4-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-4-0"></a></h3>
-<ul><li>
-<code><a href="../reference/eegPlotSpectrogram.html">eegPlotSpectrogram()</a></code> accepts strictly aligned logical, p-value, or inference-result masks. Non-selected bins are dimmed without modifying power, and optional outlines follow non-interpolated time-frequency cell boundaries.</li>
-<li>Stored <code><a href="../reference/eegSTFT.html">eegSTFT()</a></code>, <code><a href="../reference/eegMorletWavelet.html">eegMorletWavelet()</a></code>, and <code><a href="../reference/eegERSP.html">eegERSP()</a></code> products now share one validated plotting path with exact channel and axis resolution.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="internal-improvements-0-4-0">Internal Improvements<a class="anchor" aria-label="anchor" href="#internal-improvements-0-4-0"></a></h3>
-<ul><li>A private time-frequency inference helper provides complete-family threshold correction and sign-separated, four-neighbour cluster-mass correction over independent replicate arrays. Sign flips are generated per replicate, exact enumeration is used when feasible, and caller RNG state is preserved.</li>
-<li>Raw 3D epochs are no longer mistaken for precomputed time-frequency data.</li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.3.0" id="physioeeg-030">PhysioEEG 0.3.0<a class="anchor" aria-label="anchor" href="#physioeeg-030"></a></h2>
-<div class="section level3">
-<h3 id="new-features-0-3-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
-<ul><li>
-<code><a href="../reference/eegPlotButterflyGFP.html">eegPlotButterflyGFP()</a></code> composes exact-order continuous EEG butterfly traces with a Global Field Power panel, shared event markers, strict 2D/channel/time validation, and explicit population (C) or sample (C - 1) denominators.</li>
-<li>
-<code><a href="../reference/eegPlotERP.html">eegPlotERP()</a></code> now uses the shared colorblind-safe PhysioCore palette and <code><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/theme_physio.html" class="external-link">theme_physio()</a></code> without changing ERP means or confidence intervals.</li>
-</ul></div>
-<div class="section level3">
-<h3 id="internal-improvements-0-3-0">Internal Improvements<a class="anchor" aria-label="anchor" href="#internal-improvements-0-3-0"></a></h3>
-<ul><li>Butterfly plots and microstate analysis share one finite, time-by-channel GFP implementation. The population definition preserves the established <code><a href="../reference/eegMicrostates.html">eegMicrostates()</a></code> result.</li>
-</ul></div>
-</div>
-    <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.2.0" id="physioeeg-020">PhysioEEG 0.2.0<a class="anchor" aria-label="anchor" href="#physioeeg-020"></a></h2>
-<p>Initial release of PhysioEEG as a standalone package in the x-biosignal ecosystem, split out from the PhysioExperiment monolith. Provides a comprehensive, end-to-end electroencephalography (EEG) analysis toolkit operating directly on <code>PhysioExperiment</code> objects.</p>
-<div class="section level3">
-<h3 id="new-features-0-2-0">New Features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
-<div class="section level4">
-<h4 id="preprocessing-0-2-0">Preprocessing<a class="anchor" aria-label="anchor" href="#preprocessing-0-2-0"></a></h4>
-<ul><li>
-<code><a href="../reference/eegFilter.html">eegFilter()</a></code> performs bandpass, highpass, lowpass, and notch filtering with a choice of zero-phase windowed-sinc FIR filters or Butterworth IIR filters (<code>method = "fir"</code> or <code>"iir"</code>).</li>
-<li>
-<code><a href="../reference/eegRereference.html">eegRereference()</a></code> supports average, mastoid, Cz, and custom reference schemes; <code><a href="../reference/eegMontage.html">eegMontage()</a></code> applies 10-20, 10-10, and BioSemi-64 electrode layouts.</li>
-<li>
-<code><a href="../reference/eegBadChannels.html">eegBadChannels()</a></code> flags flat, noisy, and poorly-correlated channels, and <code><a href="../reference/eegInterpolate.html">eegInterpolate()</a></code> reconstructs them via spherical-spline or nearest-neighbour interpolation.</li>
-<li>
-<code><a href="../reference/eegEpoch.html">eegEpoch()</a></code> segments continuous data around events with baseline correction, and <code><a href="../reference/eegArtifactReject.html">eegArtifactReject()</a></code> rejects epochs by amplitude threshold, gradient, and related criteria.</li>
-<li>
-<code><a href="../reference/eegPreprocess.html">eegPreprocess()</a></code> chains filtering, re-referencing, bad-channel handling, and artifact rejection into a single configurable pipeline.</li>
-</ul></div>
-<div class="section level4">
-<h4 id="independent-component-analysis-0-2-0">Independent Component Analysis<a class="anchor" aria-label="anchor" href="#independent-component-analysis-0-2-0"></a></h4>
-<ul><li>
-<code><a href="../reference/eegICA.html">eegICA()</a></code> decomposes EEG into independent components using FastICA, Infomax, or JADE.</li>
-<li>
-<code><a href="../reference/eegICAdetect.html">eegICAdetect()</a></code> automatically flags artifactual components (correlation, kurtosis, and spatial criteria); <code><a href="../reference/eegICAremove.html">eegICAremove()</a></code> and <code><a href="../reference/eegICAmix.html">eegICAmix()</a></code> reconstruct cleaned signals.</li>
-</ul></div>
-<div class="section level4">
-<h4 id="event-related-potentials-0-2-0">Event-Related Potentials<a class="anchor" aria-label="anchor" href="#event-related-potentials-0-2-0"></a></h4>
-<ul><li>
-<code><a href="../reference/eegERPdetect.html">eegERPdetect()</a></code> locates canonical ERP components (N100, P300, N400, P600, MMN, LPP), with <code><a href="../reference/eegERPmeasure.html">eegERPmeasure()</a></code> and <code><a href="../reference/eegERPlatency.html">eegERPlatency()</a></code> quantifying peak/mean amplitude and fractional-area latency.</li>
-<li>
-<code><a href="../reference/eegERPbaseline.html">eegERPbaseline()</a></code>, <code><a href="../reference/eegERPdifference.html">eegERPdifference()</a></code>, and <code><a href="../reference/eegERPgrandAverage.html">eegERPgrandAverage()</a></code> handle baseline correction, difference waves, and grand averaging; <code><a href="../reference/eegERPtest.html">eegERPtest()</a></code> runs permutation and cluster-based statistics.</li>
-</ul></div>
-<div class="section level4">
-<h4 id="time-frequency-analysis-0-2-0">Time-Frequency Analysis<a class="anchor" aria-label="anchor" href="#time-frequency-analysis-0-2-0"></a></h4>
-<ul><li>
-<code><a href="../reference/eegMorletWavelet.html">eegMorletWavelet()</a></code>, <code><a href="../reference/eegSTFT.html">eegSTFT()</a></code>, and <code><a href="../reference/eegMultitaper.html">eegMultitaper()</a></code> compute time-frequency representations via Morlet wavelets, short-time Fourier transform, and multitaper spectral estimation.</li>
-<li>
-<code><a href="../reference/eegERSP.html">eegERSP()</a></code> and <code><a href="../reference/eegITC.html">eegITC()</a></code> derive event-related spectral perturbation and inter-trial coherence.</li>
-</ul></div>
-<div class="section level4">
-<h4 id="connectivity-0-2-0">Connectivity<a class="anchor" aria-label="anchor" href="#connectivity-0-2-0"></a></h4>
-<ul><li>
-<code><a href="../reference/eegCoherence.html">eegCoherence()</a></code>, <code><a href="../reference/eegPLV.html">eegPLV()</a></code>, and <code><a href="../reference/eegWPLI.html">eegWPLI()</a></code> estimate magnitude-squared and imaginary coherence, phase locking value, and weighted phase lag index.</li>
-<li>
-<code><a href="../reference/eegGrangerCausality.html">eegGrangerCausality()</a></code> computes spectral Granger causality, and <code><a href="../reference/eegConnectivityMatrix.html">eegConnectivityMatrix()</a></code> assembles all-pairs connectivity matrices.</li>
-</ul></div>
-<div class="section level4">
-<h4 id="source-localization-0-2-0">Source Localization<a class="anchor" aria-label="anchor" href="#source-localization-0-2-0"></a></h4>
-<ul><li>
-<code><a href="../reference/eegForwardModel.html">eegForwardModel()</a></code> builds spherical and simplified-BEM head models.</li>
-<li>
-<code><a href="../reference/eegSourceEstimate.html">eegSourceEstimate()</a></code> reconstructs cortical activity via sLORETA, eLORETA, and minimum-norm estimation; <code><a href="../reference/eegBeamformer.html">eegBeamformer()</a></code> provides an LCMV spatial filter, and <code><a href="../reference/eegSourcePower.html">eegSourcePower()</a></code> summarizes band-limited source power.</li>
-</ul></div>
-<div class="section level4">
-<h4 id="microstates-0-2-0">Microstates<a class="anchor" aria-label="anchor" href="#microstates-0-2-0"></a></h4>
-<ul><li>
-<code><a href="../reference/eegMicrostates.html">eegMicrostates()</a></code> clusters topographies (k-means, AAHC, PCA) into microstate maps, with <code><a href="../reference/eegMicrostateBackfit.html">eegMicrostateBackfit()</a></code>, <code><a href="../reference/eegMicrostateStats.html">eegMicrostateStats()</a></code>, and <code><a href="../reference/eegMicrostateSequence.html">eegMicrostateSequence()</a></code> for back-fitting, statistics, and sequence extraction.</li>
-</ul></div>
-<div class="section level4">
-<h4 id="sleep-analysis-0-2-0">Sleep Analysis<a class="anchor" aria-label="anchor" href="#sleep-analysis-0-2-0"></a></h4>
-<ul><li>
-<code><a href="../reference/eegSleepStage.html">eegSleepStage()</a></code> classifies epochs into Wake/N1/N2/N3/REM using simplified AASM criteria.</li>
-<li>
-<code><a href="../reference/eegSpindleDetect.html">eegSpindleDetect()</a></code>, <code><a href="../reference/eegKcomplexDetect.html">eegKcomplexDetect()</a></code>, and <code><a href="../reference/eegSlowWaveDetect.html">eegSlowWaveDetect()</a></code> detect sleep spindles, K-complexes, and slow waves; <code><a href="../reference/eegSleepMetrics.html">eegSleepMetrics()</a></code> summarizes sleep architecture.</li>
-</ul></div>
-<div class="section level4">
-<h4 id="brain-computer-interface-0-2-0">Brain-Computer Interface<a class="anchor" aria-label="anchor" href="#brain-computer-interface-0-2-0"></a></h4>
-<ul><li>
-<code><a href="../reference/eegCSP.html">eegCSP()</a></code> computes common spatial patterns; <code><a href="../reference/eegSSVEP.html">eegSSVEP()</a></code> and <code><a href="../reference/eegMotorImagery.html">eegMotorImagery()</a></code> extract steady-state and motor-imagery features.</li>
-<li>
-<code><a href="../reference/eegBCIfeatures.html">eegBCIfeatures()</a></code> and <code><a href="../reference/eegBCIclassify.html">eegBCIclassify()</a></code> provide band-power, CSP, and Riemannian feature extraction with classification.</li>
-</ul></div>
-<div class="section level4">
-<h4 id="clinical-eeg-0-2-0">Clinical EEG<a class="anchor" aria-label="anchor" href="#clinical-eeg-0-2-0"></a></h4>
-<ul><li>
-<code><a href="../reference/eegSpikeDetect.html">eegSpikeDetect()</a></code> detects epileptiform spikes (morphology and template methods); <code><a href="../reference/eegQEEG.html">eegQEEG()</a></code> produces quantitative band-power profiles.</li>
-<li>
-<code><a href="../reference/eegAsymmetry.html">eegAsymmetry()</a></code>, <code><a href="../reference/eegSlowing.html">eegSlowing()</a></code>, and <code><a href="../reference/eegSuppression.html">eegSuppression()</a></code> compute hemispheric asymmetry indices, focal/diffuse slowing, and burst-suppression detection.</li>
-</ul></div>
-<div class="section level4">
-<h4 id="visualization-0-2-0">Visualization<a class="anchor" aria-label="anchor" href="#visualization-0-2-0"></a></h4>
-<ul><li>Plotting helpers cover signal traces (<code><a href="../reference/eegPlotSignal.html">eegPlotSignal()</a></code>), ERP waveforms (<code><a href="../reference/eegPlotERP.html">eegPlotERP()</a></code>), topographic maps (<code><a href="../reference/eegPlotTopomap.html">eegPlotTopomap()</a></code>, <code><a href="../reference/eegPlotTopomapSeries.html">eegPlotTopomapSeries()</a></code>), spectrograms (<code><a href="../reference/eegPlotSpectrogram.html">eegPlotSpectrogram()</a></code>), connectivity (<code><a href="../reference/eegPlotConnectivity.html">eegPlotConnectivity()</a></code>), hypnograms (<code><a href="../reference/eegPlotHypnogram.html">eegPlotHypnogram()</a></code>), ICA components (<code><a href="../reference/eegPlotICA.html">eegPlotICA()</a></code>), and source maps (<code><a href="../reference/eegPlotSource.html">eegPlotSource()</a></code>).</li>
-</ul></div>
-<div class="section level4">
-<h4 id="simulated-data-and-onboarding-0-2-0">Simulated Data and Onboarding<a class="anchor" aria-label="anchor" href="#simulated-data-and-onboarding-0-2-0"></a></h4>
-<ul><li>
-<code><a href="../reference/make_eeg.html">make_eeg()</a></code>, <code><a href="../reference/make_eeg_erp.html">make_eeg_erp()</a></code>, <code><a href="../reference/make_eeg_sleep.html">make_eeg_sleep()</a></code>, <code><a href="../reference/make_eeg_bci.html">make_eeg_bci()</a></code>, and <code><a href="../reference/make_eeg_spikes.html">make_eeg_spikes()</a></code> generate realistic synthetic EEG for testing and demonstration.</li>
-<li>
-<code><a href="../reference/eegQuickStart.html">eegQuickStart()</a></code> provides ready-to-run example workflows.</li>
-</ul></div>
-</div>
-</div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

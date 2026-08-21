@@ -2,6 +2,8 @@
 
 ## All functions
 
+- [`eegAperiodic()`](https://x-biosignal.github.io/PhysioEEG/reference/eegAperiodic.md)
+  : Aperiodic (1/f) spectral parameterization of EEG
 - [`eegArtifactReject()`](https://x-biosignal.github.io/PhysioEEG/reference/eegArtifactReject.md)
   : Reject artifacts in epoched EEG data
 - [`eegAsymmetry()`](https://x-biosignal.github.io/PhysioEEG/reference/eegAsymmetry.md)
@@ -22,6 +24,10 @@
   : Common Spatial Pattern (CSP) Analysis
 - [`eegCoherence()`](https://x-biosignal.github.io/PhysioEEG/reference/eegCoherence.md)
   : EEG Coherence Analysis
+- [`eegComodulogram()`](https://x-biosignal.github.io/PhysioEEG/reference/eegComodulogram.md)
+  : Comodulogram (phase-frequency x amplitude-frequency PAC) for EEG
+- [`eegComplexity()`](https://x-biosignal.github.io/PhysioEEG/reference/eegComplexity.md)
+  : EEG complexity and nonlinear-dynamics measures
 - [`eegConditionalGC()`](https://x-biosignal.github.io/PhysioEEG/reference/eegConditionalGC.md)
   : Conditional (multivariate) Granger causality
 - [`eegConnectivityMatrix()`](https://x-biosignal.github.io/PhysioEEG/reference/eegConnectivityMatrix.md)
@@ -92,6 +98,8 @@
   : Motor Imagery ERD/ERS Computation
 - [`eegMultitaper()`](https://x-biosignal.github.io/PhysioEEG/reference/eegMultitaper.md)
   : Multitaper Power Spectral Density for EEG
+- [`eegPAC()`](https://x-biosignal.github.io/PhysioEEG/reference/eegPAC.md)
+  : Phase-amplitude coupling (cross-frequency coupling) for EEG
 - [`eegPDC()`](https://x-biosignal.github.io/PhysioEEG/reference/eegPDC.md)
   : Partial Directed Coherence (PDC)
 - [`eegPLV()`](https://x-biosignal.github.io/PhysioEEG/reference/eegPLV.md)

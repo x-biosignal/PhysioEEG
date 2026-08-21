@@ -23,7 +23,7 @@ satisfies \(\sum_i \mathrm{PDC}_{ij}(f)^2 = 1\) for each source \(j\)
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,7 +83,7 @@ satisfies \(\sum_i \mathrm{PDC}_{ij}(f)^2 = 1\) for each source \(j\)
     <p>Estimates frequency-resolved directed connectivity with Partial Directed
 Coherence (Baccala &amp; Sameshima 2001), computed from the frequency-domain
 coefficient matrix \(\bar{A}(f)\) of an MVAR model
-(<code><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/mvarFit.html" class="external-link">PhysioCore::mvarFit()</a></code>). Unlike DTF, PDC reflects only <em>direct</em>
+(<code><a href="https://x-biosignal.github.io/PhysioCore//reference/mvarFit.html" class="external-link">PhysioCore::mvarFit()</a></code>). Unlike DTF, PDC reflects only <em>direct</em>
 channel-to-channel influences, so a purely indirect pathway gives PDC near
 zero. The (default) generalized PDC weights each row by the inverse residual
 standard deviation to make the measure scale-invariant (Baccala 2007). PDC
@@ -131,7 +131,7 @@ stored connectivity matrix (default: all frequencies).</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p>MVAR estimator passed to <code><a href="https://x-biosignal.r-universe.dev/PhysioCore/reference/mvarFit.html" class="external-link">PhysioCore::mvarFit()</a></code>
+<dd><p>MVAR estimator passed to <code><a href="https://x-biosignal.github.io/PhysioCore//reference/mvarFit.html" class="external-link">PhysioCore::mvarFit()</a></code>
 (default: <code>"ols"</code>).</p></dd>
 
 

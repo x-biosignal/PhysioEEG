@@ -79,7 +79,7 @@ eegLateralization(
 
 A list with `per_trial` (an `n_trials` x 1 matrix of laterality indices)
 and `summary` (a
-[`PhysioBiomarker`](https://x-biosignal.r-universe.dev/PhysioCore/reference/PhysioBiomarker.html)
+[`PhysioBiomarker`](https://x-biosignal.github.io/PhysioCore//reference/PhysioBiomarker.html)
 holding the mean LI with its confidence interval, reliability, and
 provenance).
 
@@ -97,7 +97,7 @@ movements. Clinical Neurophysiology, 116(5), 1213-1221.
 
 [`eegMotorImagery()`](https://x-biosignal.github.io/PhysioEEG/reference/eegMotorImagery.md),
 [`eegCSP()`](https://x-biosignal.github.io/PhysioEEG/reference/eegCSP.md),
-[`PhysioCore::physioBiomarker()`](https://x-biosignal.r-universe.dev/PhysioCore/reference/physioBiomarker-constructor.html)
+[`PhysioCore::physioBiomarker()`](https://x-biosignal.github.io/PhysioCore//reference/physioBiomarker-constructor.html)
 
 ## Examples
 

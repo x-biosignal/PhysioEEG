@@ -51,7 +51,7 @@ eegConditionalGC(
 - method:
 
   MVAR estimator passed to
-  [`PhysioCore::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioCore/reference/mvarFit.html)
+  [`PhysioCore::mvarFit()`](https://x-biosignal.github.io/PhysioCore//reference/mvarFit.html)
   (default: `"ols"`).
 
 - assay_name:
