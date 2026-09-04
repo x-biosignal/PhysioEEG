@@ -1,5 +1,14 @@
 # Changelog
 
+## PhysioEEG 0.7.4
+
+- Test-suite performance: `test-eeg-timefreq.R` runs **12× faster**
+  (368s → 31s) by right-sizing the synthetic test data (`n_time` 5000 →
+  2000; ERSP/ITC `n_epochs` 40/20 → 12/10). Frequency grids and every
+  assertion are unchanged, so coverage is preserved (74 tests, all
+  passing). The full package test suite now completes in **~227s**
+  (previously exceeded a 500s CI budget), all 1282 tests passing.
+
 ## PhysioEEG 0.7.3
 
 - `eegICLabel(backend = "iclabel")` runs the **genuine trained ICLabel
