@@ -180,3 +180,5 @@
   : Renyi Entropy
 - [`svdEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/svdEntropy.md)
   : Singular Value Decomposition (SVD) Entropy
+- [`tsallisEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/tsallisEntropy.md)
+  : Tsallis Entropy

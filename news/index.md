@@ -1,5 +1,20 @@
 # Changelog
 
+## PhysioEEG 0.7.8
+
+### New features
+
+- [`tsallisEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/tsallisEntropy.md)
+  — Tsallis entropy (Tsallis 1988): the **non-additive** order-`q`
+  generalization of the Shannon entropy of a signal’s amplitude
+  histogram, `S_q = (1 - sum p^q)/(q-1)` in nats. `q = 1` recovers
+  Shannon; unlike the (additive) Renyi entropy,
+  `S_q(A+B) != S_q(A) + S_q(B)` for independent parts. Completes the
+  generalized-entropy pair (`renyiEntropy` additive + `tsallisEntropy`
+  non-additive); the two agree only at `q = 1`. Validated against
+  `NeuroKit2.entropy_tsallis` bit-for-bit (max \|diff\| ~9e-16) across
+  `q = {0.5, 1, 2, 3}` on real eegmmidb POz EEG.
+
 ## PhysioEEG 0.7.7
 
 ### New features

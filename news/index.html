@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,14 @@
       <small>Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.8" id="physioeeg-078">PhysioEEG 0.7.8<a class="anchor" aria-label="anchor" href="#physioeeg-078"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-7-8">New features<a class="anchor" aria-label="anchor" href="#new-features-0-7-8"></a></h3>
+<ul><li>
+<code><a href="../reference/tsallisEntropy.html">tsallisEntropy()</a></code> — Tsallis entropy (Tsallis 1988): the <strong>non-additive</strong> order-<code>q</code> generalization of the Shannon entropy of a signal’s amplitude histogram, <code>S_q = (1 - sum p^q)/(q-1)</code> in nats. <code>q = 1</code> recovers Shannon; unlike the (additive) Renyi entropy, <code>S_q(A+B) != S_q(A) + S_q(B)</code> for independent parts. Completes the generalized-entropy pair (<code>renyiEntropy</code> additive + <code>tsallisEntropy</code> non-additive); the two agree only at <code>q = 1</code>. Validated against <code>NeuroKit2.entropy_tsallis</code> bit-for-bit (max |diff| ~9e-16) across <code>q = {0.5, 1, 2, 3}</code> on real eegmmidb POz EEG.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.7" id="physioeeg-077">PhysioEEG 0.7.7<a class="anchor" aria-label="anchor" href="#physioeeg-077"></a></h2>
 <div class="section level3">
