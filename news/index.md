@@ -1,5 +1,18 @@
 # Changelog
 
+## PhysioEEG 0.7.7
+
+### New features
+
+- [`renyiEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/renyiEntropy.md)
+  — Renyi entropy (Renyi 1961): the order-`alpha` generalization of the
+  Shannon entropy of a signal’s amplitude histogram,
+  `H_alpha = 1/(1-alpha) * ln(sum p^alpha)` in nats. `alpha = 1`
+  recovers Shannon, `alpha = 2` is the collision entropy, `alpha -> inf`
+  the min-entropy; non-increasing in `alpha`. A generalized-entropy
+  family distinct from the Shannon-based measures; reproduces
+  `NeuroKit2.entropy_renyi` bit-for-bit across `alpha`.
+
 ## PhysioEEG 0.7.6
 
 ### New features

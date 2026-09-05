@@ -176,5 +176,7 @@
   : Create EEG with Embedded Epileptic Spikes
 - [`petrosianFD()`](https://x-biosignal.github.io/PhysioEEG/reference/petrosianFD.md)
   : Petrosian Fractal Dimension
+- [`renyiEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/renyiEntropy.md)
+  : Renyi Entropy
 - [`svdEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/svdEntropy.md)
   : Singular Value Decomposition (SVD) Entropy
