@@ -174,5 +174,7 @@
   : Create EEG with Sleep Stage Characteristics
 - [`make_eeg_spikes()`](https://x-biosignal.github.io/PhysioEEG/reference/make_eeg_spikes.md)
   : Create EEG with Embedded Epileptic Spikes
+- [`petrosianFD()`](https://x-biosignal.github.io/PhysioEEG/reference/petrosianFD.md)
+  : Petrosian Fractal Dimension
 - [`svdEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/svdEntropy.md)
   : Singular Value Decomposition (SVD) Entropy

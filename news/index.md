@@ -1,5 +1,20 @@
 # Changelog
 
+## PhysioEEG 0.7.6
+
+### New features
+
+- [`petrosianFD()`](https://x-biosignal.github.io/PhysioEEG/reference/petrosianFD.md)
+  — Petrosian fractal dimension (Petrosian 1995): a fast O(N)
+  waveform-complexity index from the number of sign changes in the
+  signal’s derivative (local-extrema density). Smooth oscillation → FD
+  near 1; complex/noisy → higher. Complements
+  [`svdEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/svdEntropy.md)
+  and
+  [`eegComplexity()`](https://x-biosignal.github.io/PhysioEEG/reference/eegComplexity.md);
+  reproduces `antropy.petrosian_fd` bit-for-bit (and, unlike the
+  Higuchi/Katz FDs, has a single unambiguous closed form).
+
 ## PhysioEEG 0.7.5
 
 ### New features

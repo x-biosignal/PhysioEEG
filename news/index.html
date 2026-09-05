@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,14 @@
       <small>Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.6" id="physioeeg-076">PhysioEEG 0.7.6<a class="anchor" aria-label="anchor" href="#physioeeg-076"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-7-6">New features<a class="anchor" aria-label="anchor" href="#new-features-0-7-6"></a></h3>
+<ul><li>
+<code><a href="../reference/petrosianFD.html">petrosianFD()</a></code> — Petrosian fractal dimension (Petrosian 1995): a fast O(N) waveform-complexity index from the number of sign changes in the signal’s derivative (local-extrema density). Smooth oscillation → FD near 1; complex/noisy → higher. Complements <code><a href="../reference/svdEntropy.html">svdEntropy()</a></code> and <code><a href="../reference/eegComplexity.html">eegComplexity()</a></code>; reproduces <code>antropy.petrosian_fd</code> bit-for-bit (and, unlike the Higuchi/Katz FDs, has a single unambiguous closed form).</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.5" id="physioeeg-075">PhysioEEG 0.7.5<a class="anchor" aria-label="anchor" href="#physioeeg-075"></a></h2>
 <div class="section level3">
