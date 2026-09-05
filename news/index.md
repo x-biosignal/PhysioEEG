@@ -1,5 +1,19 @@
 # Changelog
 
+## PhysioEEG 0.7.5
+
+### New features
+
+- [`svdEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/svdEntropy.md)
+  — Singular Value Decomposition entropy (Roberts et al. 1999):
+  time-delay embed a signal, take the normalized singular values of the
+  embedding matrix, and return their Shannon entropy — a measure of the
+  signal’s dimensionality (low = structured/oscillatory, high =
+  complex/noise-like). A linear-algebraic complement to
+  [`eegComplexity()`](https://x-biosignal.github.io/PhysioEEG/reference/eegComplexity.md)’s
+  entropy/fractal measures; reproduces `antropy.svd_entropy` bit-for-bit
+  (both via LAPACK SVD).
+
 ## PhysioEEG 0.7.4
 
 - Test-suite performance: `test-eeg-timefreq.R` runs **12× faster**
