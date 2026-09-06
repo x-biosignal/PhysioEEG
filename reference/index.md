@@ -166,6 +166,8 @@
   : Surface Laplacian (current source density) of EEG
 - [`eegWPLI()`](https://x-biosignal.github.io/PhysioEEG/reference/eegWPLI.md)
   : EEG Weighted Phase Lag Index (wPLI)
+- [`fuzzyEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/fuzzyEntropy.md)
+  : Fuzzy Entropy
 - [`make_eeg()`](https://x-biosignal.github.io/PhysioEEG/reference/make_eeg.md)
   : Create Simulated EEG Data
 - [`make_eeg_bci()`](https://x-biosignal.github.io/PhysioEEG/reference/make_eeg_bci.md)

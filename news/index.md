@@ -1,5 +1,21 @@
 # Changelog
 
+## PhysioEEG 0.7.10
+
+### New features
+
+- [`fuzzyEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/fuzzyEntropy.md)
+  — fuzzy entropy (Chen et al. 2007), the **fuzzy generalization of
+  sample entropy**: it replaces sample entropy’s crisp match threshold
+  (a Heaviside step `I(d < r)`) with a smooth exponential membership
+  `exp(-(d^n)/r)`, so near-matches contribute partially — markedly more
+  robust and continuous on short or noisy segments. Each embedding
+  vector’s local baseline is removed before the Chebyshev distance.
+  Completes the sample-entropy family (crisp SampEn + fuzzy FuzzyEn).
+  Validated against `NeuroKit2.entropy_fuzzy` bit-for-bit (max \|diff\|
+  ~4e-15) across (dimension, r) on real eegmmidb POz EEG; at m=2, r=0.2
+  it is lower than the crisp sample entropy (0.948 vs 1.327).
+
 ## PhysioEEG 0.7.9
 
 ### New features
