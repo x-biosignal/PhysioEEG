@@ -1,0 +1,12 @@
+citHeader("To cite PhysioEEG in publications use:")
+
+bibentry(
+  bibtype  = "Manual",
+  title    = "PhysioEEG: EEG Analysis Functions for PhysioExperiment Objects",
+  author   = person("Yusuke", "Matsui"),
+  year     = "2026",
+  note     = paste("R package version", meta$Version),
+  url      = "https://github.com/x-biosignal/PhysioEEG"
+  # doi    = "10.5281/zenodo.XXXXXXX"  # add once minted
+)
+

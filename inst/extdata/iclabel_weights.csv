@@ -1,0 +1,14 @@
+term,brain,muscle,eye,heart,line_noise,channel_noise,other
+bias,0,0,0,0,0,0,0.5
+alpha_ex,1.5,-2,0,0,0,0,0
+slope_physio,1.0,0,0,0,0,0,0
+frontal,-2,-2,4,-2,0,-1.5,0
+lf_hi,0,0,2,0,0,0,0
+hf_pos,-1.5,3,-1.5,0,0,0,0
+slope_pos,0,2,0,0,0,0,0
+tc_spiky,-1.0,0,0.5,1.5,0,0,0
+focal_hi,-1.5,0,0,0,0,3,0
+topo_hi,0,0,0,0,0,1.5,0
+hr_hi,0,0,0,3,0,0,0
+line_frac_hi,-6,-6,-6,-6,6,-6,0
+line_pos,-2,-2,-2,-2,2,-2,0

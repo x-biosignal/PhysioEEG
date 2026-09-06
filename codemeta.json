@@ -1,0 +1,40 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "PhysioEEG",
+  "name": "PhysioEEG: EEG Analysis Functions for PhysioExperiment Objects",
+  "version": "0.2.0",
+  "description": "Provides comprehensive electroencephalography (EEG) analysis functions for PhysioExperiment objects. Includes preprocessing (filtering, re-referencing, bad channel detection, interpolation, epoching, artifact rejection), independent component analysis (FastICA, Infomax, JADE) with automatic artifact detection, event-related potential (ERP) component detection and measurement (N100, P300, N400, P600, MMN), source localization (eLORETA, sLORETA, LCMV beamformer), EEG microstate analysis (K-means, AAHC), sleep staging (AASM criteria, spindle/K-complex/slow-wave detection), brain-computer interface features (CSP, SSVEP, motor imagery), clinical EEG analysis (spike detection, QEEG, asymmetry indices), time-frequency analysis (Morlet wavelet, STFT, multitaper, ERSP, ITC), connectivity analysis (coherence, PLV, wPLI, Granger causality), visualization (signal traces, ERP waveforms, topographic maps, spectrograms, connectivity plots, hypnograms, source maps), and simulated data generators for testing and demonstration.",
+  "license": "https://spdx.org/licenses/MIT",
+  "codeRepository": "https://github.com/x-biosignal/PhysioEEG",
+  "issueTracker": "https://github.com/x-biosignal/PhysioEEG/issues",
+  "programmingLanguage": {
+    "@type": "ComputerLanguage",
+    "name": "R"
+  },
+  "runtimePlatform": "R",
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Yusuke",
+      "familyName": "Matsui",
+      "email": "mail.to.matsui@gmail.com"
+    }
+  ],
+  "maintainer": [
+    {
+      "@type": "Person",
+      "givenName": "Yusuke",
+      "familyName": "Matsui",
+      "email": "mail.to.matsui@gmail.com"
+    }
+  ],
+  "developmentStatus": "active",
+  "keywords": [
+    "physiological-signals",
+    "rehabilitation",
+    "biosignal",
+    "biomechanics",
+    "R"
+  ]
+}

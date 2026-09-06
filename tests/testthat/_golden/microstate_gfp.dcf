@@ -1,0 +1,7 @@
+Key: microstate_gfp
+Source: analytic spatial standard deviation
+        sqrt(mean_ch((x-mean_ch)^2)) across channels per sample
+        (make_eeg seed 300); independent of eegMicrostates GFP
+Tolerance: 1e-08
+Captured: 2026-07-10 23:55:00 UTC
+R: 4.5.2

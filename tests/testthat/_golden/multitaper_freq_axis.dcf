@@ -1,0 +1,6 @@
+Key: multitaper_freq_axis
+Source: analytic one-sided FFT frequency axis seq(0, sr/2, length.out =
+        N/2+1), N=512 sr=250; independent of eegMultitaper freq axis
+Tolerance: 1e-10
+Captured: 2026-07-10 23:55:00 UTC
+R: 4.5.2

@@ -1,0 +1,184 @@
+# PhysioEEG 0.7.13
+
+## New features
+
+* `phaseEntropy()` — phase entropy (Rohila & Sharma 2019) from the Second-Order Difference Plot (SODP):
+  plots each first difference against the following second difference, bins the polar angle of each
+  point into `k` sectors, and takes the normalized Shannon entropy of the angle-weighted sector
+  distribution. A phase-plane geometry mechanism distinct from the amplitude, template-matching and
+  1-D symbolic (dispersion/increment/slope) entropies. Validated against `NeuroKit2.entropy_phase`
+  bit-for-bit (max |diff| ~4e-16) across the sector count k on real eegmmidb POz EEG.
+
+# PhysioEEG 0.7.12
+
+## New features
+
+* `slopeEntropy()` — slope entropy (Cuesta-Frau 2019), a symbolic complexity measure on the **slopes**
+  between successive samples: each first difference is turned into the angle `atan(dx)` (degrees) and
+  mapped to one of five symbols by two angle thresholds (steep/gentle/flat, up/down), and SlopEn is the
+  Shannon entropy of the length-`dimension - 1` slope patterns. Captures the shape of local trends — a
+  mechanism distinct from the amplitude (`renyiEntropy`/`tsallisEntropy`), NCDF-pattern
+  (`dispersionEntropy`), template-matching (`fuzzyEntropy`) and increment-magnitude (`incrementEntropy`)
+  entropies, completing the discrete-symbolic complexity trio. Validated against
+  `NeuroKit2.entropy_slope` bit-for-bit (max |diff| ~9e-16) across the embedding dimension on real
+  eegmmidb POz EEG.
+
+# PhysioEEG 0.7.11
+
+## New features
+
+* `incrementEntropy()` — increment entropy (Liu et al. 2016), a symbolic complexity measure on the
+  signal's **increments** (successive differences) rather than its amplitudes: each increment in a
+  length-`dimension` embedding vector is mapped to a word letter combining its sign (-, 0, +) with a
+  magnitude class in `0..q` (quantized against the vector's sd), and IncrEn is the Shannon entropy of
+  the word distribution normalized by `dimension - 1`. Encodes the direction and graded size of
+  changes — a mechanism distinct from the amplitude-histogram (`renyiEntropy`/`tsallisEntropy`),
+  NCDF-pattern (`dispersionEntropy`) and template-matching (`fuzzyEntropy`) entropies. Validated
+  against `NeuroKit2.entropy_increment` bit-for-bit (max |diff| ~9e-16) across (dimension, q) on real
+  eegmmidb POz EEG.
+
+# PhysioEEG 0.7.10
+
+## New features
+
+* `fuzzyEntropy()` — fuzzy entropy (Chen et al. 2007), the **fuzzy generalization of sample
+  entropy**: it replaces sample entropy's crisp match threshold (a Heaviside step `I(d < r)`) with a
+  smooth exponential membership `exp(-(d^n)/r)`, so near-matches contribute partially — markedly more
+  robust and continuous on short or noisy segments. Each embedding vector's local baseline is removed
+  before the Chebyshev distance. Completes the sample-entropy family (crisp SampEn + fuzzy FuzzyEn).
+  Validated against `NeuroKit2.entropy_fuzzy` bit-for-bit (max |diff| ~4e-15) across (dimension, r) on
+  real eegmmidb POz EEG; at m=2, r=0.2 it is lower than the crisp sample entropy (0.948 vs 1.327).
+
+# PhysioEEG 0.7.9
+
+## New features
+
+* `dispersionEntropy()` — dispersion entropy (Rostaghi & Azami 2016), a fast, outlier-robust
+  symbolic-dynamics complexity measure: NCDF symbolization into `c` amplitude classes -> length-
+  `dimension` dispersion patterns -> normalized Shannon entropy of the pattern distribution. A
+  mechanism distinct from the amplitude-histogram entropies (`renyiEntropy`/`tsallisEntropy`) and
+  ordinal permutation entropy. `reverse = TRUE` returns the reverse dispersion entropy (RDEn).
+  Validated against `NeuroKit2.entropy_dispersion` bit-for-bit for both DispEn (max |diff| 0) and
+  RDEn (max |diff| ~7e-18) across (c, dimension, delay) settings on real eegmmidb POz EEG.
+
+# PhysioEEG 0.7.8
+
+## New features
+
+* `tsallisEntropy()` — Tsallis entropy (Tsallis 1988): the **non-additive** order-`q` generalization
+  of the Shannon entropy of a signal's amplitude histogram, `S_q = (1 - sum p^q)/(q-1)` in nats.
+  `q = 1` recovers Shannon; unlike the (additive) Renyi entropy, `S_q(A+B) != S_q(A) + S_q(B)` for
+  independent parts. Completes the generalized-entropy pair (`renyiEntropy` additive + `tsallisEntropy`
+  non-additive); the two agree only at `q = 1`. Validated against `NeuroKit2.entropy_tsallis`
+  bit-for-bit (max |diff| ~9e-16) across `q = {0.5, 1, 2, 3}` on real eegmmidb POz EEG.
+
+# PhysioEEG 0.7.7
+
+## New features
+
+* `renyiEntropy()` — Renyi entropy (Renyi 1961): the order-`alpha` generalization of the Shannon
+  entropy of a signal's amplitude histogram, `H_alpha = 1/(1-alpha) * ln(sum p^alpha)` in nats.
+  `alpha = 1` recovers Shannon, `alpha = 2` is the collision entropy, `alpha -> inf` the min-entropy;
+  non-increasing in `alpha`. A generalized-entropy family distinct from the Shannon-based measures;
+  reproduces `NeuroKit2.entropy_renyi` bit-for-bit across `alpha`.
+
+# PhysioEEG 0.7.6
+
+## New features
+
+* `petrosianFD()` — Petrosian fractal dimension (Petrosian 1995): a fast O(N) waveform-complexity
+  index from the number of sign changes in the signal's derivative (local-extrema density). Smooth
+  oscillation → FD near 1; complex/noisy → higher. Complements `svdEntropy()` and `eegComplexity()`;
+  reproduces `antropy.petrosian_fd` bit-for-bit (and, unlike the Higuchi/Katz FDs, has a single
+  unambiguous closed form).
+
+# PhysioEEG 0.7.5
+
+## New features
+
+* `svdEntropy()` — Singular Value Decomposition entropy (Roberts et al. 1999): time-delay embed a
+  signal, take the normalized singular values of the embedding matrix, and return their Shannon
+  entropy — a measure of the signal's dimensionality (low = structured/oscillatory, high =
+  complex/noise-like). A linear-algebraic complement to `eegComplexity()`'s entropy/fractal
+  measures; reproduces `antropy.svd_entropy` bit-for-bit (both via LAPACK SVD).
+
+# PhysioEEG 0.7.4
+
+- Test-suite performance: `test-eeg-timefreq.R` runs **12× faster** (368s → 31s) by
+  right-sizing the synthetic test data (`n_time` 5000 → 2000; ERSP/ITC `n_epochs`
+  40/20 → 12/10). Frequency grids and every assertion are unchanged, so coverage is
+  preserved (74 tests, all passing). The full package test suite now completes in
+  **~227s** (previously exceeded a 500s CI budget), all 1282 tests passing.
+
+# PhysioEEG 0.7.3
+
+- `eegICLabel(backend = "iclabel")` runs the **genuine trained ICLabel CNN**
+  (Pion-Tonachini et al. 2019), replacing the need to trust the pure-R heuristic
+  when the real model is wanted. It delegates to the validated `mne-icalabel`
+  implementation through `reticulate` (carrying the PhysioEEG ICA mixing/unmixing
+  matrices into an MNE `ICA` object), so it uses mne-icalabel's exact EEGLAB-style
+  feature extraction and the trained weights rather than re-porting the network
+  natively (which would risk a plausible-but-wrong result). The default
+  `backend = "heuristic"` is unchanged and needs no Python; the trained backend
+  is optional (needs `reticulate` + a Python env with `mne` and `mne-icalabel`,
+  and standard 10-20/10-10 channel labels for the scalp map). Verified to return
+  valid 7-class probability distributions from the real network.
+
+# PhysioEEG 0.7.2
+
+- `eegSourceEstimate(method = "dspm")` adds **dSPM** (dynamic statistical
+  parametric mapping; Dale et al. 2000): the minimum-norm estimate
+  noise-normalized by each source's projected noise sensitivity
+  (`sqrt(diag(K K'))` for an identity noise covariance). Verified to be MNE
+  scaled per source by a time-invariant factor.
+- `eegDipoleFit()` adds **equivalent-current-dipole (ECD) fitting** — the focal
+  complement to the distributed inverses. It localizes the single dipole that
+  best explains a scalp topography (grid search inside the head sphere refined
+  with Nelder-Mead; the dipole moment is the closed-form least-squares fit at
+  each position), using the same forward physics as `eegForwardModel()`.
+  Verified to recover a planted dipole's position (< 0.02 head radii),
+  orientation, and > 99.9% goodness of fit. Fits the peak global-field-power
+  sample by default, or a chosen sample / window.
+
+# PhysioEEG 0.7.1
+
+- `eegSurfaceLaplacian()` adds the **surface Laplacian / current source density**
+  (CSD) of Perrin et al. (1989) — the spherical-spline scalp Laplacian (Kayser &
+  Tenke 2006). CSD is reference-free and a spatial high-pass, deblurring volume
+  conduction so each channel reflects the radial current beneath it. Verified on
+  its defining properties: invariance to a reference constant (the spline
+  constant term absorbs it) and spatial-high-pass behaviour (focal topographies
+  are emphasized over smooth ones ~8x). Reuses the `.legendre_poly` recurrence
+  and standard 10-10/10-20 position tables; needs electrode positions
+  (`colData` `pos_x/pos_y/pos_z`, else matched to a standard montage by label).
+
+# PhysioEEG 0.7.0
+
+Three research-grade method families that were missing from the EEG stack.
+
+- `eegComplexity()` adds the **nonlinear / complexity** family (previously absent
+  ecosystem-wide for EEG): per-channel sample & approximate entropy
+  (Richman–Moorman, Pincus), permutation entropy (Bandt–Pompe), multiscale
+  entropy (Costa), Lempel–Ziv complexity, Higuchi & Katz fractal dimension,
+  detrended fluctuation analysis (alpha), Hurst (R/S), Hjorth parameters, and
+  spectral entropy. The numeric cores are validated against known values (white
+  noise Higuchi FD → 2, Brownian → 1.5; white-noise DFA/Hurst → 0.5). Entropy
+  measures are O(N^2) and cap long channels via `max_samples`.
+- `eegAperiodic()` adds **aperiodic / 1-f spectral parameterization**
+  (specparam / FOOOF; Donoghue 2020): per-channel aperiodic exponent / offset /
+  knee plus separated oscillatory peaks, ready for a topomap or a qEEG
+  biomarker. Delegates the fit to `PhysioAnalysis::specparam()`.
+- `eegPAC()` and `eegComodulogram()` add **phase-amplitude / cross-frequency
+  coupling** (Tort modulation index, Canolty mean-vector-length, Ozkurt, PLV),
+  within a channel or across two channels, plus the comodulogram grid.
+  Delegate the estimators to `PhysioCrossModal::phaseAmplitudeCoupling()` /
+  `comodulogram()`.
+
+These reuse the existing specparam and PAC engines (new `PhysioAnalysis` Suggests;
+`PhysioCrossModal` already suggested) rather than reimplementing them, and add the
+genuinely new complexity module natively. No existing behaviour changed.
+
+# PhysioEEG 0.6.5
+
+- `make_eeg_bci()` now pads channel labels with generic names when more channels than the eight-entry motor/occipital pool are requested (previously `n_channels > 8` produced `NA` labels, which made the per-channel artifact tests error with "missing value where TRUE/FALSE needed").
+- Documentation: the `bci-classification`, `connectivity-analysis`, `preprocessing-pipeline`, `sleep-analysis`, and `time-frequency-analysis` vignettes were modernized to the current package API. They had drifted from the code (stale/renamed arguments and functions, changed return structures, and 2D-vs-3D data-shape assumptions) and no longer ran. Fixes attach `SummarizedExperiment`, use the current `make_eeg*()` signatures and the real accessor/analysis functions (`eegFilter(method=)`, `eegRereference`, `eegMontage`, `eegBadChannels`, `eegInterpolate`, `eegICA`, `eegMorletWavelet`, `eegSTFT`, `eegSleepStage`, the spindle/K-complex/slow-wave detectors, etc.), and read time-frequency/staging output from `metadata()`. All package vignettes now run clean under `R CMD check`. No package behaviour changed.
