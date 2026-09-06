@@ -182,6 +182,8 @@
   : Create EEG with Embedded Epileptic Spikes
 - [`petrosianFD()`](https://x-biosignal.github.io/PhysioEEG/reference/petrosianFD.md)
   : Petrosian Fractal Dimension
+- [`phaseEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/phaseEntropy.md)
+  : Phase Entropy
 - [`renyiEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/renyiEntropy.md)
   : Renyi Entropy
 - [`slopeEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/slopeEntropy.md)

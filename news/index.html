@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.12</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.13</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,14 @@
       <small>Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.13" id="physioeeg-0713">PhysioEEG 0.7.13<a class="anchor" aria-label="anchor" href="#physioeeg-0713"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-7-13">New features<a class="anchor" aria-label="anchor" href="#new-features-0-7-13"></a></h3>
+<ul><li>
+<code><a href="../reference/phaseEntropy.html">phaseEntropy()</a></code> — phase entropy (Rohila &amp; Sharma 2019) from the Second-Order Difference Plot (SODP): plots each first difference against the following second difference, bins the polar angle of each point into <code>k</code> sectors, and takes the normalized Shannon entropy of the angle-weighted sector distribution. A phase-plane geometry mechanism distinct from the amplitude, template-matching and 1-D symbolic (dispersion/increment/slope) entropies. Validated against <code>NeuroKit2.entropy_phase</code> bit-for-bit (max |diff| ~4e-16) across the sector count k on real eegmmidb POz EEG.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.12" id="physioeeg-0712">PhysioEEG 0.7.12<a class="anchor" aria-label="anchor" href="#physioeeg-0712"></a></h2>
 <div class="section level3">

@@ -1,5 +1,20 @@
 # Changelog
 
+## PhysioEEG 0.7.13
+
+### New features
+
+- [`phaseEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/phaseEntropy.md)
+  — phase entropy (Rohila & Sharma 2019) from the Second-Order
+  Difference Plot (SODP): plots each first difference against the
+  following second difference, bins the polar angle of each point into
+  `k` sectors, and takes the normalized Shannon entropy of the
+  angle-weighted sector distribution. A phase-plane geometry mechanism
+  distinct from the amplitude, template-matching and 1-D symbolic
+  (dispersion/increment/slope) entropies. Validated against
+  `NeuroKit2.entropy_phase` bit-for-bit (max \|diff\| ~4e-16) across the
+  sector count k on real eegmmidb POz EEG.
+
 ## PhysioEEG 0.7.12
 
 ### New features
