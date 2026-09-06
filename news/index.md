@@ -1,5 +1,23 @@
 # Changelog
 
+## PhysioEEG 0.7.12
+
+### New features
+
+- [`slopeEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/slopeEntropy.md)
+  — slope entropy (Cuesta-Frau 2019), a symbolic complexity measure on
+  the **slopes** between successive samples: each first difference is
+  turned into the angle `atan(dx)` (degrees) and mapped to one of five
+  symbols by two angle thresholds (steep/gentle/flat, up/down), and
+  SlopEn is the Shannon entropy of the length-`dimension - 1` slope
+  patterns. Captures the shape of local trends — a mechanism distinct
+  from the amplitude (`renyiEntropy`/`tsallisEntropy`), NCDF-pattern
+  (`dispersionEntropy`), template-matching (`fuzzyEntropy`) and
+  increment-magnitude (`incrementEntropy`) entropies, completing the
+  discrete-symbolic complexity trio. Validated against
+  `NeuroKit2.entropy_slope` bit-for-bit (max \|diff\| ~9e-16) across the
+  embedding dimension on real eegmmidb POz EEG.
+
 ## PhysioEEG 0.7.11
 
 ### New features

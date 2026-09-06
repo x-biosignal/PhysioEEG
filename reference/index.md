@@ -184,6 +184,8 @@
   : Petrosian Fractal Dimension
 - [`renyiEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/renyiEntropy.md)
   : Renyi Entropy
+- [`slopeEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/slopeEntropy.md)
+  : Slope Entropy
 - [`svdEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/svdEntropy.md)
   : Singular Value Decomposition (SVD) Entropy
 - [`tsallisEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/tsallisEntropy.md)

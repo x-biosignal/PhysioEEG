@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.11</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,14 @@
       <small>Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.12" id="physioeeg-0712">PhysioEEG 0.7.12<a class="anchor" aria-label="anchor" href="#physioeeg-0712"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-7-12">New features<a class="anchor" aria-label="anchor" href="#new-features-0-7-12"></a></h3>
+<ul><li>
+<code><a href="../reference/slopeEntropy.html">slopeEntropy()</a></code> — slope entropy (Cuesta-Frau 2019), a symbolic complexity measure on the <strong>slopes</strong> between successive samples: each first difference is turned into the angle <code>atan(dx)</code> (degrees) and mapped to one of five symbols by two angle thresholds (steep/gentle/flat, up/down), and SlopEn is the Shannon entropy of the length-<code>dimension - 1</code> slope patterns. Captures the shape of local trends — a mechanism distinct from the amplitude (<code>renyiEntropy</code>/<code>tsallisEntropy</code>), NCDF-pattern (<code>dispersionEntropy</code>), template-matching (<code>fuzzyEntropy</code>) and increment-magnitude (<code>incrementEntropy</code>) entropies, completing the discrete-symbolic complexity trio. Validated against <code>NeuroKit2.entropy_slope</code> bit-for-bit (max |diff| ~9e-16) across the embedding dimension on real eegmmidb POz EEG.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.11" id="physioeeg-0711">PhysioEEG 0.7.11<a class="anchor" aria-label="anchor" href="#physioeeg-0711"></a></h2>
 <div class="section level3">
