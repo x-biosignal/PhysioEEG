@@ -1,5 +1,21 @@
 # Changelog
 
+## PhysioEEG 0.7.9
+
+### New features
+
+- [`dispersionEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/dispersionEntropy.md)
+  — dispersion entropy (Rostaghi & Azami 2016), a fast, outlier-robust
+  symbolic-dynamics complexity measure: NCDF symbolization into `c`
+  amplitude classes -\> length- `dimension` dispersion patterns -\>
+  normalized Shannon entropy of the pattern distribution. A mechanism
+  distinct from the amplitude-histogram entropies
+  (`renyiEntropy`/`tsallisEntropy`) and ordinal permutation entropy.
+  `reverse = TRUE` returns the reverse dispersion entropy (RDEn).
+  Validated against `NeuroKit2.entropy_dispersion` bit-for-bit for both
+  DispEn (max \|diff\| 0) and RDEn (max \|diff\| ~7e-18) across (c,
+  dimension, delay) settings on real eegmmidb POz EEG.
+
 ## PhysioEEG 0.7.8
 
 ### New features

@@ -2,6 +2,8 @@
 
 ## All functions
 
+- [`dispersionEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/dispersionEntropy.md)
+  : Dispersion Entropy
 - [`eegAperiodic()`](https://x-biosignal.github.io/PhysioEEG/reference/eegAperiodic.md)
   : Aperiodic (1/f) spectral parameterization of EEG
 - [`eegArtifactReject()`](https://x-biosignal.github.io/PhysioEEG/reference/eegArtifactReject.md)

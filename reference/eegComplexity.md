@@ -99,8 +99,8 @@ cx <- eegComplexity(pe, measures = c("permutation_entropy", "hjorth_mobility",
                                      "spectral_entropy"))
 cx
 #>   channel permutation_entropy hjorth_mobility spectral_entropy
-#> 1     Fp1           0.7578106       0.2321886        0.2514634
-#> 2     Fp2           0.7763133       0.1718243        0.2659641
-#> 3      F7           0.9175220       0.4730310        0.5049232
-#> 4      F3           0.8686396       0.2233840        0.2696785
+#> 1     Fp1           0.7293826       0.3545342        0.2493087
+#> 2     Fp2           0.8205204       0.1419271        0.3126944
+#> 3      F7           0.9005079       0.4122412        0.5447787
+#> 4      F3           0.8649210       0.4188192        0.3752383
 ```

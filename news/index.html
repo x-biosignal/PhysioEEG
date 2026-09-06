@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,14 @@
       <small>Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.9" id="physioeeg-079">PhysioEEG 0.7.9<a class="anchor" aria-label="anchor" href="#physioeeg-079"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-7-9">New features<a class="anchor" aria-label="anchor" href="#new-features-0-7-9"></a></h3>
+<ul><li>
+<code><a href="../reference/dispersionEntropy.html">dispersionEntropy()</a></code> — dispersion entropy (Rostaghi &amp; Azami 2016), a fast, outlier-robust symbolic-dynamics complexity measure: NCDF symbolization into <code>c</code> amplitude classes -&gt; length- <code>dimension</code> dispersion patterns -&gt; normalized Shannon entropy of the pattern distribution. A mechanism distinct from the amplitude-histogram entropies (<code>renyiEntropy</code>/<code>tsallisEntropy</code>) and ordinal permutation entropy. <code>reverse = TRUE</code> returns the reverse dispersion entropy (RDEn). Validated against <code>NeuroKit2.entropy_dispersion</code> bit-for-bit for both DispEn (max |diff| 0) and RDEn (max |diff| ~7e-18) across (c, dimension, delay) settings on real eegmmidb POz EEG.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.8" id="physioeeg-078">PhysioEEG 0.7.8<a class="anchor" aria-label="anchor" href="#physioeeg-078"></a></h2>
 <div class="section level3">
