@@ -168,6 +168,8 @@
   : EEG Weighted Phase Lag Index (wPLI)
 - [`fuzzyEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/fuzzyEntropy.md)
   : Fuzzy Entropy
+- [`incrementEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/incrementEntropy.md)
+  : Increment Entropy
 - [`make_eeg()`](https://x-biosignal.github.io/PhysioEEG/reference/make_eeg.md)
   : Create Simulated EEG Data
 - [`make_eeg_bci()`](https://x-biosignal.github.io/PhysioEEG/reference/make_eeg_bci.md)

@@ -1,5 +1,23 @@
 # Changelog
 
+## PhysioEEG 0.7.11
+
+### New features
+
+- [`incrementEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/incrementEntropy.md)
+  — increment entropy (Liu et al. 2016), a symbolic complexity measure
+  on the signal’s **increments** (successive differences) rather than
+  its amplitudes: each increment in a length-`dimension` embedding
+  vector is mapped to a word letter combining its sign (-, 0, +) with a
+  magnitude class in `0..q` (quantized against the vector’s sd), and
+  IncrEn is the Shannon entropy of the word distribution normalized by
+  `dimension - 1`. Encodes the direction and graded size of changes — a
+  mechanism distinct from the amplitude-histogram
+  (`renyiEntropy`/`tsallisEntropy`), NCDF-pattern (`dispersionEntropy`)
+  and template-matching (`fuzzyEntropy`) entropies. Validated against
+  `NeuroKit2.entropy_increment` bit-for-bit (max \|diff\| ~9e-16) across
+  (dimension, q) on real eegmmidb POz EEG.
+
 ## PhysioEEG 0.7.10
 
 ### New features
