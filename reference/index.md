@@ -182,6 +182,8 @@
   : Create EEG with Sleep Stage Characteristics
 - [`make_eeg_spikes()`](https://x-biosignal.github.io/PhysioEEG/reference/make_eeg_spikes.md)
   : Create EEG with Embedded Epileptic Spikes
+- [`multiscaleEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/multiscaleEntropy.md)
+  : Multiscale Entropy
 - [`petrosianFD()`](https://x-biosignal.github.io/PhysioEEG/reference/petrosianFD.md)
   : Petrosian Fractal Dimension
 - [`phaseEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/phaseEntropy.md)

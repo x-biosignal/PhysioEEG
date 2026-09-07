@@ -1,5 +1,20 @@
 # Changelog
 
+## PhysioEEG 0.7.15
+
+### New features
+
+- [`multiscaleEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/multiscaleEntropy.md)
+  — multiscale entropy (Costa et al. 2002) as a standalone op,
+  completing the entropy family alongside `sampleEntropy` (via
+  PhysioMoCap), `svdEntropy`, permutation/dispersion/ increment/slope
+  entropies and Lempel-Ziv. It returns the per-scale sample entropy of
+  the coarse-grained signal (non-overlapping means, tolerance `r`×SD
+  fixed on the original), and reproduces NeuroKit2 `entropy_multiscale`
+  (MSEn) bit-for-bit across scales 1–8 on real eegmmidb POz EEG. A
+  rising or sustained MSE at coarse scales marks multi-scale structure;
+  white noise falls monotonically.
+
 ## PhysioEEG 0.7.14
 
 ### New features
