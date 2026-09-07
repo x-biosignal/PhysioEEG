@@ -1,5 +1,33 @@
 # Changelog
 
+## PhysioEEG 0.7.14
+
+### New features
+
+- [`katzFD()`](https://x-biosignal.github.io/PhysioEEG/reference/katzFD.md)
+  — Katz’s fractal dimension (Katz 1988) as a standalone op, completing
+  the fractal-dimension family alongside
+  [`petrosianFD()`](https://x-biosignal.github.io/PhysioEEG/reference/petrosianFD.md)
+  and
+  [`svdEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/svdEntropy.md).
+  KFD = log10(L/a)/log10(d/a) in the amplitude-only convention used by
+  the de-facto references. On real eegmmidb POz EEG it reproduces
+  **both** `antropy.katz_fd` **and** NeuroKit2’s `fractal_katz`
+  bit-for-bit (`|diff| = 0` against each).
+
+### Bug fixes
+
+- `eegComplexity(measure = "katz_fd")` now uses the field-standard
+  amplitude-only Katz convention (matching `antropy`, NeuroKit2, pyeeg
+  and mne-features) via
+  [`katzFD()`](https://x-biosignal.github.io/PhysioEEG/reference/katzFD.md).
+  It previously used a Euclidean-plane variant that mixed the
+  sample-index and amplitude axes’ units, was scale-dependent, and
+  matched no reference implementation (e.g. KFD 1.696 vs the
+  field-standard 3.468 on POz). The `katz_fd` measure is not in the
+  default `measures` set, so this affects only callers who requested it
+  explicitly.
+
 ## PhysioEEG 0.7.13
 
 ### New features

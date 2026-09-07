@@ -170,6 +170,8 @@
   : Fuzzy Entropy
 - [`incrementEntropy()`](https://x-biosignal.github.io/PhysioEEG/reference/incrementEntropy.md)
   : Increment Entropy
+- [`katzFD()`](https://x-biosignal.github.io/PhysioEEG/reference/katzFD.md)
+  : Katz Fractal Dimension
 - [`make_eeg()`](https://x-biosignal.github.io/PhysioEEG/reference/make_eeg.md)
   : Create Simulated EEG Data
 - [`make_eeg_bci()`](https://x-biosignal.github.io/PhysioEEG/reference/make_eeg_bci.md)

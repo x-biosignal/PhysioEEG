@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.13</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.14</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,19 @@
       <small>Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.14" id="physioeeg-0714">PhysioEEG 0.7.14<a class="anchor" aria-label="anchor" href="#physioeeg-0714"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-7-14">New features<a class="anchor" aria-label="anchor" href="#new-features-0-7-14"></a></h3>
+<ul><li>
+<code><a href="../reference/katzFD.html">katzFD()</a></code> — Katz’s fractal dimension (Katz 1988) as a standalone op, completing the fractal-dimension family alongside <code><a href="../reference/petrosianFD.html">petrosianFD()</a></code> and <code><a href="../reference/svdEntropy.html">svdEntropy()</a></code>. KFD = log10(L/a)/log10(d/a) in the amplitude-only convention used by the de-facto references. On real eegmmidb POz EEG it reproduces <strong>both</strong> <code>antropy.katz_fd</code> <strong>and</strong> NeuroKit2’s <code>fractal_katz</code> bit-for-bit (<code>|diff| = 0</code> against each).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-7-14">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-7-14"></a></h3>
+<ul><li>
+<code>eegComplexity(measure = "katz_fd")</code> now uses the field-standard amplitude-only Katz convention (matching <code>antropy</code>, NeuroKit2, pyeeg and mne-features) via <code><a href="../reference/katzFD.html">katzFD()</a></code>. It previously used a Euclidean-plane variant that mixed the sample-index and amplitude axes’ units, was scale-dependent, and matched no reference implementation (e.g. KFD 1.696 vs the field-standard 3.468 on POz). The <code>katz_fd</code> measure is not in the default <code>measures</code> set, so this affects only callers who requested it explicitly.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.13" id="physioeeg-0713">PhysioEEG 0.7.13<a class="anchor" aria-label="anchor" href="#physioeeg-0713"></a></h2>
 <div class="section level3">
