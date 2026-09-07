@@ -1,0 +1,7 @@
+# Integrity-sealed glass-brain outline artifacts. Pin them so git never applies
+# end-of-line normalization on any platform checkout; otherwise the SHA-256
+# manifest verified in tests/testthat/test-eeg-vis-glassbrain.R would break on
+# the r-universe build matrix (e.g. a CRLF checkout of the .dcf on Windows).
+inst/extdata/glassbrain_outline.rds     binary
+inst/extdata/glassbrain_outline.dcf     -text
+inst/extdata/glassbrain_outline.sha256  -text

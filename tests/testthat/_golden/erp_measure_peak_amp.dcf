@@ -1,0 +1,7 @@
+Key: erp_measure_peak_amp
+Source: base R apply(...,2,max) on across-epoch mean waveform, P300
+        window 250-500ms (seed 200); independent of
+        eegERPmeasure(method='peak')
+Tolerance: 1e-08
+Captured: 2026-07-10 23:55:00 UTC
+R: 4.5.2

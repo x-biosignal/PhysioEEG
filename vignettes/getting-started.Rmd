@@ -1,0 +1,144 @@
+---
+title: "Getting Started with PhysioEEG"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with PhysioEEG}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+# Getting Started with PhysioEEG
+
+PhysioEEG provides comprehensive EEG analysis functions for PhysioExperiment
+objects. This vignette shows a quick tour of the main features.
+
+## Creating Test Data
+
+PhysioEEG includes test data generators for quick exploration:
+
+```{r setup, eval=FALSE}
+library(PhysioEEG)
+
+# Basic 19-channel EEG (10-20 system)
+pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
+
+# EEG with embedded ERP components
+pe_erp <- make_eeg_erp(n_epochs = 40, n_channels = 19, sr = 250)
+```
+
+## Independent Component Analysis (ICA)
+
+Decompose EEG into independent components and remove artifacts:
+
+```{r ica, eval=FALSE}
+# Run ICA
+pe <- eegICA(pe, n_components = 19, method = "fastica")
+
+# Detect artifact components automatically
+artifacts <- eegICAdetect(pe, method = "kurtosis")
+print(artifacts)
+
+# Remove artifact components
+artifact_idx <- artifacts$component[artifacts$type == "artifact"]
+pe_clean <- eegICAremove(pe, components = artifact_idx)
+```
+
+## ERP Analysis
+
+Detect and measure event-related potentials in epoched data:
+
+```{r erp, eval=FALSE}
+pe_erp <- make_eeg_erp(n_epochs = 40, n_channels = 19, sr = 250)
+
+# Detect P300 component
+p300 <- eegERPdetect(pe_erp, component = "P300")
+print(p300)
+
+# Measure amplitude in a specific window
+amp <- eegERPmeasure(pe_erp, window = c(250, 500), method = "mean",
+                     polarity = "positive")
+print(amp)
+```
+
+## Quantitative EEG (QEEG)
+
+Compute band power across all channels:
+
+```{r qeeg, eval=FALSE}
+pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
+pe_qeeg <- eegQEEG(pe)
+
+# View relative band powers
+qeeg_info <- metadata(pe_qeeg)$qeeg
+print(qeeg_info$relative_power)
+```
+
+## Microstate Analysis
+
+Segment EEG into discrete microstates:
+
+```{r microstates, eval=FALSE}
+pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
+pe_ms <- eegMicrostates(pe, n_states = 4, method = "kmeans")
+
+# Compute statistics
+stats <- eegMicrostateStats(pe_ms)
+print(stats)
+```
+
+## Brain-Computer Interface (BCI)
+
+Motor imagery classification with CSP:
+
+```{r bci, eval=FALSE}
+pe_bci <- make_eeg_bci(n_trials = 30, n_channels = 8, sr = 256)
+labels <- metadata(pe_bci)$labels
+
+# Extract CSP features
+pe_csp <- eegCSP(pe_bci, labels = labels, n_filters = 3)
+
+# Classify
+features <- eegBCIfeatures(pe_bci, method = "bandpower")
+results <- eegBCIclassify(pe_bci, features = features, labels = labels)
+print(paste("Accuracy:", mean(results$predicted_class == labels)))
+```
+
+## Sleep Analysis
+
+Automatic sleep staging and event detection:
+
+```{r sleep, eval=FALSE}
+pe_sleep <- make_eeg_sleep(n_time = 150000, n_channels = 2, sr = 500)
+
+# Stage sleep
+stages <- eegSleepStage(pe_sleep, epoch_sec = 30)
+print(table(stages$stage))
+
+# Detect spindles
+spindles <- eegSpindleDetect(pe_sleep)
+print(paste("Spindles detected:", nrow(spindles)))
+```
+
+## Clinical EEG Analysis
+
+Spike detection, QEEG, and slowing assessment:
+
+```{r clinical, eval=FALSE}
+pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
+
+# Detect EEG slowing
+slowing <- eegSlowing(pe, method = "dtar")
+print(slowing)
+
+# Frontal alpha asymmetry
+asym <- eegAsymmetry(pe)
+print(asym)
+
+# Burst-suppression detection
+bs <- eegSuppression(pe, threshold = 10)
+print(paste("BSR:", attr(bs, "bsr"), "%"))
+```
