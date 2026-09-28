@@ -66,7 +66,7 @@ A data.frame with columns:
 
   Numeric debiased wPLI (Vinck et al., 2011, Eq. 6), computed by the
   shared
-  [`wpliEstimate`](https://x-biosignal.github.io/PhysioCore//reference/wpliEstimate.html)
+  [`wpliEstimate`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/wpliEstimate.html)
   estimator so it matches
   [`PhysioCrossModal::weightedPLI`](https://x-biosignal.github.io/PhysioCrossModal/reference/weightedPLI.html).
   It is unbiased and therefore distributes around 0 for independent
@@ -94,7 +94,7 @@ and sample-size bias. NeuroImage, 55(4), 1548-1565.
 [`eegPLV()`](https://x-biosignal.github.io/PhysioEEG/reference/eegPLV.md),
 [`eegConnectivityMatrix()`](https://x-biosignal.github.io/PhysioEEG/reference/eegConnectivityMatrix.md),
 [`eegPlotConnectivity()`](https://x-biosignal.github.io/PhysioEEG/reference/eegPlotConnectivity.md),
-[`wpliEstimate`](https://x-biosignal.github.io/PhysioCore//reference/wpliEstimate.html)
+[`wpliEstimate`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/wpliEstimate.html)
 
 ## Examples
 
