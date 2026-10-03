@@ -1,0 +1,6 @@
+Key: erp_grand_average
+Source: base R elementwise mean (a1+a2+a3)/3 of three make_eeg_erp
+        assays (seeds 123/124/125); independent of eegERPgrandAverage
+Tolerance: 1e-08
+Captured: 2026-07-10 23:55:00 UTC
+R: 4.5.2

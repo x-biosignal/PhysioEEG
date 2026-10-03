@@ -1,0 +1,8 @@
+Key: multitaper_psd_char
+Source: characterization: eegMultitaper(bandwidth=3,n_tapers=3) PSD of
+        a 10Hz sinusoid (seed 400, N=512, sr=250); regression-guard
+        only - custom DPSS approximation has no independent reference
+        obtainable here
+Tolerance: 1e-08
+Captured: 2026-07-10 23:55:01 UTC
+R: 4.5.2
