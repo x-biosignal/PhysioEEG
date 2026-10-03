@@ -99,9 +99,7 @@ signals. Human Brain Mapping, 8(4), 194-208.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 4, sr = 500)
 pe <- eegCoherence(pe, method = "coherence", band = c(8, 13))
-coh_matrix <- metadata(pe)$connectivity$matrix
-} # }
+coh_matrix <- S4Vectors::metadata(pe)$connectivity$matrix
 ```

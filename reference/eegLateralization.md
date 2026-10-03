@@ -97,14 +97,15 @@ movements. Clinical Neurophysiology, 116(5), 1213-1221.
 
 [`eegMotorImagery()`](https://x-biosignal.github.io/PhysioEEG/reference/eegMotorImagery.md),
 [`eegCSP()`](https://x-biosignal.github.io/PhysioEEG/reference/eegCSP.md),
-[`PhysioCore::physioBiomarker()`](https://x-biosignal.github.io/PhysioCore//reference/PhysioCore-reexports.html)
+[`PhysioExperiment::physioBiomarker()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/physioBiomarker-constructor.html)
 
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_bci(n_trials = 20, n_channels = 8, sr = 256)
 li <- eegLateralization(pe, method = "power")
 li$summary
-} # }
+#> <PhysioBiomarker> LI = -0.0002938 index [-0.292, 0.291]
+#>   reliability: ICC=NA, SEM=NA 
+#>   interpretation: right(C4) vs left(C3); positive = right-dominant 
 ```

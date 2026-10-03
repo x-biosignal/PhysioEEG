@@ -87,15 +87,17 @@ index. Clinical Neurophysiology, 127(2), 1452-1459.
 [`eegBSI()`](https://x-biosignal.github.io/PhysioEEG/reference/eegBSI.md),
 [`eegSlowing()`](https://x-biosignal.github.io/PhysioEEG/reference/eegSlowing.md),
 [`eegQEEG()`](https://x-biosignal.github.io/PhysioEEG/reference/eegQEEG.md),
-[`PhysioCore::physioBiomarker()`](https://x-biosignal.github.io/PhysioCore//reference/PhysioCore-reexports.html),
-[`PhysioCore::normativeLookup()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/normativeLookup.html)
+[`PhysioExperiment::physioBiomarker()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/physioBiomarker-constructor.html),
+[`PhysioExperiment::normativeLookup()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/normativeLookup.html)
 
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 250)
 dar <- eegDAR(pe, age = 60)
 dar[["C3"]]
-} # }
+#> <PhysioBiomarker> DAR = 0.9258 ratio
+#>   reliability: ICC=NA, SEM=NA 
+#>   normative: 66th percentile (ref 0.212-1.39)
+#>   interpretation: channel/region: C3 
 ```

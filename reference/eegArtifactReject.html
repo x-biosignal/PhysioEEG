@@ -11,7 +11,7 @@ gradient (point-to-point voltage change), and joint probability."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -132,13 +132,11 @@ assay. Artifact log stored in <code>metadata(x)$artifact_log</code>.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">10000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">10000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">events</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>onset_sec <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">7</span>, <span class="fl">9</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pe_ep</span> <span class="op">&lt;-</span> <span class="fu"><a href="eegEpoch.html">eegEpoch</a></span><span class="op">(</span><span class="va">pe</span>, <span class="va">events</span>, limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.2</span>, <span class="fl">0.8</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pe_clean</span> <span class="op">&lt;-</span> <span class="fu">eegArtifactReject</span><span class="op">(</span><span class="va">pe_ep</span>, method <span class="op">=</span> <span class="st">"threshold"</span>,</span></span>
 <span class="r-in"><span>                               threshold_uv <span class="op">=</span> <span class="fl">100</span>, assay_name <span class="op">=</span> <span class="st">"epoched"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

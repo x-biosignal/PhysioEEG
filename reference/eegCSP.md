@@ -33,7 +33,11 @@ eegCSP(x, labels, n_filters = 3, assay_name = NULL, output_assay = "csp")
 
 - output_assay:
 
-  Output assay name for CSP features (default: `"csp"`).
+  Name the result is stored under. Despite the argument's name this is a
+  key in
+  [`metadata`](https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html),
+  NOT an assay: after the call `assay(x, "csp")` does not exist while
+  `metadata(x)$csp` holds the result (default: `"csp"`).
 
 ## Value
 
@@ -57,10 +61,11 @@ single-trial analysis. IEEE Signal Processing Magazine, 25(1), 41-56.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_bci(n_trials = 30, n_channels = 8, sr = 256)
-labels <- metadata(pe)$labels
+labels <- S4Vectors::metadata(pe)$labels
 result <- eegCSP(pe, labels = labels, n_filters = 3)
-csp_features <- SummarizedExperiment::assay(result, "csp")
-} # }
+# CSP filters and log-variance features are stored in metadata
+csp_features <- S4Vectors::metadata(result)$csp_features
+dim(csp_features)  # trials x (2 * n_filters)
+#> [1] 60  6
 ```

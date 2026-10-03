@@ -11,7 +11,7 @@ channels. Delegates the estimator to PhysioCrossModal::phaseAmplitudeCoupling().
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -141,10 +141,35 @@ list with <code>pac</code> and, for <code>"tort"</code>, the phase-amplitude <co
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">5000</span>, n_channels <span class="op">=</span> <span class="fl">4</span>, sr <span class="op">=</span> <span class="fl">250</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">eegPAC</span><span class="op">(</span><span class="va">pe</span>, phase_channel <span class="op">=</span> <span class="fl">1</span>, phase_band <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span>, amp_band <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">80</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"PhysioCrossModal"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">5000</span>, n_channels <span class="op">=</span> <span class="fl">4</span>, sr <span class="op">=</span> <span class="fl">250</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">eegPAC</span><span class="op">(</span><span class="va">pe</span>, phase_channel <span class="op">=</span> <span class="fl">1</span>, phase_band <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span>, amp_band <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">30</span>, <span class="fl">80</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $pac</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.0004274329</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $method</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "tort"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $phase_band</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $amp_band</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 30 80</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $n_bins</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 18</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $distribution</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] 0.06013918 0.05539763 0.05877512 0.05768208 0.05505245 0.05362357</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] 0.05160298 0.05318179 0.05622009 0.05821859 0.05694298 0.05811456</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] 0.05636442 0.05273079 0.05119354 0.05119147 0.05455322 0.05901553</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $bin_centers</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] -2.9670597 -2.6179939 -2.2689280 -1.9198622 -1.5707963 -1.2217305</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] -0.8726646 -0.5235988 -0.1745329  0.1745329  0.5235988  0.8726646</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13]  1.2217305  1.5707963  1.9198622  2.2689280  2.6179939  2.9670597</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

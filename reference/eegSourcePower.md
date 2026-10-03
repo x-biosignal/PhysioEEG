@@ -57,11 +57,16 @@ Experimental and Clinical Pharmacology, 24(Suppl D), 5-12.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 1000, n_channels = 19, sr = 250)
 fm <- eegForwardModel(pe, method = "spherical", n_sources = 20)
 pe <- eegSourceEstimate(pe, fm, method = "mne")
 bp <- eegSourcePower(pe)
 head(bp)
-} # }
+#>   source_id  band     power
+#> 1         1 delta 905.27188
+#> 2         1 theta  92.44628
+#> 3         1 alpha 602.26873
+#> 4         1  beta 142.02806
+#> 5         1 gamma   9.83678
+#> 6         2 delta 737.85565
 ```

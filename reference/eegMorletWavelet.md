@@ -40,8 +40,12 @@ eegMorletWavelet(
 
 - output_assay:
 
-  Name of the assay to store wavelet power results (default:
-  `"wavelet_power"`).
+  Name the result is stored under. Despite the argument's name this is a
+  key in
+  [`metadata`](https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html),
+  NOT an assay: after the call `assay(x, "the value given")` does not
+  exist while `metadata(x)$the value given` holds the result (default:
+  `"the value given"`). (default: `"wavelet_power"`).
 
 ## Value
 
@@ -68,10 +72,12 @@ conscious perception. Trends in Cognitive Sciences, 3(4), 151-162.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 5000, n_channels = 4, sr = 500)
-pe_wt <- eegMorletWavelet(pe, frequencies = seq(5, 40, by = 1))
-wp <- SummarizedExperiment::assay(pe_wt, "wavelet_power")
-dim(wp)  # time x frequencies x channels
-} # }
+pe <- make_eeg(n_time = 1000, n_channels = 4, sr = 250)
+pe_wt <- eegMorletWavelet(pe, frequencies = seq(5, 40, by = 5))
+# results are stored in metadata(x)$wavelet
+str(S4Vectors::metadata(pe_wt)$wavelet, max.level = 1)
+#> List of 3
+#>  $ frequencies: num [1:8] 5 10 15 20 25 30 35 40
+#>  $ n_cycles   : num 7
+#>  $ phase      : num [1:1000, 1:8, 1:4] 0.552 0.679 0.807 0.934 1.061 ...
 ```

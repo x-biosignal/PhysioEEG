@@ -47,12 +47,10 @@ NeuroImage, 180, 577-593.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe1 <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
 pe1 <- eegMicrostates(pe1, n_states = 4)
-maps <- metadata(pe1)$microstates$maps
+maps <- S4Vectors::metadata(pe1)$microstates$maps
 
 pe2 <- make_eeg(n_time = 3000, n_channels = 19, sr = 500)
 pe2 <- eegMicrostateBackfit(pe2, maps)
-} # }
 ```

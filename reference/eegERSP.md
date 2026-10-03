@@ -47,7 +47,12 @@ eegERSP(
 
 - output_assay:
 
-  Name of the assay to store ERSP results (default: `"ersp"`).
+  Name the result is stored under. Despite the argument's name this is a
+  key in
+  [`metadata`](https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html),
+  NOT an assay: after the call `assay(x, "the value given")` does not
+  exist while `metadata(x)$the value given` holds the result (default:
+  `"the value given"`). (default: `"ersp"`).
 
 ## Value
 
@@ -77,10 +82,13 @@ Neurophysiology, 86(4), 283-293.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_erp(n_epochs = 20, n_channels = 2, sr = 250)
 pe_ersp <- eegERSP(pe, baseline = c(1, 50), frequencies = seq(5, 30, by = 5))
-ersp_data <- SummarizedExperiment::assay(pe_ersp, "ersp")
-dim(ersp_data)  # time x frequencies x channels
-} # }
+# results are stored in metadata(x)$ersp
+str(S4Vectors::metadata(pe_ersp)$ersp, max.level = 1)
+#> List of 4
+#>  $ frequencies: num [1:6] 5 10 15 20 25 30
+#>  $ baseline   : num [1:2] 1 50
+#>  $ n_cycles   : num 7
+#>  $ n_epochs   : int 20
 ```

@@ -70,19 +70,19 @@ containing the visible `" -- "` or `" -> "` separators cannot collide.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 1000, n_channels = 4, sr = 250)
-mat <- matrix(c(
-  1, 0.5, 0, -0.4,
-  0.5, 1, 0.3, 0,
-  0, 0.3, 1, 0.6,
-  -0.4, 0, 0.6, 1
-), 4, 4)
-labels <- SummarizedExperiment::colData(pe)$label
-dimnames(mat) <- list(labels, labels)
-metadata(pe)$connectivity <- list(
-  matrix = mat, method = "coherence", band = c(8, 13)
-)
-eegPlotConnectogram(pe, threshold = 0.2)
-} # }
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  pe <- make_eeg(n_time = 1000, n_channels = 4, sr = 250)
+  mat <- matrix(c(
+    1, 0.5, 0, -0.4,
+    0.5, 1, 0.3, 0,
+    0, 0.3, 1, 0.6,
+    -0.4, 0, 0.6, 1
+  ), 4, 4)
+  labels <- SummarizedExperiment::colData(pe)$label
+  dimnames(mat) <- list(labels, labels)
+  S4Vectors::metadata(pe)$connectivity <- list(
+    matrix = mat, method = "coherence", band = c(8, 13)
+  )
+  eegPlotConnectogram(pe, threshold = 0.2)
+}
 ```

@@ -49,9 +49,9 @@ A ggplot2 object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
-pe <- eegICA(pe, n_components = 10)
-eegPlotICA(pe, components = 1:5)
-} # }
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
+  pe <- eegICA(pe, n_components = 10)
+  eegPlotICA(pe, components = 1:5)
+}
 ```

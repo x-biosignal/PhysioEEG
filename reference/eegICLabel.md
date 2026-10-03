@@ -99,9 +99,7 @@ signals. Behavioral and Brain Functions, 7, 30.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, sr = 500)
 pe <- eegICA(pe, n_components = 10, method = "fastica")
 probs <- eegICLabel(pe)
-} # }
 ```

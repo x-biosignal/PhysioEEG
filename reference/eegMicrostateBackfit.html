@@ -11,7 +11,7 @@ from one dataset to another dataset."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -116,14 +116,12 @@ the temporal dynamics of whole-brain neuronal networks. NeuroImage, 180, 577-593
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe1</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">5000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pe1</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">5000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pe1</span> <span class="op">&lt;-</span> <span class="fu"><a href="eegMicrostates.html">eegMicrostates</a></span><span class="op">(</span><span class="va">pe1</span>, n_states <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">maps</span> <span class="op">&lt;-</span> <span class="fu">metadata</span><span class="op">(</span><span class="va">pe1</span><span class="op">)</span><span class="op">$</span><span class="va">microstates</span><span class="op">$</span><span class="va">maps</span></span></span>
+<span class="r-in"><span><span class="va">maps</span> <span class="op">&lt;-</span> <span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">pe1</span><span class="op">)</span><span class="op">$</span><span class="va">microstates</span><span class="op">$</span><span class="va">maps</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">pe2</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">3000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pe2</span> <span class="op">&lt;-</span> <span class="fu">eegMicrostateBackfit</span><span class="op">(</span><span class="va">pe2</span>, <span class="va">maps</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

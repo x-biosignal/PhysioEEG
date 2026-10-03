@@ -53,10 +53,10 @@ A ggplot2 object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-mat <- matrix(runif(16), 4, 4)
-diag(mat) <- 1
-pe <- make_eeg(n_time = 1000, n_channels = 4, sr = 250)
-eegPlotConnectivity(pe, method = "heatmap", matrix = mat)
-} # }
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  mat <- matrix(runif(16), 4, 4)
+  diag(mat) <- 1
+  pe <- make_eeg(n_time = 1000, n_channels = 4, sr = 250)
+  eegPlotConnectivity(pe, method = "heatmap", matrix = mat)
+}
 ```

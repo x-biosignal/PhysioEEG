@@ -44,10 +44,10 @@ A ggplot2 object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 1000, n_channels = 19, sr = 250)
-src <- data.frame(x = runif(50, -1, 1), y = runif(50, -1, 1),
-                  amplitude = rnorm(50)^2)
-eegPlotSource(pe, source_data = src, method = "scatter")
-} # }
+if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("patchwork", quietly = TRUE)) {
+  pe <- make_eeg(n_time = 1000, n_channels = 19, sr = 250)
+  src <- data.frame(x = runif(50, -1, 1), y = runif(50, -1, 1),
+                    amplitude = rnorm(50)^2)
+  eegPlotSource(pe, source_data = src, method = "scatter")
+}
 ```

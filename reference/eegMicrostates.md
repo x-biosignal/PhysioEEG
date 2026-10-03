@@ -81,9 +81,7 @@ NeuroImage, 180, 577-593.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
 pe <- eegMicrostates(pe, n_states = 4, method = "kmeans")
-ms <- metadata(pe)$microstates
-} # }
+ms <- S4Vectors::metadata(pe)$microstates
 ```

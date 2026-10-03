@@ -75,15 +75,15 @@ single-trial analysis. IEEE Signal Processing Magazine, 25(1), 41-56.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_bci(n_trials = 20, n_channels = 8, sr = 256)
-labels <- metadata(pe)$labels
+labels <- S4Vectors::metadata(pe)$labels
 features <- eegBCIfeatures(pe, method = "bandpower")
 result <- eegBCIclassify(pe, features = features, labels = labels, method = "lda")
 
 # With 5-fold cross-validation
 result_cv <- eegBCIclassify(pe, features = features, labels = labels,
                             method = "lda", cv_folds = 5)
+#> Warning: eegBCIclassify() cross-validation extracts features on the full dataset before splitting into folds, which leaks label/data information into the test folds and inflates accuracy (Varoquaux et al., 2017). This path is deprecated; use eegDecode() for a leakage-free per-fold pipeline.
 attr(result_cv, "cv_accuracy")
-} # }
+#> [1] 1
 ```

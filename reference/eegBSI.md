@@ -90,14 +90,16 @@ Neurophysiology, 122(5), 874-883.
 
 [`eegDAR()`](https://x-biosignal.github.io/PhysioEEG/reference/eegDAR.md),
 [`eegAsymmetry()`](https://x-biosignal.github.io/PhysioEEG/reference/eegAsymmetry.md),
-[`PhysioCore::physioBiomarker()`](https://x-biosignal.github.io/PhysioCore//reference/PhysioCore-reexports.html)
+[`PhysioExperiment::physioBiomarker()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/physioBiomarker-constructor.html)
 
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 250)
 res <- eegBSI(pe, age = 60)
 res$bsi
-} # }
+#> <PhysioBiomarker> BSI = 0.05377 index
+#>   reliability: ICC=NA, SEM=NA 
+#>   normative: 57th percentile (ref 0.0108-0.0892)
+#>   interpretation: 8 hemispheric pairs 
 ```

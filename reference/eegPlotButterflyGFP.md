@@ -64,8 +64,8 @@ A patchwork object containing two ggplot panels.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 2500, n_channels = 8, sr = 500)
-eegPlotButterflyGFP(pe, channels = c("Fz", "Cz", "Pz"))
-} # }
+if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("patchwork", quietly = TRUE)) {
+  pe <- make_eeg(n_time = 1500, n_channels = 19, sr = 250)
+  eegPlotButterflyGFP(pe, channels = c("Fz", "Cz", "Pz"))
+}
 ```

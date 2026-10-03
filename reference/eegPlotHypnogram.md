@@ -37,10 +37,10 @@ A ggplot2 object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg_sleep(n_time = 150000, n_channels = 2, sr = 500)
-stages <- eegSleepStage(pe)
-metadata(pe)$sleep_stages <- stages
-eegPlotHypnogram(pe)
-} # }
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  pe <- make_eeg_sleep(n_time = 150000, n_channels = 2, sr = 500)
+  stages <- eegSleepStage(pe)
+  S4Vectors::metadata(pe)$sleep_stages <- stages
+  eegPlotHypnogram(pe)
+}
 ```

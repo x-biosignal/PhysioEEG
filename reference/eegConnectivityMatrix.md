@@ -65,9 +65,12 @@ signals. Human Brain Mapping, 8(4), 194-208.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 4, sr = 500)
 conn <- eegConnectivityMatrix(pe, method = "plv", band = c(8, 13))
 print(conn)
-} # }
+#>           Fp1       Fp2        F7        F3
+#> Fp1 1.0000000 0.9623725 0.8560568 0.9618666
+#> Fp2 0.9623725 1.0000000 0.8253624 0.9497751
+#> F7  0.8560568 0.8253624 1.0000000 0.8506339
+#> F3  0.9618666 0.9497751 0.8506339 1.0000000
 ```

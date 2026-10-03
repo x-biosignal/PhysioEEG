@@ -43,8 +43,12 @@ eegSTFT(
 
 - output_assay:
 
-  Name of the assay to store STFT power results (default:
-  `"stft_power"`).
+  Name the result is stored under. Despite the argument's name this is a
+  key in
+  [`metadata`](https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html),
+  NOT an assay: after the call `assay(x, "the value given")` does not
+  exist while `metadata(x)$the value given` holds the result (default:
+  `"the value given"`). (default: `"stft_power"`).
 
 ## Value
 
@@ -71,10 +75,16 @@ conscious perception. Trends in Cognitive Sciences, 3(4), 151-162.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 5000, n_channels = 4, sr = 500)
+pe <- make_eeg(n_time = 2000, n_channels = 4, sr = 250)
 pe_stft <- eegSTFT(pe, window_sec = 0.5, overlap = 0.75)
-sp <- SummarizedExperiment::assay(pe_stft, "stft_power")
-dim(sp)  # time_bins x frequencies x channels
-} # }
+# results are stored in metadata(x)$stft
+str(S4Vectors::metadata(pe_stft)$stft, max.level = 1)
+#> List of 7
+#>  $ time_axis    : num [1:59] 0.252 0.38 0.508 0.636 0.764 ...
+#>  $ freq_axis    : num [1:64] 0 1.98 3.97 5.95 7.94 ...
+#>  $ window_sec   : num 0.5
+#>  $ overlap      : num 0.75
+#>  $ window_type  : chr "hanning"
+#>  $ window_length: int 126
+#>  $ hop_size     : int 32
 ```

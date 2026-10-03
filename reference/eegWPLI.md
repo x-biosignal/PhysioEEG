@@ -99,9 +99,14 @@ and sample-size bias. NeuroImage, 55(4), 1548-1565.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 4, sr = 500)
 wpli_df <- eegWPLI(pe, band = c(8, 13))
 head(wpli_df)
-} # }
+#>   channel1 channel2      wpli wpli_debiased
+#> 1      Fp1      Fp2 1.0000000     1.0000000
+#> 2      Fp1       F7 1.0000000     1.0000000
+#> 3      Fp1       F3 1.0000000     1.0000000
+#> 4      Fp2       F7 0.6775492     0.2819576
+#> 5      Fp2       F3 1.0000000     1.0000000
+#> 6       F7       F3 1.0000000     1.0000000
 ```

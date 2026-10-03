@@ -41,7 +41,12 @@ eegMultitaper(
 
 - output_assay:
 
-  Name of the assay to store PSD results (default: `"multitaper_psd"`).
+  Name the result is stored under. Despite the argument's name this is a
+  key in
+  [`metadata`](https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html),
+  NOT an assay: after the call `assay(x, "the value given")` does not
+  exist while `metadata(x)$the value given` holds the result (default:
+  `"the value given"`). (default: `"multitaper_psd"`).
 
 ## Value
 
@@ -70,10 +75,12 @@ Proceedings of the IEEE, 70(9), 1055-1096.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
+pe <- make_eeg(n_time = 2000, n_channels = 4, sr = 250)
 pe_mt <- eegMultitaper(pe, bandwidth = 4)
-psd <- SummarizedExperiment::assay(pe_mt, "multitaper_psd")
-dim(psd)  # frequencies x channels
-} # }
+# results are stored in metadata(x)$multitaper
+str(S4Vectors::metadata(pe_mt)$multitaper, max.level = 1)
+#> List of 3
+#>  $ frequencies: num [1:1001] 0 0.125 0.25 0.375 0.5 ...
+#>  $ bandwidth  : num 4
+#>  $ n_tapers   : int 7
 ```

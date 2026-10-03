@@ -74,7 +74,6 @@ with automatic fallback to FIR if the signal package is not available.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
 # Bandpass filter
 pe_filt <- eegFilter(pe, lowcut = 1, highcut = 40)
@@ -84,5 +83,4 @@ pe_hp <- eegFilter(pe, lowcut = 0.1)
 pe_notch <- eegFilter(pe, lowcut = 1, highcut = 40, notch = 50)
 # IIR Butterworth
 pe_iir <- eegFilter(pe, lowcut = 1, highcut = 40, method = "iir", order = 4)
-} # }
 ```

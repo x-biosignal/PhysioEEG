@@ -75,9 +75,7 @@ EEG- and MEG-data. Journal of Neuroscience Methods, 164(1), 177-190.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe1 <- make_eeg_erp(n_epochs = 20, sr = 250)
 pe2 <- make_eeg_erp(n_epochs = 20, sr = 250)
 result <- eegERPtest(pe1, pe2, method = "permutation", n_perm = 500)
-} # }
 ```

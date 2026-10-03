@@ -29,7 +29,7 @@ Or install the development version from GitHub:
 
 ``` r
 
-# install.packages("remotes")
+# install.packages("remotes", repos = "https://cloud.r-project.org")
 remotes::install_github("x-biosignal/PhysioEEG")
 ```
 
@@ -39,23 +39,22 @@ remotes::install_github("x-biosignal/PhysioEEG")
 
 library(PhysioEEG)
 
-# Generate simulated EEG data with ERP components
+# Continuous EEG: run the preprocessing pipeline (filter, bad channels, re-reference)
+raw <- make_eeg(n_time = 2500, n_channels = 19, sr = 250)
+clean <- eegPreprocess(raw, lowcut = 1, highcut = 40, verbose = FALSE)
+
+# Epoched EEG with embedded ERP components: detect and measure the P300
 pe <- make_eeg_erp(n_epochs = 40, n_channels = 19, sr = 250)
+components <- eegERPdetect(pe, component = "P300")
+measures <- eegERPmeasure(pe, window = c(0.25, 0.5))
 
-# Run full preprocessing pipeline (filter, re-reference, artifact rejection)
-pe <- eegPreprocess(pe, lowcut = 1, highcut = 40, ref = "average")
+# Inspect the detected component (peak amplitude and latency per channel)
+components
+measures
 
-# Detect and measure P300 component
-erp <- eegERPdetect(pe, component = "P300")
-measures <- eegERPmeasure(pe, component = "P300")
-
-# Plot ERP waveform and topographic map
-eegPlotERP(pe, channels = c("Fz", "Cz", "Pz"))
-eegPlotTopomap(pe, time = 0.35)
-
-# Inspect continuous channel traces and reference-dependent GFP together
-continuous <- make_eeg(n_time = 2500, n_channels = 8, sr = 500)
-eegPlotButterflyGFP(continuous, channels = c("Fz", "F3", "F4"))
+# Plotting helpers -- eegPlotERP(), eegPlotTopomap(), eegPlotButterflyGFP(),
+# eegPlotSpectrogram() -- render these results and require the optional
+# ggplot2 package.
 ```
 
 ## Features

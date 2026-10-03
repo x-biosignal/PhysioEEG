@@ -59,10 +59,8 @@ attribute `"labels"` giving the corresponding class of each.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, sr = 500)
 pe <- eegICA(pe, n_components = 10, method = "fastica")
 bad <- eegICLabelFlag(pe, prob_threshold = 0.5)
 pe <- eegICAremove(pe, components = bad)
-} # }
 ```

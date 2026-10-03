@@ -78,9 +78,18 @@ Donoghue et al. 2020, Nat Neurosci (specparam / FOOOF).
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 2500, n_channels = 8, sr = 250)
-ap <- eegAperiodic(pe, freq_range = c(2, 40))
-ap$aperiodic          # per-channel exponent / offset
-} # }
+if (requireNamespace("PhysioAnalysis", quietly = TRUE)) {
+  pe <- make_eeg(n_time = 2500, n_channels = 8, sr = 250)
+  ap <- eegAperiodic(pe, freq_range = c(2, 40))
+  ap$aperiodic          # per-channel exponent / offset
+}
+#>   channel    offset exponent r_squared     error
+#> 1     Fp1 1.0569143 1.899793 0.9517044 0.1794116
+#> 2     Fp2 0.9976620 1.893552 0.9729035 0.1329855
+#> 3      F7 0.7323077 1.689029 0.9699991 0.1272416
+#> 4      F3 0.9299269 1.865744 0.9517095 0.1647729
+#> 5      Fz 0.7507181 1.747007 0.9560722 0.1427750
+#> 6      F4 0.9321072 1.853310 0.9602022 0.1416420
+#> 7      F8 0.9810790 1.895442 0.9554800 0.1608447
+#> 8      T3 1.0408772 1.930276 0.9532819 0.1750132
 ```

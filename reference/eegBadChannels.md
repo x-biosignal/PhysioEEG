@@ -56,9 +56,7 @@ A data.frame with columns: `channel` (label), `is_bad` (logical),
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
 bad_df <- eegBadChannels(pe)
 bad_labels <- bad_df$channel[bad_df$is_bad]
-} # }
 ```

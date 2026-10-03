@@ -56,11 +56,10 @@ the specified output assay. Event information is stored in
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 10000, n_channels = 19, sr = 500)
 events <- data.frame(onset_sec = c(1.0, 3.0, 5.0, 7.0))
 pe_ep <- eegEpoch(pe, events, limits = c(-0.2, 0.8))
-dim(SummarizedExperiment::assay(pe_ep, "epoched"))
-# time x channels x epochs
-} # }
+# the epoched array is stored in metadata(x)$epoched
+dim(S4Vectors::metadata(pe_ep)$epoched)  # time x channels x epochs
+#> [1] 501  19   4
 ```

@@ -23,7 +23,7 @@ with provenance and, for the global BSI, a normative reference range."></head><b
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -166,16 +166,18 @@ correlation with functional status after 6 months. Clinical Neurophysiology,
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="eegDAR.html">eegDAR()</a></code>, <code><a href="eegAsymmetry.html">eegAsymmetry()</a></code>, <code><a href="https://x-biosignal.github.io/PhysioCore//reference/PhysioCore-reexports.html" class="external-link">PhysioCore::physioBiomarker()</a></code></p></div>
+    <div class="dont-index"><p><code><a href="eegDAR.html">eegDAR()</a></code>, <code><a href="eegAsymmetry.html">eegAsymmetry()</a></code>, <code><a href="https://x-biosignal.r-universe.dev/PhysioExperiment/reference/physioBiomarker-constructor.html" class="external-link">PhysioExperiment::physioBiomarker()</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">5000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">250</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">5000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">250</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">eegBSI</span><span class="op">(</span><span class="va">pe</span>, age <span class="op">=</span> <span class="fl">60</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span><span class="op">$</span><span class="va">bsi</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;PhysioBiomarker&gt; BSI = 0.05377 index</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   reliability: ICC=NA, SEM=NA </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   normative: 57th percentile (ref 0.0108-0.0892)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   interpretation: 8 hemispheric pairs </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -96,9 +96,14 @@ clinical EEG. Electroencephalography and Clinical Neurophysiology,
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_spikes(n_time = 30000, n_channels = 19, sr = 500, n_spikes = 15)
 spikes <- eegSpikeDetect(pe, method = "morphology")
 head(spikes)
-} # }
+#>   channel sample time_sec amplitude duration_ms confidence
+#> 1       1   4668    9.334  234.5476          24          1
+#> 2       1  18795   37.588  273.8889         166          1
+#> 3       2  13100   26.198  283.5217          26          1
+#> 4      13  10440   20.878  239.4109          52          1
+#> 5      18   6120   12.238  279.9133          46          1
+#> 6      18  16608   33.214  169.3206         128          1
 ```

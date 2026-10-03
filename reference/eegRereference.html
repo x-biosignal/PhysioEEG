@@ -11,7 +11,7 @@ improve spatial resolution and comparability across studies."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -151,12 +151,10 @@ Neuroinformatics</em>, 9, 16. <a href="https://doi.org/10.3389/fninf.2015.00016"
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">5000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">5000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pe_avg</span>    <span class="op">&lt;-</span> <span class="fu">eegRereference</span><span class="op">(</span><span class="va">pe</span>, ref_type <span class="op">=</span> <span class="st">"average"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pe_robust</span> <span class="op">&lt;-</span> <span class="fu">eegRereference</span><span class="op">(</span><span class="va">pe</span>, ref_type <span class="op">=</span> <span class="st">"robust"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pe_median</span> <span class="op">&lt;-</span> <span class="fu">eegRereference</span><span class="op">(</span><span class="va">pe</span>, ref_type <span class="op">=</span> <span class="st">"median"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

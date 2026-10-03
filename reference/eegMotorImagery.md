@@ -63,9 +63,10 @@ single-trial analysis. IEEE Signal Processing Magazine, 25(1), 41-56.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_bci(n_trials = 20, n_channels = 8, sr = 256)
 result <- eegMotorImagery(pe)
-erd_data <- SummarizedExperiment::assay(result, "erd_ers")
-} # }
+# ERD/ERS features are stored in metadata(x)$erd_ers
+erd_data <- S4Vectors::metadata(result)$erd_ers
+dim(erd_data)  # trials x (channels * bands)
+#> [1] 40 16
 ```

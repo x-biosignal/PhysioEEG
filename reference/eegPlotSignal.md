@@ -60,8 +60,8 @@ A ggplot2 object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 2500, n_channels = 4, sr = 500)
-eegPlotSignal(pe, mode = "stacked")
-} # }
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  pe <- make_eeg(n_time = 2500, n_channels = 4, sr = 500)
+  eegPlotSignal(pe, mode = "stacked")
+}
 ```

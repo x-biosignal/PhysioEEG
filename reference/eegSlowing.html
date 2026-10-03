@@ -13,7 +13,7 @@ mild, moderate, or severe slowing categories."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -141,11 +141,29 @@ clinical EEG. Electroencephalography and Clinical Neurophysiology, 106(3), 259-2
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">5000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">5000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">eegSlowing</span><span class="op">(</span><span class="va">pe</span>, method <span class="op">=</span> <span class="st">"dtar"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    channel metric    value   classification</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1        1   dtar 1.281362     mild_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2        2   dtar 1.009824     mild_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        3   dtar 1.226197     mild_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        4   dtar 1.216584     mild_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        5   dtar 1.045893     mild_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6        6   dtar 1.399565     mild_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7        7   dtar 1.359063     mild_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8        8   dtar 1.194493     mild_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9        9   dtar 2.576911 moderate_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10      10   dtar 2.041697 moderate_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11      11   dtar 3.418652 moderate_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12      12   dtar 5.516801   severe_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13      13   dtar 5.362880   severe_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14      14   dtar 5.119384   severe_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15      15   dtar 4.104294   severe_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16      16   dtar 4.415537   severe_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17      17   dtar 3.791294 moderate_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18      18   dtar 2.083023 moderate_slowing</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19      19   dtar 1.516108     mild_slowing</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

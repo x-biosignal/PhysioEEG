@@ -9,7 +9,7 @@ plus pink noise. Channels are labeled using the International 10-20 system."></h
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,18 +98,30 @@ Channel labels follow the International 10-20 system (Fp1, Fp2, F7, ...,
 O1, O2). Column data contains <code>label</code> and <code>type</code> fields.</p>
     </div>
     <div class="section level2">
+    <h2 id="what-this-generator-does-and-does-not-model">What this generator does and does not model<a class="anchor" aria-label="anchor" href="#what-this-generator-does-and-does-not-model"></a></h2>
+
+
+<p>Each channel is generated independently, so the channels are only weakly
+correlated: on a 19-channel, 10 s record the median absolute between-channel
+correlation is about 0.26. Real EEG is spatially smooth and neighbouring
+electrodes correlate strongly, which several methods rely on. In particular
+<code><a href="eegBadChannels.html">eegBadChannels</a></code> judges a channel partly by its correlation with
+the others against <code>corr_threshold</code> (default 0.4), so on this generator's
+output it flags every channel as bad – and anything downstream that needs good
+channels, such as <code><a href="eegInterpolate.html">eegInterpolate</a></code>, then has none to work with.
+That is the generator being independent, not the detector being wrong. Use it
+for per-channel operations – filtering, spectra, epoching, per-channel
+measures – and use real data, or a generator with a shared spatial component,
+when exercising anything that assumes channels covary.</p>
+<p>pe &lt;- make_eeg(n_time = 2500, n_channels = 4, sr = 250)
+dim(SummarizedExperiment::assay(pe, "raw"))  # 2500 x 4</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="make_eeg_erp.html">make_eeg_erp()</a></code>, <code><a href="make_eeg_sleep.html">make_eeg_sleep()</a></code>, <code><a href="make_eeg_bci.html">make_eeg_bci()</a></code>,
 <code><a href="make_eeg_spikes.html">make_eeg_spikes()</a></code>, <code><a href="eegFilter.html">eegFilter()</a></code>, <code><a href="eegCoherence.html">eegCoherence()</a></code></p></div>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu">make_eeg</span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">2500</span>, n_channels <span class="op">=</span> <span class="fl">4</span>, sr <span class="op">=</span> <span class="fl">250</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">pe</span>, <span class="st">"raw"</span><span class="op">)</span><span class="op">)</span>  <span class="co"># 2500 x 4</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2500    4</span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

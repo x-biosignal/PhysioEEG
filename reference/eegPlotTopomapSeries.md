@@ -50,8 +50,8 @@ A ggplot2 object with faceted topomaps.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 2500, n_channels = 19, sr = 500)
-eegPlotTopomapSeries(pe, times = c(0.1, 0.2, 0.3))
-} # }
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  pe <- make_eeg(n_time = 2500, n_channels = 19, sr = 500)
+  eegPlotTopomapSeries(pe, times = c(0.1, 0.2, 0.3))
+}
 ```

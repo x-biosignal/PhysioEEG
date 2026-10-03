@@ -53,13 +53,15 @@ first if positions are not set.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
 pe <- eegMontage(pe, system = "10-20")
-bad_df <- eegBadChannels(pe)
-bad_labels <- bad_df$channel[bad_df$is_bad]
-if (length(bad_labels) > 0) {
-  pe_clean <- eegInterpolate(pe, bad_labels)
-}
-} # }
+# interpolate two named channels from their neighbours
+pe_clean <- eegInterpolate(pe, bad_channels = c("C3", "C4"))
+pe_clean
+#> class: PhysioExperiment
+#> dim: 5000 x 19 
+#> assays(2): raw, interpolated
+#> samplingRate: 500 Hz
+#> channels(19): Fp1, Fp2, F7, F3, Fz ...
+#> colData names(5): label, type, pos_x, pos_y, pos_z
 ```

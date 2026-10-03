@@ -59,8 +59,8 @@ A ggplot2 object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg_erp(n_epochs = 40, sr = 250)
-eegPlotERP(pe, channels = "Cz")
-} # }
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  pe <- make_eeg_erp(n_epochs = 40, sr = 250)
+  eegPlotERP(pe, channels = "Cz")
+}
 ```

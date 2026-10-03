@@ -40,7 +40,12 @@ eegITC(
 
 - output_assay:
 
-  Name of the assay to store ITC results (default: `"itc"`).
+  Name the result is stored under. Despite the argument's name this is a
+  key in
+  [`metadata`](https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html),
+  NOT an assay: after the call `assay(x, "the value given")` does not
+  exist while `metadata(x)$the value given` holds the result (default:
+  `"the value given"`). (default: `"itc"`).
 
 ## Value
 
@@ -71,10 +76,12 @@ Neurophysiology, 86(4), 283-293.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg_erp(n_epochs = 40, n_channels = 2, sr = 250)
+pe <- make_eeg_erp(n_epochs = 20, n_channels = 2, sr = 250)
 pe_itc <- eegITC(pe, frequencies = seq(5, 30, by = 5))
-itc_data <- SummarizedExperiment::assay(pe_itc, "itc")
-dim(itc_data)  # time x frequencies x channels
-} # }
+# results are stored in metadata(x)$itc
+str(S4Vectors::metadata(pe_itc)$itc, max.level = 1)
+#> List of 3
+#>  $ frequencies: num [1:6] 5 10 15 20 25 30
+#>  $ n_cycles   : num 7
+#>  $ n_epochs   : int 20
 ```

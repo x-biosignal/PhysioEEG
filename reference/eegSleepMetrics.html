@@ -11,7 +11,7 @@ in metadata(x)$sleep_stages."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -123,13 +123,22 @@ Journal of Clinical Sleep Medicine, 13(5), 665-666.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg_sleep.html">make_eeg_sleep</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">150000</span>, n_channels <span class="op">=</span> <span class="fl">2</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg_sleep.html">make_eeg_sleep</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">150000</span>, n_channels <span class="op">=</span> <span class="fl">2</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">stages</span> <span class="op">&lt;-</span> <span class="fu"><a href="eegSleepStage.html">eegSleepStage</a></span><span class="op">(</span><span class="va">pe</span>, epoch_sec <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">metadata</span><span class="op">(</span><span class="va">pe</span><span class="op">)</span><span class="op">$</span><span class="va">sleep_stages</span> <span class="op">&lt;-</span> <span class="va">stages</span></span></span>
+<span class="r-in"><span><span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">pe</span><span class="op">)</span><span class="op">$</span><span class="va">sleep_stages</span> <span class="op">&lt;-</span> <span class="va">stages</span></span></span>
 <span class="r-in"><span><span class="va">metrics</span> <span class="op">&lt;-</span> <span class="fu">eegSleepMetrics</span><span class="op">(</span><span class="va">pe</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">metrics</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              metric value    unit</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  total_sleep_time   4.0 minutes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  sleep_efficiency  80.0 percent</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3              waso   0.5 minutes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     sleep_latency   0.5 minutes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       rem_latency   0.0 minutes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6            pct_N1   0.0 percent</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7            pct_N2   0.0 percent</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8            pct_N3  62.5 percent</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9           pct_REM  37.5 percent</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10            pct_W  20.0 percent</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -76,9 +76,10 @@ clinical EEG. Electroencephalography and Clinical Neurophysiology,
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
 asym <- eegAsymmetry(pe)
 print(asym)
-} # }
+#>    pair left_channel right_channel left_power right_power asymmetry_index
+#> 1 F4-F3           F3            F4   31.06232    29.60231     -0.04814290
+#> 2 F8-F7           F7            F8   26.61676    25.12516     -0.05767128
 ```

@@ -64,8 +64,6 @@ in vision research: a review. Journal of Vision, 15(6), 4.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_bci(n_trials = 10, n_channels = 8, sr = 256)
 result <- eegSSVEP(pe, frequencies = c(10, 12, 15), method = "cca")
-} # }
 ```

@@ -66,9 +66,7 @@ Technique (2nd ed.). MIT Press.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_erp(n_epochs = 40, sr = 250)
 result <- eegERPmeasure(pe, window = c(250, 500), method = "peak",
                         polarity = "positive")
-} # }
 ```

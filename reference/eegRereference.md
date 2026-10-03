@@ -79,10 +79,8 @@ Neuroinformatics*, 9, 16.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
 pe_avg    <- eegRereference(pe, ref_type = "average")
 pe_robust <- eegRereference(pe, ref_type = "robust")
 pe_median <- eegRereference(pe, ref_type = "median")
-} # }
 ```

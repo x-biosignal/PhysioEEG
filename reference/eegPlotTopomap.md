@@ -64,8 +64,8 @@ A ggplot2 object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 500, n_channels = 19, sr = 250)
-eegPlotTopomap(pe, time = 0.5)
-} # }
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  pe <- make_eeg(n_time = 500, n_channels = 19, sr = 250)
+  eegPlotTopomap(pe, time = 0.5)
+}
 ```

@@ -69,9 +69,18 @@ The comodulogram list from
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 7500, n_channels = 2, sr = 250)
-cm <- eegComodulogram(pe, channel = 1)
-cm$peak
-} # }
+if (requireNamespace("PhysioCrossModal", quietly = TRUE)) {
+  pe <- make_eeg(n_time = 7500, n_channels = 2, sr = 250)
+  cm <- eegComodulogram(pe, channel = 1)
+  cm$peak
+}
+#> $phase_freq
+#> [1] 10
+#> 
+#> $amp_freq
+#> [1] 20
+#> 
+#> $value
+#> [1] 0.002669823
+#> 
 ```

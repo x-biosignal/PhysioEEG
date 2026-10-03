@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,6 +62,20 @@
       <small>Source: <a href="https://github.com/x-biosignal/PhysioEEG/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.16" id="physioeeg-0716">PhysioEEG 0.7.16<a class="anchor" aria-label="anchor" href="#physioeeg-0716"></a></h2>
+<div class="section level3">
+<h3 id="documentation-0-7-16">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-7-16"></a></h3>
+<ul><li>Runnable <code>@examples</code> added or corrected across 78 help pages. Each runs offline in seconds, writes nothing outside <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>, and is executed by <code>R CMD check</code>; anything needing a device, a download or an optional backend is fenced with the reason stated.</li>
+<li>The README’s quick start runs as written: it attaches the package, builds its own inputs, and uses only hard dependencies.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="documentation-0-7-16-1">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-7-16-1"></a></h3>
+<ul><li>The <code>output_assay</code> argument of <code><a href="../reference/eegMorletWavelet.html">eegMorletWavelet()</a></code>, <code><a href="../reference/eegERSP.html">eegERSP()</a></code>, <code><a href="../reference/eegITC.html">eegITC()</a></code>, <code><a href="../reference/eegMultitaper.html">eegMultitaper()</a></code>, <code><a href="../reference/eegSTFT.html">eegSTFT()</a></code> and <code><a href="../reference/eegCSP.html">eegCSP()</a></code> names a key in <code>metadata()</code>, not an assay. Their help pages said “output assay name”, so a reader looked for <code>assay(x, "ersp_data")</code> and found nothing. The descriptions now say what happens. Behaviour is unchanged.</li>
+<li>
+<code><a href="../reference/make_eeg.html">make_eeg()</a></code> documents what it does not model: each channel is generated independently, giving a median absolute between-channel correlation near 0.26 against <code><a href="../reference/eegBadChannels.html">eegBadChannels()</a></code>’s <code>corr_threshold</code> of 0.4, so that detector condemns every channel and <code><a href="../reference/eegInterpolate.html">eegInterpolate()</a></code> is then left with none. That is the generator being independent, not the detector being wrong.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.15" id="physioeeg-0715">PhysioEEG 0.7.15<a class="anchor" aria-label="anchor" href="#physioeeg-0715"></a></h2>
 <div class="section level3">

@@ -11,7 +11,7 @@ Also computes the transition probability matrix between states."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -118,13 +118,21 @@ the temporal dynamics of whole-brain neuronal networks. NeuroImage, 180, 577-593
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">5000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">5000</span>, n_channels <span class="op">=</span> <span class="fl">19</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="eegMicrostates.html">eegMicrostates</a></span><span class="op">(</span><span class="va">pe</span>, n_states <span class="op">=</span> <span class="fl">4</span>, method <span class="op">=</span> <span class="st">"kmeans"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">stats</span> <span class="op">&lt;-</span> <span class="fu">eegMicrostateStats</span><span class="op">(</span><span class="va">pe</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">stats</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   state duration_ms occurrence_per_sec coverage_pct</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1    409.5000                0.4        16.38</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     2   2682.0000                0.2        53.64</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     3    313.6667                0.6        18.82</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     4    558.0000                0.2        11.16</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">stats</span>, <span class="st">"transition_matrix"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.0 0.25 0.75  0.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  0.0 0.00 0.50  0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  0.8 0.00 0.00  0.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  0.0 0.00 1.00  0.0</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

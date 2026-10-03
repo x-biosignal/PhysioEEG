@@ -92,9 +92,10 @@ Journal of Clinical Sleep Medicine, 13(5), 665-666.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_sleep(n_time = 150000, n_channels = 2, sr = 500)
 slow_waves <- eegSlowWaveDetect(pe)
 head(slow_waves)
-} # }
+#> [1] channel       start_sample  end_sample    negative_peak positive_peak
+#> [6] duration_ms   slope        
+#> <0 rows> (or 0-length row.names)
 ```

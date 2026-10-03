@@ -4,7 +4,7 @@ Estimates frequency-resolved directed connectivity between EEG channels
 with the Directed Transfer Function (Kaminski & Blinowska 1991),
 computed from the transfer function \\H(f)\\ of a multivariate
 autoregressive (MVAR) model fitted with
-[`PhysioCore::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/mvarFit.html).
+[`PhysioExperiment::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/mvarFit.html).
 Because \\H(f)\\ inverts the whole VAR system, DTF reflects both direct
 and indirect pathways. The (default) normalized DTF satisfies \\\sum_j
 \mathrm{DTF}\_{ij}(f)^2 = 1\\ for each target \\i\\ (inflow
@@ -57,7 +57,7 @@ eegDTF(
 - method:
 
   MVAR estimator passed to
-  [`PhysioCore::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/mvarFit.html)
+  [`PhysioExperiment::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/mvarFit.html)
   (default: `"ols"`).
 
 - assay_name:
@@ -82,14 +82,13 @@ Cybernetics, 65(3), 203-210.
 [`eegPDC()`](https://x-biosignal.github.io/PhysioEEG/reference/eegPDC.md),
 [`eegConditionalGC()`](https://x-biosignal.github.io/PhysioEEG/reference/eegConditionalGC.md),
 [`eegConnectivityMatrix()`](https://x-biosignal.github.io/PhysioEEG/reference/eegConnectivityMatrix.md),
-[`PhysioCore::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/mvarFit.html)
+[`PhysioExperiment::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/mvarFit.html)
 
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 4000, n_channels = 5, sr = 250)
 pe <- eegDTF(pe, order = 5)
-dim(metadata(pe)$connectivity$array)
-} # }
+dim(S4Vectors::metadata(pe)$connectivity$array)
+#> [1]   5   5 128
 ```

@@ -76,9 +76,7 @@ Experimental and Clinical Pharmacology, 24(Suppl D), 5-12.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 500, n_channels = 19, sr = 250)
 fm <- eegForwardModel(pe, method = "spherical", n_sources = 50)
 pe <- eegSourceEstimate(pe, fm, method = "mne")
-} # }
 ```

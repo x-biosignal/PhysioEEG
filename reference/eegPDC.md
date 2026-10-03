@@ -3,7 +3,7 @@
 Estimates frequency-resolved directed connectivity with Partial Directed
 Coherence (Baccala & Sameshima 2001), computed from the frequency-domain
 coefficient matrix \\\bar{A}(f)\\ of an MVAR model
-([`PhysioCore::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/mvarFit.html)).
+([`PhysioExperiment::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/mvarFit.html)).
 Unlike DTF, PDC reflects only *direct* channel-to-channel influences, so
 a purely indirect pathway gives PDC near zero. The (default) generalized
 PDC weights each row by the inverse residual standard deviation to make
@@ -52,7 +52,7 @@ eegPDC(
 - method:
 
   MVAR estimator passed to
-  [`PhysioCore::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/mvarFit.html)
+  [`PhysioExperiment::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/mvarFit.html)
   (default: `"ols"`).
 
 - assay_name:
@@ -81,9 +81,13 @@ new concept in neural structure determination. Biological Cybernetics,
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 4000, n_channels = 5, sr = 250)
 pe <- eegPDC(pe, order = 5)
-metadata(pe)$connectivity$matrix
-} # }
+S4Vectors::metadata(pe)$connectivity$matrix
+#>           Fp1        Fp2         F7         F3        Fz
+#> Fp1 0.9308886 0.20475110 0.09796020 0.10207939 0.1918640
+#> Fp2 0.1188708 0.95332157 0.17014541 0.08760945 0.1391627
+#> F7  0.1051502 0.12406314 0.96623214 0.07591603 0.1297131
+#> F3  0.1390672 0.04612233 0.04757274 0.96540989 0.1932865
+#> Fz  0.2153827 0.09414714 0.06520345 0.16158563 0.9137596
 ```

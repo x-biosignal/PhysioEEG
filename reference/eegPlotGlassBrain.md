@@ -76,10 +76,10 @@ Bare amplitude vectors and two-dimensional coordinates are rejected.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 500, n_channels = 19, sr = 250)
-fm <- eegForwardModel(pe, method = "spherical", n_sources = 50)
-localized <- eegSourceEstimate(pe, fm, method = "mne")
-eegPlotGlassBrain(localized)
-} # }
+if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("patchwork", quietly = TRUE)) {
+  pe <- make_eeg(n_time = 500, n_channels = 19, sr = 250)
+  fm <- eegForwardModel(pe, method = "spherical", n_sources = 50)
+  localized <- eegSourceEstimate(pe, fm, method = "mne")
+  eegPlotGlassBrain(localized)
+}
 ```

@@ -57,11 +57,19 @@ NeuroImage, 180, 577-593.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 19, sr = 500)
 pe <- eegMicrostates(pe, n_states = 4, method = "kmeans")
 stats <- eegMicrostateStats(pe)
 print(stats)
+#>   state duration_ms occurrence_per_sec coverage_pct
+#> 1     1    409.5000                0.4        16.38
+#> 2     2   2682.0000                0.2        53.64
+#> 3     3    313.6667                0.6        18.82
+#> 4     4    558.0000                0.2        11.16
 attr(stats, "transition_matrix")
-} # }
+#>      [,1] [,2] [,3] [,4]
+#> [1,]  0.0 0.25 0.75  0.0
+#> [2,]  0.0 0.00 0.50  0.5
+#> [3,]  0.8 0.00 0.00  0.2
+#> [4,]  0.0 0.00 1.00  0.0
 ```

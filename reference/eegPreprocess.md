@@ -118,12 +118,19 @@ depends on which steps are enabled. Processing log is stored in
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 10000, n_channels = 19, sr = 500)
 pe <- eegMontage(pe, system = "10-20")
-events <- data.frame(onset_sec = c(1, 3, 5, 7, 9))
+# filter + average-reference; bad-channel detection/interpolation disabled
+# so the example does not depend on the montage's neighbour geometry
 pe_proc <- eegPreprocess(pe, lowcut = 1, highcut = 40, notch = 50,
-                          epoch = TRUE, events = events,
-                          artifact_reject = TRUE)
-} # }
+                         bad_channels = FALSE, interpolate = FALSE,
+                         verbose = FALSE)
+pe_proc
+#> class: PhysioExperiment
+#> dim: 10000 x 19 
+#> assays(3): raw, filtered, rereferenced
+#> samplingRate: 500 Hz
+#> channels(19): Fp1, Fp2, F7, F3, Fz ...
+#> colData names(5): label, type, pos_x, pos_y, pos_z
+#> provenance: 1 steps
 ```

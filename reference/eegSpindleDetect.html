@@ -13,7 +13,7 @@ zero crossings in the bandpassed signal."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -166,11 +166,23 @@ oscillation. Sleep, 34(10), 1411-1421.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg_sleep.html">make_eeg_sleep</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">150000</span>, n_channels <span class="op">=</span> <span class="fl">2</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg_sleep.html">make_eeg_sleep</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">150000</span>, n_channels <span class="op">=</span> <span class="fl">2</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">spindles</span> <span class="op">&lt;-</span> <span class="fu">eegSpindleDetect</span><span class="op">(</span><span class="va">pe</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">spindles</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   channel start_sample end_sample duration_ms peak_sample peak_amplitude</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       1        32365      32620         512       32501       7.185351</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       1        37365      37622         516       37482       6.984016</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       1       122367     122636         540      122482       6.943870</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4       1       127382     127639         516      127501       7.043511</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       2       122366     122636         542      122501       7.067580</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       2       127377     127637         522      127501       6.609500</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   frequency_hz</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     13.67188</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     13.56589</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     12.96296</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     13.56589</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5     13.83764</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6     13.40996</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

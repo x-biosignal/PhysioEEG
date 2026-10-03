@@ -96,8 +96,8 @@ significant or establish a neurophysiological mechanism.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pe <- make_eeg(n_time = 5000, n_channels = 4, sr = 500)
-eegPlotSpectrogram(pe, channel = 1)
-} # }
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  pe <- make_eeg(n_time = 5000, n_channels = 4, sr = 500)
+  eegPlotSpectrogram(pe, channel = 1)
+}
 ```

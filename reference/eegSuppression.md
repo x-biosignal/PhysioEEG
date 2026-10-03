@@ -79,9 +79,8 @@ clinical EEG. Electroencephalography and Clinical Neurophysiology,
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 10000, n_channels = 4, sr = 500)
 result <- eegSuppression(pe, threshold = 10)
 print(attr(result, "bsr"))
-} # }
+#> [1] 0
 ```

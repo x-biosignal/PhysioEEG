@@ -13,7 +13,7 @@ and applying rule-based classification."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -152,11 +152,23 @@ Journal of Clinical Sleep Medicine, 13(5), 665-666.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg_sleep.html">make_eeg_sleep</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">90000</span>, n_channels <span class="op">=</span> <span class="fl">2</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg_sleep.html">make_eeg_sleep</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">90000</span>, n_channels <span class="op">=</span> <span class="fl">2</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">stages</span> <span class="op">&lt;-</span> <span class="fu">eegSleepStage</span><span class="op">(</span><span class="va">pe</span>, epoch_sec <span class="op">=</span> <span class="fl">30</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">stages</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   epoch stage start_sample end_sample  delta_power theta_power alpha_power</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1     W            1      15000 4.635160e+02    484.5215 842732.6567</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2     2   REM        15001      30000 4.186072e+02 239693.1601    704.3590</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     3    N3        30001      45000 3.530500e+04   3501.0902   7650.3457</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     4    N3        45001      60000 1.274289e+07    500.4129    594.3589</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5     5    N3        60001      75000 3.420374e+04   3550.2539   7842.9891</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6     6   REM        75001      90000 4.190141e+02  94328.4560    665.6874</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   sigma_power beta_power</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    503.6035   1668.842</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    540.5154   1593.042</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  13495.6811   1773.220</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    430.2320   1684.233</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  13784.6707   1694.592</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    516.8163  35357.397</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

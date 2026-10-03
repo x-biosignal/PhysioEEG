@@ -78,9 +78,7 @@ IEEE Transactions on Biomedical Engineering, 44(9), 867-880.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 1000, n_channels = 19, sr = 250)
 fm <- eegForwardModel(pe, method = "spherical", n_sources = 50)
 pe <- eegBeamformer(pe, fm, method = "lcmv")
-} # }
 ```

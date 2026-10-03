@@ -93,9 +93,21 @@ Journal of Clinical Sleep Medicine, 13(5), 665-666.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_sleep(n_time = 90000, n_channels = 2, sr = 500)
 stages <- eegSleepStage(pe, epoch_sec = 30)
 head(stages)
-} # }
+#>   epoch stage start_sample end_sample  delta_power theta_power alpha_power
+#> 1     1     W            1      15000 4.635160e+02    484.5215 842732.6567
+#> 2     2   REM        15001      30000 4.186072e+02 239693.1601    704.3590
+#> 3     3    N3        30001      45000 3.530500e+04   3501.0902   7650.3457
+#> 4     4    N3        45001      60000 1.274289e+07    500.4129    594.3589
+#> 5     5    N3        60001      75000 3.420374e+04   3550.2539   7842.9891
+#> 6     6   REM        75001      90000 4.190141e+02  94328.4560    665.6874
+#>   sigma_power beta_power
+#> 1    503.6035   1668.842
+#> 2    540.5154   1593.042
+#> 3  13495.6811   1773.220
+#> 4    430.2320   1684.233
+#> 5  13784.6707   1694.592
+#> 6    516.8163  35357.397
 ```

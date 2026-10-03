@@ -73,9 +73,14 @@ models and cross-spectral methods. Econometrica, 37(3), 424-438.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 4, sr = 500)
 gc_df <- eegGrangerCausality(pe, order = 5, band = c(8, 13))
 head(gc_df)
-} # }
+#>   from_channel to_channel   gc_value
+#> 1          Fp1        Fp2 0.08458763
+#> 2          Fp1         F7 0.06416600
+#> 3          Fp1         F3 0.07524694
+#> 4          Fp2        Fp1 0.17008322
+#> 5          Fp2         F7 0.04102852
+#> 6          Fp2         F3 0.15872682
 ```

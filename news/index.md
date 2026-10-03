@@ -1,5 +1,41 @@
 # Changelog
 
+## PhysioEEG 0.7.16
+
+### Documentation
+
+- Runnable `@examples` added or corrected across 78 help pages. Each
+  runs offline in seconds, writes nothing outside
+  [`tempdir()`](https://rdrr.io/r/base/tempfile.html), and is executed
+  by `R CMD check`; anything needing a device, a download or an optional
+  backend is fenced with the reason stated.
+- The README’s quick start runs as written: it attaches the package,
+  builds its own inputs, and uses only hard dependencies.
+
+### Documentation
+
+- The `output_assay` argument of
+  [`eegMorletWavelet()`](https://x-biosignal.github.io/PhysioEEG/reference/eegMorletWavelet.md),
+  [`eegERSP()`](https://x-biosignal.github.io/PhysioEEG/reference/eegERSP.md),
+  [`eegITC()`](https://x-biosignal.github.io/PhysioEEG/reference/eegITC.md),
+  [`eegMultitaper()`](https://x-biosignal.github.io/PhysioEEG/reference/eegMultitaper.md),
+  [`eegSTFT()`](https://x-biosignal.github.io/PhysioEEG/reference/eegSTFT.md)
+  and
+  [`eegCSP()`](https://x-biosignal.github.io/PhysioEEG/reference/eegCSP.md)
+  names a key in `metadata()`, not an assay. Their help pages said
+  “output assay name”, so a reader looked for `assay(x, "ersp_data")`
+  and found nothing. The descriptions now say what happens. Behaviour is
+  unchanged.
+- [`make_eeg()`](https://x-biosignal.github.io/PhysioEEG/reference/make_eeg.md)
+  documents what it does not model: each channel is generated
+  independently, giving a median absolute between-channel correlation
+  near 0.26 against
+  [`eegBadChannels()`](https://x-biosignal.github.io/PhysioEEG/reference/eegBadChannels.md)’s
+  `corr_threshold` of 0.4, so that detector condemns every channel and
+  [`eegInterpolate()`](https://x-biosignal.github.io/PhysioEEG/reference/eegInterpolate.md)
+  is then left with none. That is the generator being independent, not
+  the detector being wrong.
+
 ## PhysioEEG 0.7.15
 
 ### New features

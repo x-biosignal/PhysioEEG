@@ -11,7 +11,7 @@ as a percentage change from baseline power in specified frequency bands."></head
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -130,11 +130,12 @@ single-trial analysis. IEEE Signal Processing Magazine, 25(1), 41-56.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg_bci.html">make_eeg_bci</a></span><span class="op">(</span>n_trials <span class="op">=</span> <span class="fl">20</span>, n_channels <span class="op">=</span> <span class="fl">8</span>, sr <span class="op">=</span> <span class="fl">256</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg_bci.html">make_eeg_bci</a></span><span class="op">(</span>n_trials <span class="op">=</span> <span class="fl">20</span>, n_channels <span class="op">=</span> <span class="fl">8</span>, sr <span class="op">=</span> <span class="fl">256</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">eegMotorImagery</span><span class="op">(</span><span class="va">pe</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">erd_data</span> <span class="op">&lt;-</span> <span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">result</span>, <span class="st">"erd_ers"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span><span class="co"># ERD/ERS features are stored in metadata(x)$erd_ers</span></span></span>
+<span class="r-in"><span><span class="va">erd_data</span> <span class="op">&lt;-</span> <span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span><span class="op">$</span><span class="va">erd_ers</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">erd_data</span><span class="op">)</span>  <span class="co"># trials x (channels * bands)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 40 16</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

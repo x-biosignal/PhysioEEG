@@ -36,10 +36,11 @@ NeuroImage, 180, 577-593.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 2000, n_channels = 19, sr = 500)
 pe <- eegMicrostates(pe, n_states = 4)
 seq_labels <- eegMicrostateSequence(pe)
 table(seq_labels)
-} # }
+#> seq_labels
+#>   A   B   C   D 
+#> 228 743 297 732 
 ```

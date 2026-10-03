@@ -68,8 +68,6 @@ single-trial analysis. IEEE Signal Processing Magazine, 25(1), 41-56.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_bci(n_trials = 20, n_channels = 8, sr = 256)
 features <- eegBCIfeatures(pe, method = "bandpower")
-} # }
 ```

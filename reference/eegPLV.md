@@ -63,9 +63,14 @@ signals. Human Brain Mapping, 8(4), 194-208.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, n_channels = 4, sr = 500)
 plv_df <- eegPLV(pe, band = c(8, 13))
 head(plv_df)
-} # }
+#>   channel1 channel2       plv
+#> 1      Fp1      Fp2 0.9753093
+#> 2      Fp1       F7 0.8910803
+#> 3      Fp1       F3 0.9537405
+#> 4      Fp2       F7 0.8931339
+#> 5      Fp2       F3 0.9541991
+#> 6       F7       F3 0.8784138
 ```

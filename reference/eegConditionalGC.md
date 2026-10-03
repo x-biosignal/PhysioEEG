@@ -51,7 +51,7 @@ eegConditionalGC(
 - method:
 
   MVAR estimator passed to
-  [`PhysioCore::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/mvarFit.html)
+  [`PhysioExperiment::mvarFit()`](https://x-biosignal.r-universe.dev/PhysioExperiment/reference/mvarFit.html)
   (default: `"ols"`).
 
 - assay_name:
@@ -78,8 +78,21 @@ causality toolbox. Journal of Neuroscience Methods, 223, 50-68.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 4000, n_channels = 3, sr = 250)
 eegConditionalGC(pe, target = 3, source = 1, conditioning = 2)
-} # }
+#> $value
+#> [1] 0.08268634
+#> 
+#> $target
+#> [1] "F7"
+#> 
+#> $source
+#> [1] "Fp1"
+#> 
+#> $conditioning
+#> [1] "Fp2"
+#> 
+#> $order
+#> [1] 17
+#> 
 ```

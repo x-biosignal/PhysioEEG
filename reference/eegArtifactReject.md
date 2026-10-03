@@ -60,11 +60,9 @@ assay. Artifact log stored in `metadata(x)$artifact_log`.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 10000, n_channels = 19, sr = 500)
 events <- data.frame(onset_sec = c(1, 3, 5, 7, 9))
 pe_ep <- eegEpoch(pe, events, limits = c(-0.2, 0.8))
 pe_clean <- eegArtifactReject(pe_ep, method = "threshold",
                                threshold_uv = 100, assay_name = "epoched")
-} # }
 ```

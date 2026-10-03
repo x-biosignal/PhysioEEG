@@ -82,9 +82,21 @@ Journal of Clinical Sleep Medicine, 13(5), 665-666.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_sleep(n_time = 150000, n_channels = 2, sr = 500)
 kcomplexes <- eegKcomplexDetect(pe)
 head(kcomplexes)
-} # }
+#>   channel negative_peak_sample positive_peak_sample negative_amplitude
+#> 1       1               135267               135990          -79.77818
+#> 2       1               136267               136990          -79.44237
+#> 3       1               137266               137991          -79.58419
+#> 4       1               138267               138992          -79.96084
+#> 5       1               139267               139990          -79.41695
+#> 6       1               140266               140992          -79.85121
+#>   positive_amplitude duration_ms
+#> 1           56.01905        1446
+#> 2           56.40773        1446
+#> 3           56.18535        1450
+#> 4           56.37444        1450
+#> 5           55.69484        1446
+#> 6           56.07785        1452
 ```

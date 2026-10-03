@@ -11,7 +11,7 @@ the characteristic negative-positive waveform morphology."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -147,11 +147,23 @@ Journal of Clinical Sleep Medicine, 13(5), 665-666.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg_sleep.html">make_eeg_sleep</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">150000</span>, n_channels <span class="op">=</span> <span class="fl">2</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg_sleep.html">make_eeg_sleep</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">150000</span>, n_channels <span class="op">=</span> <span class="fl">2</span>, sr <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">kcomplexes</span> <span class="op">&lt;-</span> <span class="fu">eegKcomplexDetect</span><span class="op">(</span><span class="va">pe</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">kcomplexes</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   channel negative_peak_sample positive_peak_sample negative_amplitude</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       1               135267               135990          -79.77818</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       1               136267               136990          -79.44237</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       1               137266               137991          -79.58419</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4       1               138267               138992          -79.96084</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       1               139267               139990          -79.41695</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       1               140266               140992          -79.85121</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   positive_amplitude duration_ms</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1           56.01905        1446</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2           56.40773        1446</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3           56.18535        1450</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4           56.37444        1450</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5           55.69484        1446</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6           56.07785        1452</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

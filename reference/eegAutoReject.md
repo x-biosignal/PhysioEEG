@@ -106,10 +106,9 @@ NeuroImage, 159, 417-429.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_erp(n_epochs = 40, n_channels = 19, sr = 250)
 pe <- eegMontage(pe, system = "10-20")
 pe <- eegAutoReject(pe, assay_name = "raw")
 dim(S4Vectors::metadata(pe)$autoreject$bad_matrix)
-} # }
+#> [1] 40 19
 ```

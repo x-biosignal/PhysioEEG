@@ -78,8 +78,6 @@ Computation, 7(6), 1129-1159.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg(n_time = 5000, sr = 500)
 result <- eegICA(pe, n_components = 4, method = "fastica")
-} # }
 ```

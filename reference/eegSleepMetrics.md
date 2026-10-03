@@ -72,11 +72,20 @@ Journal of Clinical Sleep Medicine, 13(5), 665-666.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_sleep(n_time = 150000, n_channels = 2, sr = 500)
 stages <- eegSleepStage(pe, epoch_sec = 30)
-metadata(pe)$sleep_stages <- stages
+S4Vectors::metadata(pe)$sleep_stages <- stages
 metrics <- eegSleepMetrics(pe)
 print(metrics)
-} # }
+#>              metric value    unit
+#> 1  total_sleep_time   4.0 minutes
+#> 2  sleep_efficiency  80.0 percent
+#> 3              waso   0.5 minutes
+#> 4     sleep_latency   0.5 minutes
+#> 5       rem_latency   0.0 minutes
+#> 6            pct_N1   0.0 percent
+#> 7            pct_N2   0.0 percent
+#> 8            pct_N3  62.5 percent
+#> 9           pct_REM  37.5 percent
+#> 10            pct_W  20.0 percent
 ```

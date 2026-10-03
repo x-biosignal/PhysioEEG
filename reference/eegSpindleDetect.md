@@ -102,9 +102,21 @@ oscillation. Sleep, 34(10), 1411-1421.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe <- make_eeg_sleep(n_time = 150000, n_channels = 2, sr = 500)
 spindles <- eegSpindleDetect(pe)
 head(spindles)
-} # }
+#>   channel start_sample end_sample duration_ms peak_sample peak_amplitude
+#> 1       1        32365      32620         512       32501       7.185351
+#> 2       1        37365      37622         516       37482       6.984016
+#> 3       1       122367     122636         540      122482       6.943870
+#> 4       1       127382     127639         516      127501       7.043511
+#> 5       2       122366     122636         542      122501       7.067580
+#> 6       2       127377     127637         522      127501       6.609500
+#>   frequency_hz
+#> 1     13.67188
+#> 2     13.56589
+#> 3     12.96296
+#> 4     13.56589
+#> 5     13.83764
+#> 6     13.40996
 ```

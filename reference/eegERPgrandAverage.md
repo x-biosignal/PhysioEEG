@@ -44,9 +44,7 @@ Technique (2nd ed.). MIT Press.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
 pe1 <- make_eeg_erp(n_epochs = 20, sr = 250)
 pe2 <- make_eeg_erp(n_epochs = 20, sr = 250)
 result <- eegERPgrandAverage(pe1, pe2)
-} # }
 ```

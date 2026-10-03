@@ -15,7 +15,7 @@ as targets and columns as sources."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">PhysioEEG</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.15</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.16</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -145,21 +145,22 @@ collide.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">1000</span>, n_channels <span class="op">=</span> <span class="fl">4</span>, sr <span class="op">=</span> <span class="fl">250</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="fl">1</span>, <span class="fl">0.5</span>, <span class="fl">0</span>, <span class="op">-</span><span class="fl">0.4</span>,</span></span>
-<span class="r-in"><span>  <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">0.3</span>, <span class="fl">0</span>,</span></span>
-<span class="r-in"><span>  <span class="fl">0</span>, <span class="fl">0.3</span>, <span class="fl">1</span>, <span class="fl">0.6</span>,</span></span>
-<span class="r-in"><span>  <span class="op">-</span><span class="fl">0.4</span>, <span class="fl">0</span>, <span class="fl">0.6</span>, <span class="fl">1</span></span></span>
-<span class="r-in"><span><span class="op">)</span>, <span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">pe</span><span class="op">)</span><span class="op">$</span><span class="va">label</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">labels</span>, <span class="va">labels</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">metadata</span><span class="op">(</span><span class="va">pe</span><span class="op">)</span><span class="op">$</span><span class="va">connectivity</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  matrix <span class="op">=</span> <span class="va">mat</span>, method <span class="op">=</span> <span class="st">"coherence"</span>, band <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">13</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">eegPlotConnectogram</span><span class="op">(</span><span class="va">pe</span>, threshold <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">pe</span> <span class="op">&lt;-</span> <span class="fu"><a href="make_eeg.html">make_eeg</a></span><span class="op">(</span>n_time <span class="op">=</span> <span class="fl">1000</span>, n_channels <span class="op">=</span> <span class="fl">4</span>, sr <span class="op">=</span> <span class="fl">250</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fl">1</span>, <span class="fl">0.5</span>, <span class="fl">0</span>, <span class="op">-</span><span class="fl">0.4</span>,</span></span>
+<span class="r-in"><span>    <span class="fl">0.5</span>, <span class="fl">1</span>, <span class="fl">0.3</span>, <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>    <span class="fl">0</span>, <span class="fl">0.3</span>, <span class="fl">1</span>, <span class="fl">0.6</span>,</span></span>
+<span class="r-in"><span>    <span class="op">-</span><span class="fl">0.4</span>, <span class="fl">0</span>, <span class="fl">0.6</span>, <span class="fl">1</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>, <span class="fl">4</span>, <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu">SummarizedExperiment</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">pe</span><span class="op">)</span><span class="op">$</span><span class="va">label</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/dimnames.html" class="external-link">dimnames</a></span><span class="op">(</span><span class="va">mat</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">labels</span>, <span class="va">labels</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">S4Vectors</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/S4Vectors/man/Annotated-class.html" class="external-link">metadata</a></span><span class="op">(</span><span class="va">pe</span><span class="op">)</span><span class="op">$</span><span class="va">connectivity</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    matrix <span class="op">=</span> <span class="va">mat</span>, method <span class="op">=</span> <span class="st">"coherence"</span>, band <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">13</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">eegPlotConnectogram</span><span class="op">(</span><span class="va">pe</span>, threshold <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-plt img"><img src="eegPlotConnectogram-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
